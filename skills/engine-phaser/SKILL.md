@@ -19,7 +19,7 @@ Read the reference that matches the work. Do not load all of them.
 | Draw a tilemap, chunk a world, add overlays or animated tiles | [tilemaps and terrain](references/tilemaps-and-terrain.md) |
 | Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md) |
 | Add day and night, lights, fog, saturation or heat shimmer without blurring pixel art | [lighting and atmosphere](references/lighting-and-atmosphere.md) |
-| Make the canvas pixel-exact at any devicePixelRatio, or build a pixel-only UI | [pixel-perfect and UI](references/pixel-perfect-and-ui.md) |
+| Make the canvas pixel-exact, build pixel UI, or clip a scrolling pane in WebGL | [pixel-perfect and UI](references/pixel-perfect-and-ui.md) |
 | Drive sound from sim events, write a music state machine | [audio directors](references/audio-directors.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |

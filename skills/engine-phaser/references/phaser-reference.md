@@ -55,6 +55,7 @@ choices that paid off, not engine facts.
 | One integer scale per layer, chosen from device pixels; UI is its own scene and camera; match devicePixelRatio | [pixel-perfect and UI](pixel-perfect-and-ui.md) 1, 2 | `src/game/ui/UiScale.ts`, `DevicePixels.ts` |
 | All text is `BitmapText` from the tool export; no `Text`, CSS or DOM text; tone is glyph frames, not tint | pixel-perfect 3 | `src/game/ui/PixelFont.ts` |
 | Panels tiled, not `NineSlice`-stretched; scrim is a dither; tweens round every frame | pixel-perfect 4 | `src/game/ui/Skin.ts` |
+| Phaser 4 WebGL clipping uses native filter masks or camera viewports, not legacy `setMask`; clip input separately and bound surfaces | pixel-perfect 8 | `examples/web/phaser-probes/scroll-mask.mjs` in agent-engine |
 | Accessible controls and native text entry project the same screen/action model as Phaser; no DOM-count ban or duplicate layout | pixel-perfect 7 | Guidance; existing `ui/AriaLive.ts` covers announcements only |
 | Text fit in three layers (static table, runtime guard, GPU walk-through) | pixel-perfect 5 | `feat/text-fit` branch |
 | Dedupe keydown by event identity (*verified*: shared queue, per-scene dispatch); input capture state | pixel-perfect 6 | `src/game/ui/keys.ts` |

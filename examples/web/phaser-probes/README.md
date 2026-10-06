@@ -12,3 +12,9 @@ game on `http://localhost:5173` (override with `--url=` or the second argument) 
 They assume the game starts a world when Enter is pressed after the title scene; adapt the first lines for your own
 start flow. The method they support is in `skills/engine-phaser/references/verifying-on-a-gpu.md`: read a pixel at a
 tile whose data you know, then toggle layers one at a time and read it again.
+
+`scroll-mask.mjs /absolute/path/to/host-project` is standalone: it starts its own tiny Phaser 4.2.1 scene, with no dev server or
+game debug API. The host project supplies `phaser` and `@playwright/test`. Set `CHROME_CHANNEL=chrome` to use installed Chrome;
+otherwise install Playwright Chromium. It requires a hardware GPU and prints its renderer string. It proves the legacy WebGL mask
+failure beside native external-filter clipping, scrolling, zoom, viewport-only input and ten scene restarts. See pixel-perfect-and-ui
+section 8 for the production recipe, resource policy and behaviors this focused probe does not cover.
