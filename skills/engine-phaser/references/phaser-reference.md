@@ -14,6 +14,7 @@ choices that paid off, not engine facts.
 | State in a global `BasePlugin` mapped onto scenes; scenes subscribe through `bind` that unsubscribes on `SHUTDOWN` (*verified*: `PluginManager.addToScene`) | scenes 3 | `src/game/plugins/SimHostPlugin.ts` |
 | Constants (scene, texture, registry keys, depths) in one `as const` file | scenes 1 | `src/game/config.ts` |
 | `Phaser.WEBGL`, not `AUTO`, when you need GPU layers or filters; fail in pixels with the smallest dependency | scenes 2 | `src/game/scenes/BootScene.ts` |
+| WebGL 2 is officially supported; 4.2.1 defaults to GL1 and accepts a supplied GL2 context; ES3 custom programs need matching stages | [WebGL backends](webgl-backends.md) | Cyberpunkt's linked GL1/GL2 pixel probe; AE is a separate engine |
 | `start` hands off, `launch` runs beside; load shared assets once; swap state in `init` through a start-data callback | scenes 4, [gotchas](phaser-4-gotchas.md) 11 | `scenes/worldAssets.ts`, `WorldScene.init` |
 | One `SHUTDOWN` handler removes every long-lived subscription; restart-leak test | gotchas 14 | `tests/browser/lifecycle.spec.ts` (arch-review branch) |
 | Hold the loop on blur, hidden and context loss; `noAudio` if sound is elsewhere | gotchas 15 | `src/game/loop/Attention.ts` (arch-review branch) |

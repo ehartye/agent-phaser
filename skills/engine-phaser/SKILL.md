@@ -15,6 +15,7 @@ Read the reference that matches the work. Do not load all of them.
 | Scan every rule on one page (index with evidence and examples) | [phaser reference](references/phaser-reference.md) |
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
 | Boot, scenes, a global plugin, the fixed-step loop and interpolation | [scenes, loop and plugins](references/scenes-loop-and-plugins.md) |
+| Choose WebGL 1/2, integrate ES3 shaders or distinguish Phaser AE | [WebGL backends](references/webgl-backends.md) |
 | Draw a tilemap, chunk a world, add overlays or animated tiles | [tilemaps and terrain](references/tilemaps-and-terrain.md) |
 | Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md) |
 | Add day and night, lights, fog, saturation or heat shimmer without blurring pixel art | [lighting and atmosphere](references/lighting-and-atmosphere.md) |
@@ -36,7 +37,9 @@ Read the reference that matches the work. Do not load all of them.
    (scenes, tilemaps, filters and post effects, v4 features, v3 to v4 migration, data manager, particles). They are
    accurate to the installed version. Prefer them to memory and to web posts.
 3. **Check what the renderer really is.** Print the WebGL renderer string (`WEBGL_debug_renderer_info`). Headless
-   browsers silently fall back to software rendering, which hides performance and some correctness problems.
+   browsers silently fall back to software rendering, which hides performance and some correctness problems. Phaser 4
+   officially supports WebGL 2; 4.2.1 creates WebGL 1 by default and accepts a supplied WebGL 2 context. `Phaser.WEBGL`
+   is not an API-version selector. Read [WebGL backends](references/webgl-backends.md) for ES3 shaders and the separate Phaser AE API.
 4. **Put rules in a headless layer.** Keep game state and rules in plain TypeScript that never imports Phaser, and let
    Phaser draw it. See [architecture](references/architecture.md). This single choice makes the game unit-testable,
    saves small, and scene restarts safe.
