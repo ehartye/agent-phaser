@@ -41,8 +41,8 @@ it. example: `ui/DevicePixels.ts`, `BootScene.ts`.
 
 ## 3. All text is `BitmapText` from the tool's own font export
 
-- Never `add.text`/`make.text`, CSS fonts, or browser tooltips. Ban them with a test that scans `src/game` (and a second test that the
-  page creates no DOM node for visible UI).
+- Never `add.text`/`make.text`, CSS fonts, or browser tooltips for visible game UI. Ban them with a test that scans the presentation code
+  and checks for unintended browser-rendered game chrome. Semantic controls and native input bridges follow section 7; do not ban them by counting DOM nodes.
 - Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
   register each tone as a `BitmapFont` with `cache.bitmapFont.add(key, { data, texture, frame: '__BASE', fromAtlas: false })`. **A tone
   is a different set of glyph frames, never a tint.**
@@ -93,9 +93,25 @@ example: the `feat/text-fit` branch of fallow-valley-next (`ui/TextGuard.ts`, `u
 - Focus is spatial for menus on a pad (nearest node in a direction; drift across the axis counts double; wrap) and kept as a pure function
   (see [gamepad and input](gamepad-and-input.md)).
 
-## 7. Accessibility without DOM text
+## 7. Accessible controls and native input without a second UI implementation
 
-One visually hidden `aria-live` node (1x1, clipped) mirrors every message for screen readers, and is the only DOM node the game creates.
-A test asserts it is the only one.
+Pixel-only describes the game's visible rendering, not its accessibility tree. An `aria-live` node can announce a message but cannot
+replace navigable buttons, named controls, selection state or editable text. Preserve those capabilities when porting an existing game.
 
-example: `ui/AriaLive.ts`, `tests/architecture.test.ts` ("strict pixel-only UI").
+- Define each screen's labels, actions, enabled/selected state and input values once. The Phaser view and semantic DOM projection consume
+  that model and invoke the same action handlers. DOM measurements must not drive Phaser layout; do not maintain a second set of menus or rules.
+- Project the interactive controls needed by assistive technology as real semantic elements with appropriate names, state and focus order.
+  Visually conceal that projection without removing it from the accessibility tree (`display:none`, `hidden` and `aria-hidden` are not
+  suitable for controls that must remain accessible). Use one live region for status updates where appropriate, without duplicate announcements.
+- For character names, save-slot names or other editable fields, use a native input/textarea bridge for IME, selection, paste and the mobile
+  software keyboard. Share its value and composition state with the bitmap presentation. Focus it from a real user gesture; support composition
+  events and commit/cancel without letting typing trigger game commands. Keep browser chrome out of the rendered game; the OS keyboard remains native.
+- Synchronize semantic and visual focus, visibly indicate focus in Phaser, contain it in modals and restore it on close. When a modal opens,
+  underlying controls must stop being actionable in both projections. Manage listeners and DOM nodes with the owning scene's shutdown lifecycle.
+- Verify keyboard-only navigation, assistive-technology activation reaching the same handler exactly once, names/states, focus restoration,
+  text composition and repeated scene teardown. Inspect visible pixels separately. Test the actual mobile keyboard and VoiceOver on iPhone;
+  desktop DOM tests and simulated events do not establish those device behaviors.
+
+Fallow Valley's `ui/AriaLive.ts` is an announcement example, not evidence of complete interactive accessibility. Its historical one-node
+architecture assertion is too restrictive for games with semantic controls or native text entry. The bridge above is architectural guidance;
+it has not been validated as a shipped Fallow Valley or Space to Grow implementation.

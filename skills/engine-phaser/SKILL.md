@@ -58,9 +58,10 @@ Read the reference that matches the work. Do not load all of them.
   saved and a restored sim side by side).
 - **Every scene restart must be leak-tested.** Restart the scene ten times in a browser spec and require listener counts,
   textures and display objects not to grow (gotchas 14 and 15); a WebGL context loss/restore spec belongs beside it (gotcha 13).
-- **Games for this owner use a strict pixel-only UI.** Every visible UI and message pixel comes from agent-sprites bitmap
-  fonts, skins and icons (no browser text, no Phaser `Text`); the UI layer may have a higher resolution than the gameplay
-  layer, but each layer uses one integer scale. Ban `Text` creation with a test.
+- **Games for this owner use a strict pixel-only UI.** Every visible game UI and message pixel comes from agent-sprites bitmap
+  fonts, skins and icons (no browser-rendered game text, no Phaser `Text`); the UI layer may have a higher resolution than the gameplay
+  layer, but each layer uses one integer scale. Ban `Text` creation with a test. Preserve accessible controls and native text entry
+  through the shared-model semantic bridge in [pixel-perfect and UI](references/pixel-perfect-and-ui.md); a live region alone is not an interactive interface.
 - **When a tool is missing something, fix the tool.** Capabilities the game needs from agent-sprites or agent-beeps
   belong in those tools (with a tracked backlog item), not in game-side workarounds.
 
