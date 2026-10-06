@@ -145,6 +145,30 @@ Keep a `WeakSet` so it is applied once per tileset. Verify by animating three di
 same frames started a quarter apart. Phase tiles need their own cells in the sheet because `tileData` is keyed by tile index.
 Put sparse animated content (plants, glow, drips) in its own sparse GPU layer (gotcha 2 refinement); the CPU layers stay static.
 
+## 11. Restarting scenes: a loading scene ignores `start`, and the sim must change in `init`, not before
+
+Found building a title screen that plays the real world scene behind its menu, then starts a game over it (Phaser 4.2.1).
+
+* `scene.start('world')` on a scene that is **running, paused or sleeping** shuts it down and restarts it (`init`, `preload`, `create`
+  again). On a scene that is **starting, loading or creating** (statuses START to CREATING) `SceneManager.start` returns without doing
+  anything, so the data you passed never arrives. Gate a start on `scene.isActive(key)` and queue it for the first frame it is true.
+* Do not "fix" that with `stop` then `start`: stopping a scene mid-load leaves its queued files in the loader, and the second load
+  logs `Texture key already in use` for every atlas. Load the scene's assets in an earlier scene instead (one function that queues
+  them, called from the preload scene; the loader skips keys already cached, so the scene's own `preload` calling it again is free).
+* If a global object holds the game state (our `SimHost` plugin), do **not** swap it in the scene that decides to start. The running
+  scene keeps drawing for the rest of that frame and the next, one world's views with the other world's entities. Pass a `boot`
+  callback in the start data and call it first thing in the restarted scene's `init`.
+* A modal or panel that rebuilds its own window (a changed row, a new page) must re-centre it: only the stack that opened it knew
+  where it belonged, so the rebuilt window appeared at (0, 0). Put placement in the base class `layout`.
+
+## 12. Whole-pixel screen shake
+
+`camera.shake` offsets by fractions of a pixel, which smears pixel art. Use the camera's follow offset instead: every ~33 ms
+pick an integer offset (a hash of the step index, so it is repeatable), let the amplitude fall in whole steps to exactly 0, and set
+`camera.setLerp(1, 1)` while it rings so the offset lands on the frame it is set (restore the lerp after). Assert in a test that
+every sampled offset is an integer and that the last sample is `(0, 0)`. A hit stop is the same idea in time: skip the fixed-step
+advance for 60 to 110 ms and keep the last interpolation alpha, never touching the sim's clock.
+
 ## How these were found (do it this way)
 
 1. Build the smallest standalone version in the live scene (`scene.make.tilemap({ data })` plus a layer inside a
