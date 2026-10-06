@@ -205,3 +205,35 @@ redrawn after a restore. If sound comes from another engine, set `audio: { noAud
 3. Print the layer data and compare with the pixel: that separates a data bug from a render bug.
 4. Read Phaser's source for the render node (`src/renderer/webgl/renderNodes/submitter/`) once you have a suspect.
 5. Re-introduce the bug and confirm the regression test fails.
+
+## 16. `emitter.setFrequency()` resets the flow counter, so calling it every frame starves the emitter
+
+`ParticleEmitter.setFrequency(f)` sets `frequency` **and** `flowCounter = f` (`src/gameobjects/particles/ParticleEmitter.js#L1727`); each
+update does `flowCounter -= delta` and emits while it is `<= 0` (`#L2897`). If the wanted rate depends on something that changes (a camera
+size) and you call `setFrequency` every frame, a frame (16.7 ms) is shorter than the interval (21.7 ms), the counter never reaches 0 and
+nothing is ever emitted, while the emitter reports `emitting: true` and the right frequency. Change it only when the wanted rate has moved by
+a threshold. Reproduce: call `setFrequency(emitter.frequency)` in a loop of frames and watch `getAliveParticleCount()` drain to 0, then recover
+once you stop.
+
+A death zone is anything with `contains(x, y)`: `emitter.addDeathZone({ type: 'onEnter', source: { contains: (x, y) => underRoof(x, y) } })`.
+`DeathZone.willKill` tests `particle.worldPosition` every update (`src/gameobjects/particles/zones/DeathZone.js#L63`), so a function over your
+own world data makes weather stop at roofs with no per-particle allocation.
+
+## 17. The `delta` your scene receives is smoothed
+
+`TimeStep.step` hands scenes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of the last ten deltas, and any delta above
+`1000 / minFps` replaced by the last sane value (`src/core/TimeStep.js#L570`). Accumulators are fine with that; code that wants the real frame time
+should read `game.loop.rawDelta`. `game.step(time, delta)` bypasses smoothing, so a hand-driven test loop and the live loop differ slightly: test the
+pure stepper with raw numbers and trust the game loop for the rest.
+
+## 18. CPU tilemap layers inside a positioned container are culled as if the container were at the origin
+
+`CullBounds` subtracts the layer's *own* `x, y` from `camera.worldView` and never looks at a parent container
+(`src/tilemaps/components/CullBounds.js#L27`). A layer at (0, 0) inside a container at (2560, 0) is judged to be far from a camera looking
+at 2560, so only some of its tiles draw: landmarks, covers and wall pieces vanish at random while others show; a GPU ground layer is
+unaffected. `CullTiles` honours `layer.skipCull` by using the whole layer (`src/tilemaps/components/CullTiles.js#L28`), so set
+`layer.skipCull = true` on every CPU layer you put in a positioned container and do your own culling at chunk level (hide views that do not
+touch the camera). Cost: a visible CPU layer then walks all its tiles every frame, which is why hiding off-screen views and empty layers
+matters ([performance](performance.md)). Related: the CPU layer renderer reads `src.alpha` (the layer's own, `src/tilemaps/TilemapLayerWebGLRenderer.js#L50`),
+which is why a container's alpha does not reach it (gotcha 8). Test: read the pixel at a landmark tile in a far chunk (yellow hatch handle in the
+example), with and without `skipCull`.

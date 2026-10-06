@@ -59,3 +59,59 @@ See `examples/web/phaser-probes` for generic versions.
 - Teleporting a long way and screenshotting after a fixed wait can be flaky on the first frame; wait for chunks to bind.
 - At zoom 3, tile (8, 8) is 384 px from the origin; an edit you cannot see may simply be off screen.
 - Day and night multiply tints change pixel colours; set the clock to noon before sampling colours.
+
+## Read pixels inside the page: `renderer.snapshotPixel`
+
+A Playwright screenshot is not the only way to read the screen. In the page, `game.renderer.snapshotPixel(x, y, cb)` queues a read that is
+fulfilled at the end of the next rendered frame, so a probe can build a tiny object, run a frame and read a colour in one script:
+
+```ts
+const px = (wx: number, wy: number) => new Promise<{ red: number; green: number; blue: number }>((res) => {
+  game.renderer.snapshotPixel(Math.round((wx - cam.worldView.x) * cam.zoom), Math.round((wy - cam.worldView.y) * cam.zoom), res);
+  stepFrame();                                     // in a manual loop: game.step(t, 0)
+});
+```
+
+Each Phaser behaviour claim in these references can be reduced to such a probe. Two examples that decide real designs (both pass on 4.2.1;
+if one starts failing after an upgrade, the workaround it justifies can be deleted):
+
+- GPU layer at `x = 60` draws at `120`: build a 4x4 GPU layer of a known tile at `(60, 0)`, read a pixel at world x 70 (unchanged) and x 170 (now
+  the tile colour); put the same layer at `(0, 0)` inside a container at `(60, 0)` and the colours swap to the correct ones.
+- An "empty" (`-1`) tile in a GPU layer is the tileset's top-left pixel: an all-empty layer over a sheet whose first pixel is opaque paints that
+  colour; over a sheet whose first cell is transparent it paints nothing.
+
+example: fallow-valley-next `tests/browser/phaser-evidence.spec.ts`.
+
+## Drive the real loop by hand, deterministically
+
+`game.loop.sleep()` stops `requestAnimationFrame` and keeps the callback; `game.step(time, delta)` then runs one whole frame (pre-step, every
+scene update, render) with the clock you give it, with no delta smoothing; `game.loop.wake()` gives it back. With a virtual clock, tweens, the
+scene `time` clock, particles and the fixed-step stepper all follow it, so tests need no `waitForTimeout`.
+
+- Keys and pointer events are queued by the DOM and consumed at the next step: `keydown` does nothing until a frame runs. A held key re-sends
+  `move` each frame, so hold, run a zero-delta frame, then step.
+- A tight synchronous `while (!ready) game.step()` starves the loader (asset XHRs finish on the event loop). Yield between frames.
+- Expose one typed debug object (`__game.debug`) that the panel, the browser tests, the command-line tools and demo mode all use:
+  `frames(n, { dt })`, `ticks(n)`, `tp(place)`, `time(h)`, `weather(w)`, `layer(name, on)`, `state()`, `sample()` (fps, CPU ms, draw calls),
+  `hash()`, `record()`/`stop()`/`replay(rec)`. Gate it: always on the dev server, on a production build only when the URL asks
+  (`?debug=1`), loaded through a dynamic `import()` so it is a separate chunk.
+- `evaluate` serialises a function: it cannot close over variables, and a TypeScript helper called inside it does not exist in the page.
+  Never return a Phaser object from it.
+
+example: `src/game/debug/*`, `tests/harness/*`, `tools/fv.mjs`, `docs/HARNESS.md`.
+
+## Determinism proofs and regression tests worth having
+
+- **Record and replay**: the sim is `f(seed, command log)`. A recording is the seed, commands with their tick and a state hash every 100 ticks;
+  replaying on a fresh sim names the first tick and state part that differ. Record camera-driven chunk generation too (it spawns creatures).
+  Save the RNG state in snapshots and compare saved and restored sims side by side.
+- **Visual regression**: render a few dozen canonical scenes at a fixed size with the interface hidden and compare with a perceptual tolerance
+  (`maxDiffPixelRatio`, colour `threshold`); one `snapshotPathTemplate` without `{platform}` if one GPU makes the baselines. Tag exact-pixel
+  tests `@gpu` so a software-GL CI can skip them.
+- **Perf budgets** in a separate project that runs after the others on one worker.
+- **Two workers by default.** Eight Chromiums each loading the dev server and a WebGL context exhaust memory and push first load past any fixed
+  sleep. Wait on state (the title scene being active), never on time; one retry locally, reported as flaky.
+- **Mutation scripts for pure logic**: a script holds `[name, file, exact text, replacement]` rows, rewrites one line, runs the unit tests, requires
+  failure, and always restores the file. A survivor means the tests do not guard that line.
+
+example: `tools/mutation-input.mjs`, `tests/visual/scenes.spec.ts`, `tests/perf/budget.spec.ts`, `playwright.config.ts`.

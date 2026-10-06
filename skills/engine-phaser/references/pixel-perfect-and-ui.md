@@ -1,0 +1,101 @@
+# Pixel-perfect rendering and a pixel-only UI layer (Phaser 4.2.1)
+
+For a game whose every visible pixel, including text and menus, must come from authored pixel assets. The rules generalise: one
+integer scale per layer, device pixels not CSS pixels, no resampling anywhere. Verified on a real GPU at devicePixelRatio 1, 1.25,
+1.5 and 3.
+
+## 1. One integer scale per layer, chosen from device pixels
+
+- **World layer**: camera zoom `clamp(floor(canvasWidth / (tilesAcross * TILE)), min, max)`, whole numbers only. A source pixel is
+  then Z by Z device pixels everywhere.
+- **UI layer**: a separate scene with its own camera at its own whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
+  gives 2x at 1280x720, 3x at 1600x900, 4x at 1080p and 1x on a 390 px phone. Lay out in **logical pixels** (canvas / S, rounded
+  down); at most `S - 1` device pixels are left over at the right and bottom and nothing draws there.
+- **The two layers may differ** (world 3x, UI 2x). Within a layer there is exactly one scale: no 2x logo next to 1x text, no rotated or
+  half-pixel text. A bigger title uses a separately authored bigger face, not the regular face enlarged.
+- Apply the UI scale with the camera, not by scaling objects:
+
+```ts
+cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0); cam.roundPixels = true;
+// re-run on Scale.Events.RESIZE and on your own "scale changed" event; remove both on SHUTDOWN
+```
+
+example: fallow-valley-next `src/game/ui/UiScale.ts` (pure, tested), `UiCamera.ts`, `scenes/WorldScene.ts#fit`.
+
+## 2. Device pixels, not CSS pixels
+
+`Scale.RESIZE` sizes the canvas in CSS pixels. On a display with `devicePixelRatio` 1.25 or 1.5 the browser stretches that canvas by a
+fraction and every art pixel becomes a different width. Size the canvas to the page times the ratio and set Phaser's CSS zoom to the
+inverse, so the cameras pick integer zooms from device pixels:
+
+```ts
+scale.scaleMode = Phaser.Scale.NONE;
+const dpr = Math.max(1, devicePixelRatio), w = Math.round(cssW * dpr), h = Math.round(cssH * dpr);
+if (scale.zoom !== 1 / dpr) scale.setZoom(1 / dpr);
+if (scale.width !== w || scale.height !== h) scale.resize(w, h);
+// re-apply on window resize and on matchMedia(`(resolution: ${devicePixelRatio}dppx)`) change (browser zoom, moving monitors)
+```
+
+This is the one `1 / dpr` in the codebase; allow-list it in the "no fractional scale" test. A browser spec at DPR 1.25, 1.5 and 3 proves
+it. example: `ui/DevicePixels.ts`, `BootScene.ts`.
+
+## 3. All text is `BitmapText` from the tool's own font export
+
+- Never `add.text`/`make.text`, CSS fonts, or browser tooltips. Ban them with a test that scans `src/game` (and a second test that the
+  page creates no DOM node for visible UI).
+- Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
+  register each tone as a `BitmapFont` with `cache.bitmapFont.add(key, { data, texture, frame: '__BASE', fromAtlas: false })`. **A tone
+  is a different set of glyph frames, never a tint.**
+- Draw at font scale 1, one `BitmapText` per wrapped line at integer offsets inside a `Container`. Keep a Phaser-free copy of the metrics
+  (measure, wrap, fit with an ellipsis, align, "which characters are missing") so layout and a glyph-coverage test run in Node.
+- Floating world labels are the same face at the *world* layer's zoom: rise in whole-pixel steps, blink out instead of fading.
+
+example: `ui/PixelFont.ts`, `ui/FontMetrics.ts`, `view/FxDirector.ts#float`.
+
+## 4. Panels are tiled, not stretched
+
+Phaser's `NineSlice` stretches its centre and edges. A stretch by a fraction (a 16 px centre drawn 20 px wide) puts texel boundaries
+between device pixels, which breaks the one-scale rule wherever the centre has detail (a slot inset, a highlight line). Build the panel
+from nine whole-pixel pieces instead: four corners at their own size, and the edges and centre as `TileSprite`s that repeat the art in
+whole source pixels. Take insets, padding, minimum sizes and painted bounds from the tool's export; there should be no size in the UI
+code that came from looking at the art. (A flat single-colour shadow plate has no detail, so `NineSlice` is fine there.)
+
+- Dim behind a modal with the skin's **dithered scrim** (a hard-alpha checkerboard) in a `TileSprite`, not a translucent rectangle.
+- Slide with a tween that rounds every frame (`setPosition(Math.round(fx + (tx - fx) * t), ...)`); leave by sliding. Nothing fades:
+  a half-transparent pixel is a colour the art does not contain.
+- Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
+
+example: `ui/Skin.ts#panel`, `ui/widgets.ts#tweenInt`, `ui/Window.ts` (ModalStack, scrim).
+
+## 5. Text must fit, in three layers
+
+A string that runs off its box is a bug the type system cannot see. What worked:
+
+1. **Static**: a table of every container (id, face, width as a function of the logical screen width, maximum lines) and every string
+   that can go in it, measured with the real glyph advances at every supported width. A mutation block proves the check can fail.
+   A source scan for unbounded `.print(` of dynamic text with a list of allowed exceptions that may only shrink.
+2. **Runtime guard**: every text object registers itself; a debug call measures what is on screen from the real transforms and lists
+   lines that leave the screen, leave a declared clip box, or overlap another line. The browser fixture fails any test with a finding.
+3. **GPU walk-through**: open every screen with worst-case content at several viewport sizes and scales; compare pixels outside the
+   window rectangle with the window hidden and shown.
+
+example: the `feat/text-fit` branch of fallow-valley-next (`ui/TextGuard.ts`, `ui/FontMetrics.ts#layout`,
+`tests/text-fit.test.ts`); not merged to the main line when this was written.
+
+## 6. Input capture and the keyboard queue
+
+- One shared UI state (`{ capture, pointerOnUi, paused }`) on the registry. While a modal is open, and for a few frames after it closes,
+  the world ignores movement, hotbar and tile clicks, so the key that closed a screen does not also act.
+- **A keydown can reach a handler twice.** The keyboard queue is on the shared manager and every active scene's `KeyboardPlugin.update`
+  dispatches it to its own listeners (`src/input/keyboard/KeyboardPlugin.js#L733`); the duplicate guard is per plugin. With the title and
+  the world both active, a handler registered in both sees one DOM event twice (a typed name came out "AAda"). Dedupe by event identity
+  (`WeakSet<KeyboardEvent>`) in every interface handler.
+- Focus is spatial for menus on a pad (nearest node in a direction; drift across the axis counts double; wrap) and kept as a pure function
+  (see [gamepad and input](gamepad-and-input.md)).
+
+## 7. Accessibility without DOM text
+
+One visually hidden `aria-live` node (1x1, clipped) mirrors every message for screen readers, and is the only DOM node the game creates.
+A test asserts it is the only one.
+
+example: `ui/AriaLive.ts`, `tests/architecture.test.ts` ("strict pixel-only UI").

@@ -1,6 +1,7 @@
 # Phaser architecture that scales
 
-This is the structure Fallow Valley uses. It is a pattern, not a framework: copy the shape, not the code.
+This is the structure Fallow Valley uses. It is a pattern, not a framework: copy the shape, not the code. The whole rule set is
+indexed in [phaser reference](phaser-reference.md); boot, scenes, plugins and the loop are in [scenes, loop and plugins](scenes-loop-and-plugins.md).
 
 ## The one idea
 
@@ -55,7 +56,7 @@ compile-time check that every event has a decision: adding an event then fails t
 | Tilemap layers, pooled | one pooled view per visible chunk, rebound as the camera moves, so scrolling allocates nothing |
 | Cameras | integer zoom only (whole source pixels), visible chunks from `camera.worldView` |
 | Particle emitters | one reused emitter per effect; `explode` for bursts; weather is one emitter reconfigured per weather |
-| Tweens and `time` events | feedback and timers; no `setTimeout` in game code |
+| Tweens and `time` events | feedback and timers in the view; `setTimeout` only outside the world (delayed audio cues, debug polling) |
 
 ## Sim design choices that paid off
 
