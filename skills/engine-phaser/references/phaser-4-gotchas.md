@@ -168,6 +168,34 @@ pick an integer offset (a hash of the step index, so it is repeatable), let the 
 `camera.setLerp(1, 1)` while it rings so the offset lands on the frame it is set (restore the lerp after). Assert in a test that
 every sampled offset is an integer and that the last sample is `(0, 0)`. A hit stop is the same idea in time: skip the fixed-step
 advance for 60 to 110 ms and keep the last interpolation alpha, never touching the sim's clock.
+## 13. `generateLayerDataTexture()` leaves a dead GL wrapper, and that breaks WebGL context restore
+
+`TilemapGPULayer.generateLayerDataTexture()` replaces its data texture with `layerDataTexture.destroy()`, which frees the GL
+texture but leaves the wrapper in `renderer.glTextureWrappers` (its `renderer` is null). Each regeneration leaks one, and when the
+browser restores a lost context Phaser calls `createResource()` on every wrapper and throws
+`Cannot read properties of null (reading 'gl')`: the renderer never comes back. The layer's own `destroy()` also never frees the
+data texture. Workaround: before regenerating, `renderer.deleteTexture(layer.layerDataTexture)` and null the field; do the same
+when you destroy a chunk. Test: count `renderer.glTextureWrappers.filter(w => w.renderer === null)` (expect 0) and run
+`gl.getExtension('WEBGL_lose_context').loseContext()` then `restoreContext()` and assert the world draws again.
+
+## 14. Scene lifecycle: what survives stop/start
+
+`Systems.shutdown()` removes only the TRANSITION_* listeners and emits SHUTDOWN. A scene's own `events` emitter keeps every other
+listener (a `scene.events.on(WAKE)` in `create()` stacks one per visit); game-wide emitters (`game.events`, `scale`, `registry.events`),
+the global texture manager and the DOM obviously outlive the scene. The scene's input/keyboard plugins and display list do clean
+up. Also: the Scene *object* is reused, so a `WeakMap<Scene, Pool>` hands out images that were destroyed with the display list,
+field initialisers run once per Scene object (reset accumulators in `init()`), and canvas textures you made are yours to remove.
+Remove everything in one SHUTDOWN handler. Guard it with a browser spec that restarts the scene ten times and requires listener
+counts per event name (`emitter.eventNames()` / `listenerCount`), texture count and display-object count not to grow, plus a static
+test that a file subscribing to a long-lived emitter also unsubscribes. Prove it red by mutation.
+
+## 15. Focus, visibility, context loss, and unused audio
+
+Phaser pauses its loop in a hidden tab (and resets the delta on return) but keeps running when the window only loses focus, so a
+simulation plays on unseen: listen once per game for `Core.Events.BLUR/FOCUS/HIDDEN/VISIBLE` and stop stepping. On
+`renderer.on(Renderer.Events.LOSE_WEBGL)` Phaser disables the renderer but your update loop still runs, and creating a GL
+resource then throws (`Framebuffer Unsupported`): hold the frame until `RESTORE_WEBGL`. Dynamic textures (RenderTexture) must be
+redrawn after a restore. If sound comes from another engine, set `audio: { noAudio: true }` or Phaser builds an unused AudioContext.
 
 ## How these were found (do it this way)
 

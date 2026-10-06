@@ -47,7 +47,11 @@ Read the reference that matches the work. Do not load all of them.
 - **Prove a regression test by mutation.** Re-introduce the bug, watch the test fail, restore the fix.
 - **Every runtime use of a Phaser value needs `import Phaser from 'phaser'`.** Phaser's types are a global namespace, so
   a missing import compiles and then throws `Phaser is not defined`. Add a test that scans for it.
-- **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep.
+- **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the generator's
+  state in the snapshot: otherwise a loaded game restarts the random stream and drifts from the original (test it by stepping a
+  saved and a restored sim side by side).
+- **Every scene restart must be leak-tested.** Restart the scene ten times in a browser spec and require listener counts,
+  textures and display objects not to grow (gotchas 14 and 15); a WebGL context loss/restore spec belongs beside it (gotcha 13).
 - **Games for this owner use a strict pixel-only UI.** Every visible UI and message pixel comes from agent-sprites bitmap
   fonts, skins and icons (no browser text, no Phaser `Text`); the UI layer may have a higher resolution than the gameplay
   layer, but each layer uses one integer scale. Ban `Text` creation with a test.
