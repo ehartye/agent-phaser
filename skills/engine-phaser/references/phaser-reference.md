@@ -57,7 +57,7 @@ choices that paid off, not engine facts.
 | Accessible controls and native text entry project the same screen/action model as Phaser; no DOM-count ban or duplicate layout | pixel-perfect 7 | Guidance; existing `ui/AriaLive.ts` covers announcements only |
 | Text fit in three layers (static table, runtime guard, GPU walk-through) | pixel-perfect 5 | `feat/text-fit` branch |
 | Dedupe keydown by event identity (*verified*: shared queue, per-scene dispatch); input capture state | pixel-perfect 6 | `src/game/ui/keys.ts` |
-| Do not build on the Gamepad plugin (*verified*); poll `getGamepads()` once per frame; position-named buttons; the pad is a key source for menus | [gamepad and input](gamepad-and-input.md) | `src/game/input/*` |
+| Start with native Gamepad configuration and one input owner; reproduce version-specific lifecycle defects before a scoped fallback; position-named buttons | [gamepad and input](gamepad-and-input.md) | `src/game/input/*` is a custom example, not a native-first template |
 | Audio directors decide, a tiny player plays; exhaustive tables as type errors; music state machine with hysteresis; unlock on first gesture | [audio directors](audio-directors.md) | `src/game/audio/*`, `src/content/sounds.ts` |
 
 ## Verification, performance, pipeline

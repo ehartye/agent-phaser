@@ -45,6 +45,9 @@ Read the reference that matches the work. Do not load all of them.
 
 ## Rules that earned their place
 
+- **Use Phaser's native capability first.** Configure and test it before adding a parallel implementation. For controller input,
+  see [gamepad and input](references/gamepad-and-input.md): configurable thresholds are not defects; lifecycle workarounds require
+  a version-specific reproduction, one input owner and a removal condition.
 - **Measure pixels, not impressions.** A screenshot that "looks plausible" hid a layer covering the whole terrain for
   hours. Read a pixel at a place whose expected colour you know, then toggle layers and read it again.
 - **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and

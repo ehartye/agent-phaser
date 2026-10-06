@@ -1,44 +1,57 @@
 # Controllers and input devices in a Phaser 4 game
 
-Everything here comes from adding first-class gamepad support to Fallow Valley (Phaser 4.2.1, Chrome on Windows with a mocked
-pad). The code lives in that repo under `src/game/input` and `docs/INPUT.md`; read those for the full design.
+The Fallow Valley examples live under `src/game/input` and `docs/INPUT.md`. Their custom polling is a project-specific
+implementation, not a requirement for other games. Start with the installed Phaser API and verify the game's requirements.
 
-## Do not build on Phaser's Gamepad plugin
+## Start with Phaser's Gamepad plugin
 
-Read from `node_modules/phaser/src/input/gamepad` and confirmed in the browser with Phaser's own `Gamepad`, `Button` and `Axis`
-classes fed a fake pad:
+Enable `input: { gamepad: true }` in the game config. Use one scene as the input owner and project its actions to gameplay and
+menus; other scenes must not independently dispatch the same controller actions. Configure each pad when acquired or reconnected:
 
-- **Off by default.** `input: { gamepad: true }` in the game config; otherwise `scene.input.gamepad` is undefined.
-- **`Button.threshold` is 1.** `pressed` needs 1.0, so an analog trigger at 90% travel is not pressed and many pads never report
-  exactly 1.0. Use `button.value` and your own threshold (0.5).
-- **`Axis.threshold` is 0.1 and per axis.** `leftStick` zeroes each axis on its own: `(0.12, 0.05)` reads `(0.12, 0)`, bending the
-  direction onto an axis. A dead zone belongs on the vector's length.
-- **`Gamepad.connected` and `.timestamp` are creation-time snapshots.** `update(pad)` copies buttons and axes but never replaces
-  `this.pad`, and browsers hand back a new snapshot per `getGamepads()` call, so `connected` is `true` forever. Disconnects are
-  visible only through the `DISCONNECTED` event.
-- **Dead pads stay.** `plugin.gamepads` is sparse by device index and never pruned, `total` is its `length`, `pad1` to `pad4` are
-  never cleared (a pad re-plugged at another index leaves `pad1` stale).
-- **Stale-timestamp early return.** `Gamepad.update` returns when `pad.timestamp < this._created`. Chrome only advances the
-  timestamp when state changes, so a pad that has not changed since the object was created is ignored until it does. A fake pad
-  with `timestamp: 0` never updates.
-- **One plugin per scene.** Each scene owns its plugin, its `Gamepad` objects and its own button state, so three scenes see three
-  independent sets of edges.
+```ts
+// Native configuration, applied before consuming actions from this pad.
+for (const button of pad.buttons) button.threshold = 0.5;
+pad.setAxisThreshold(0);
+// Read pad.leftStick (or axes values); apply one radial response in the action mapper.
+```
 
-## What to do instead
+- `Button.threshold` defaults to 1; setting it to 0.5 retains Phaser's pressed state and button edge events. A configurable
+  default is not a reason to replace the plugin or maintain a second edge detector.
+- Axis thresholds default to 0.1 per component. Setting them to zero preserves the vector `(0.12, 0.05)` instead of `(0.12, 0)`.
+  Apply one game-specific radial dead zone to the vector: about 0.2 for movement, rescaled toward full speed around 0.95 if desired.
+  Treat non-finite values as zero. Do not stack per-axis clipping with a radial transform.
+- Use `CONNECTED` and `DISCONNECTED` events to maintain active device identity and release held actions on loss. Clear gameplay
+  actions on blur, hidden, modal capture and scene shutdown too. Unsubscribe on shutdown; resample or reacquire on resume.
+- Read native button state and edges in the owner's Phaser input/update cycle. Share the resulting action state, bindings and
+  focus policy; do not add a second `navigator.getGamepads()` loop beside the native plugin.
 
-Poll `navigator.getGamepads()` yourself, once per frame, in a plain class with no Phaser import:
+## Version-scoped lifecycle hazards and fallback gate
 
-- Hook `game.events.on(Phaser.Core.Events.PRE_STEP, ...)` so every scene reads one frame and the same button edges.
-- Apply a **radial** dead zone (length based, about 0.2 for movement), ramp from the dead zone to about 0.95 (worn sticks never reach
-  1.0) so there is no jump at the edge, optionally raise to a power of 1.2 to 1.3 for fine control. Treat NaN as zero.
-- Triggers are buttons with an analog `value`: press at 0.5.
-- Compute edges per pad from the previous poll. With several pads, the one with the latest activity is active.
-- A pad unplugged mid-game appears as a null slot or `connected: false`: release everything (the player must stop) and fall back to
-  keyboard hints.
-- The browser exposes a pad only after a button press on it while the page is focused, and `getGamepads()` needs a secure context
-  (https or localhost). Wrap the call in try/catch.
-- Haptics: `pad.vibrationActuator?.playEffect('dual-rumble', { duration, weakMagnitude, strongMagnitude })` exists in Chrome-family
-  browsers only. Swallow rejections and treat it as optional.
+Verified against installed Phaser **4.2.1** source (`src/input/gamepad/{Button,Axis,Gamepad,GamepadPlugin}.js`) and synthetic
+fresh snapshots in Chrome on Windows, 2026-10-06. These are conditions to reproduce in the target game, not claims about all
+browsers or later Phaser versions:
+
+- `Gamepad.update(pad)` updates controls but retains its original `this.pad`. With fresh snapshots, `.connected` and `.timestamp`
+  can be stale. Prefer lifecycle events to those cached properties for device loss.
+- `refreshPads()` skips null slots without pruning cached pads; `total` is the sparse array length, and `pad1` to `pad4` can
+  retain stale aliases. Track event-based membership by device index; do not infer active membership from aliases or `total`.
+- `update` ignores snapshots whose timestamp is earlier than `_created`. The trial reproduced ignored controls at timestamp 0.
+  Test held input on initial acquisition and resume, including a valid older unchanged timestamp; do not merely make a mock's
+  timestamp advance every frame and declare lifecycle parity.
+- Scene plugins have independent control state. One action owner prevents duplicate dispatch; test its shutdown/restart and
+  controller reconnection, including reuse of an index by the same or a different device.
+
+Before replacing an engine capability, record the requirement, installed version, native API/configuration attempted, failing
+minimal reproduction and smallest workaround. Prefer a scoped lifecycle adapter or upstream fix over replacing the entire input
+stack. If direct polling is demonstrated necessary, use it as the **single** controller source, disable competing native controller
+consumption, and record a regression test plus removal condition. Do not patch Phaser private fields merely to make a test pass.
+
+This trial exercised native classes and plugin methods with synthetic inputs, not physical controllers or a full scene lifecycle.
+The configurable thresholds passed; the caching and timestamp defects above remain. The native-first policy does not certify
+Phaser 4.2.1 as free of controller bugs.
+
+Gamepad exposure can require a focused user gesture and a secure context (https or localhost). Test denied/unavailable access.
+Haptics are optional: feature-detect the actuator and swallow unsupported/rejected effects.
 
 ## Design that paid off
 
@@ -62,9 +75,14 @@ Poll `navigator.getGamepads()` yourself, once per frame, in a plain class with n
 
 ## Verifying without hardware
 
-Replace `navigator.getGamepads` in `page.addInitScript` with a function that returns a fresh snapshot of a fake pad (axes, buttons
-with analog values, `timestamp: performance.now()`, a recording `vibrationActuator`) and nothing until a `connect()`; drive it from
-the test, then assert on game state (sim commands, cursor tile, open modal) and measure pixels as usual.
+Replace `navigator.getGamepads` in `page.addInitScript` with a function that returns fresh snapshots of a fake pad (axes, analog
+button values, controllable timestamps, an optional recording actuator), and nothing until `connect()`. Dispatch matching browser
+connect/disconnect events. Drive the real native input owner and assert on game state (commands, cursor, open modal).
+
+- Verify partial triggers, vector direction, drift, one edge per press, two pads, hot unplug while held, reconnection at the same and
+  a different index, held input at boot/resume, blur/hidden, modal capture, and ten scene restarts without listener growth.
+- Include unavailable API and stale/unchanged timestamps as deliberate cases. A happy-path mock does not establish native lifecycle
+  correctness. Scope any fallback to the observed failure and rerun this suite after a Phaser upgrade.
 
 - Never return a Phaser object from `page.evaluate` (`camera.setVisible(false)` returns the camera): serialising its object graph
   blows the test runner's heap with an out-of-memory crash. Use a block body.
