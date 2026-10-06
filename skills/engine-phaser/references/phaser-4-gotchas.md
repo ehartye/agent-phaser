@@ -93,6 +93,27 @@ Use tint modes: `sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)` fo
   pixels. Compute visible chunks from `worldView`, not from the canvas size.
 - The Phaser `skills` folder inside the package is the fastest accurate reference for v4 APIs.
 
+## 8. A Container's alpha does not reach the CPU tilemap layers inside it
+
+`container.setAlpha(0.25)` changed nothing on screen when the container held a `TilemapLayer`; the scene graph said 0.25
+and the pixel was unchanged (a roof fade was silently broken). Set alpha on the layer itself. Verify fades with a pixel
+read of a tile with the effect on and off.
+
+## 9. Lighting, camera filters and render textures (measured on 4.2.1)
+
+- `setLighting(true)` works on CPU tilemap layers, sprites and images. Falloff is smooth and additive (easy to overexpose),
+  there is no occlusion, and it is per-object opt-in, which is awkward with pooled chunk layers. About 0.9 ms for 8 lights at
+  1280x720. For pixel-art bands, wall shadows or a grade, a world-locked light map is more controllable: a texture with one
+  texel per world pixel (`RenderTexture` filled with ambient, ADD `stamp` pools; or a CPU canvas for occlusion), drawn over
+  the world with MULTIPLY and NEAREST filtering.
+- Camera filters (`camera.filters.internal.addColorMatrix()`, `addDisplacement(key, x, y)`) keep pixel art crisp when the game
+  is `pixelArt: true` (compare distinct colour counts with the filter on and off), cost nothing while `setActive(false)`, and
+  only affect that camera, so a UI scene is untouched. `ColorMatrix.saturate(-1)` is full grayscale, `0` is identity.
+- `RenderTexture`/`DynamicTexture` commands (`fill`, `stamp`) are queued and run (and are cleared) only on `render()`. Never
+  queue without rendering.
+- To measure cost instead of vsync, launch Chromium with `--disable-gpu-vsync --disable-frame-rate-limit` and read
+  `game.loop.actualFps`.
+
 ## How these were found (do it this way)
 
 1. Build the smallest standalone version in the live scene (`scene.make.tilemap({ data })` plus a layer inside a
