@@ -60,6 +60,7 @@ choices that paid off, not engine facts.
 | Text fit in three layers (static table, runtime guard, GPU walk-through) | pixel-perfect 5 | `feat/text-fit` branch |
 | Dedupe keydown by event identity (*verified*: shared queue, per-scene dispatch); input capture state | pixel-perfect 6 | `src/game/ui/keys.ts` |
 | Start with native Gamepad configuration and one input owner; reproduce version-specific lifecycle defects before a scoped fallback; position-named buttons | [gamepad and input](gamepad-and-input.md) | `src/game/input/*` is a custom example, not a native-first template |
+| Touch: Phaser 4.2.1 listens to touch events and tracks one finger unless `input.activePointers` is raised (*verified*, `InputManager`); gestures as a pure recognizer on a fake clock; tap to move is a sim command (`goto`, incremental A\*), never a view-side move; bare ground is never worked by a tap; whole-number pixel-ratio tiers | [touch and mobile](touch-and-mobile.md) | `src/game/input/touch.ts`, `tapIntent.ts`, `src/sim/pathfind.ts`, `docs/MOBILE.md` |
 | Audio directors decide, a tiny player plays; exhaustive tables as type errors; music state machine with hysteresis; unlock on first gesture | [audio directors](audio-directors.md) | `src/game/audio/*`, `src/content/sounds.ts` |
 
 ## Verification, performance, pipeline

@@ -24,6 +24,7 @@ Read the reference that matches the work. Do not load all of them.
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
 | Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md) |
+| Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md) |
 | Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
 
