@@ -115,3 +115,22 @@ example: `src/game/debug/*`, `tests/harness/*`, `tools/fv.mjs`, `docs/HARNESS.md
   failure, and always restores the file. A survivor means the tests do not guard that line.
 
 example: `tools/mutation-input.mjs`, `tests/visual/scenes.spec.ts`, `tests/perf/budget.spec.ts`, `playwright.config.ts`.
+
+## A debug API, a manual frame loop and a page object (what replaces the sleeps)
+
+The probes above each repeated "start, wait 600 ms, press Enter, wait 1200 ms". Under parallel workers the title was not up yet, Enter went nowhere, and the next
+line failed with "no game in progress". Build the harness once instead (Fallow Valley: `docs/HARNESS.md`, `src/game/debug`, `tests/harness`):
+
+- **One typed debug object on the page** (`__game.debug`), loaded only in dev or when the URL asks (`?debug=1`, `?demo=name`) through a dynamic `import()` so a production
+  build carries it as a separate chunk. It starts a world (`start({ seed, hour, weather, at, give, god })` once the title scene is active, never by key press), teleports to
+  named places (biome interiors found on the climate field, points of interest, camps, bosses, a vault's rooms), sets the clock and pins weather, gives items, spawns, pauses,
+  steps and scales time, toggles render layers, inspects the tile under the cursor, hashes the sim, snapshots, records and replays.
+- **A manual frame loop.** `game.loop.sleep()` then `game.step(virtualTime, dt)`: tests and capture advance by ticks and frames, not wall time. Yield to the event loop between
+  frames while waiting for scenes (asset loads finish there; a synchronous loop never lets `preload` complete). Keys are consumed at the next frame.
+- **A page object and fixture** that fails every test on a console error or warning, exposes `start`, `step(ticks)`, `frames`, `screenshotWorld()` (interface hidden),
+  pixel probes (`at`, `fraction`, `meanLum`), and `evalSim/evalDebug/evalWorld` wrappers (functions are serialised: pass data as an argument).
+- **Visual regression with `toHaveScreenshot`**: about twenty canonical scenes (biomes by time of day and weather), a perceptual tolerance, one baseline set, an update
+  command. Tag GPU-only tests (`@gpu`) so a SwiftShader CI can run the rest as a smoke.
+- **Determinism**: hash the whole sim state (snapshot plus RNG words) and record inputs with periodic hashes. If generation spawns creatures and the camera drives
+  generation, record the chunks the view generated or the replay diverges.
+- **Workers**: eight Chromium workers each with a WebGL context can exhaust memory; default to two, retry once, and report flaky tests rather than hiding them.
