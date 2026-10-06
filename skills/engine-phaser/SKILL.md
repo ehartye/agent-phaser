@@ -16,6 +16,7 @@ Read the reference that matches the work. Do not load all of them.
 | Draw a tilemap, chunk a world, add overlays or animated tiles | [tilemaps and terrain](references/tilemaps-and-terrain.md) |
 | Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
+| Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md) |
 | Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
 
