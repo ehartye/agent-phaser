@@ -15,6 +15,7 @@ Read the reference that matches the work. Do not load all of them.
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
 | Draw a tilemap, chunk a world, add overlays or animated tiles | [tilemaps and terrain](references/tilemaps-and-terrain.md) |
 | Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md) |
+| Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
 | Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
 
