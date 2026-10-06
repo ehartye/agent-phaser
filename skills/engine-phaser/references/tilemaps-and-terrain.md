@@ -55,6 +55,18 @@ Draw every tile as its own material, then overlay each higher-priority neighbour
 Register tile animations on the **tileset** (`tileData`), not per layer; the GPU layer animates them in the shader, so
 a whole lake animates for one data upload. Remember `animationDuration` (gotcha 3). Have every water tile use frame 0.
 
+More than one animation per tileset needs the index-map fix (gotcha 10), and only GPU layers animate. A sparse animated layer
+(plants, glow, drips) is a GPU layer over a sheet whose cell 0 is transparent (gotcha 2 refinement). Give a plant field
+phase-shifted copies of one loop so it does not sway in lockstep.
+
+## Ground variety without a stored layer
+
+Variety that needs no sim data can be a second sparse GPU ground layer between the base ground and the blend overlays, holding
+seamless macro patterns picked by `(x mod P, y mod P)` and a low-frequency noise field. Give a flavoured tile a priority a hair
+below its parent material so the parent's existing 47-mask overlays encroach on the patch border: ragged edges for free, no
+per-flavour transition art. Derive street furniture (lane dashes, crossings, curbs) from the neighbouring ground ids instead of
+placing it, so any generator that paints asphalt gets markings.
+
 ## Procedural terrain generation notes
 
 - Regions must come from coherent noise fields, not per-tile randomness: single random gravel tiles in dust render as

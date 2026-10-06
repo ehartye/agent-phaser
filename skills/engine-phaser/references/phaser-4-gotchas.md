@@ -37,6 +37,12 @@ In the game, two overlay layers (about 95% empty) hid the real terrain on every 
 **Workaround.** A GPU layer must be full. Use it for the dense base ground and make the code that fills it incapable of
 emitting -1. Use a CPU `TilemapLayer` for anything sparse (overlays, objects, roofs, floors).
 
+**Refinement (read from `TilemapGPULayer-frag.js`).** The layer data does mark `-1` as empty, but the shader's empty branch
+returns texel coordinate `(0, 0)` of the tileset for the whole quad, so the tile is filled with the colour of the sheet's
+**top-left pixel**, not a lookup of tile 0's art. That makes a sparse GPU layer possible: make cell 0 of the tileset fully
+transparent (an explicit `empty` cell first in the sheet) and "empty" becomes transparent. Sheets whose first cell is opaque
+(a terrain sheet starting with dust) still need full layers. See gotcha 10 for what sparse GPU layers are good for.
+
 **Related crash.** `removeTileAt(x, y, true)` leaves `null` in the layer; `generateLayerDataTexture()` then throws
 `Cannot read properties of null (reading 'index')`. Use `removeTileAt(x, y, false)` on a GPU layer.
 
@@ -113,6 +119,31 @@ read of a tile with the effect on and off.
   queue without rendering.
 - To measure cost instead of vsync, launch Chromium with `--disable-gpu-vsync --disable-frame-rate-limit` and read
   `game.loop.actualFps`.
+
+## 10. Tile animations: GPU layers only, and the second animation plays the wrong tiles
+
+**Symptom.** After registering several tile animations (swaying plants, pulsing crystals), a row of one plant draws tiles of
+other plants (wildflowers showed glowing mushrooms and dry grass). The first animation registered (our water) was always right.
+CPU `TilemapLayer`s never animate at all.
+
+**Cause.** Only `TilemapGPULayer` animates tiles (`tileData[i].animation`, read by `Tileset.createAnimationDataTexture`). That
+texture stores each animation as a pair of 32-bit values, so animation `n` sits at texels `2n` and `2n + 1`. The fragment shader
+(`animationIndex` in `TilemapGPULayer-frag.js`) reads texels `n` and `n + 1`, and `generateLayerDataTexture` writes the map value
+`n` unchanged into the layer data. They agree only for `n = 0`.
+
+**Workaround.** After registering `tileData`, and before the first GPU layer is created from that tileset, double the
+tile-to-animation map once:
+
+```ts
+const map = tileset.getAnimationDataIndexMap(renderer);          // creates the animation texture and the map
+for (const [tile, anim] of map) map.set(tile, anim * 2);         // the shader reads texel 2n
+```
+
+Keep a `WeakSet` so it is applied once per tileset. Verify by animating three different tiles and reading the screen.
+
+**Also.** To desynchronise a field of animated tiles (no per-tile phase in the shader), register one animation per phase: the
+same frames started a quarter apart. Phase tiles need their own cells in the sheet because `tileData` is keyed by tile index.
+Put sparse animated content (plants, glow, drips) in its own sparse GPU layer (gotcha 2 refinement); the CPU layers stay static.
 
 ## How these were found (do it this way)
 
