@@ -21,6 +21,11 @@ node web/verify.mjs phaser                # or three: writes web/results/*-repor
 ```
 
 `verify.mjs` takes Playwright from `PLAYWRIGHT_DIR` (default: a sibling agent-beeps checkout) and launches Chromium with
-`--use-angle=d3d11 --ignore-gpu-blocklist`; it reports the WebGL renderer string so you can see whether it ran on the GPU
-or in software. It loads the page, records console errors and failed requests, samples animation state twice,
-screenshots, clicks (the gesture that unlocks audio), then triggers the pickup 12 times and checks the variants.
+`--use-angle=d3d11 --ignore-gpu-blocklist --force_high_performance_gpu` (Windows; the third flag picks the discrete GPU
+on a laptop with two). It prints the WebGL renderer string and fails when it is a software renderer (SwiftShader,
+llvmpipe) unless you pass `--allow-software`. It loads the page, records console errors and failed requests, samples
+animation state twice, screenshots, checks that audio is locked and nothing played, makes one real click (the gesture
+that unlocks audio), checks that audio runs, then triggers the pickup 12 times and checks the variants. It launches
+without `--autoplay-policy=no-user-gesture-required`, because that flag lets audio run without the gesture and hides
+the gate; `--autoplay` adds it back for debugging. It exits 1 when a check fails. `verify-checks.mjs` holds the flags
+and checks; `node --test web/verify-checks.test.mjs` tests them without a browser.

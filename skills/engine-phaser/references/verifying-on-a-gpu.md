@@ -12,11 +12,17 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:5199',
     viewport: { width: 1280, height: 720 },
-    launchOptions: { args: ['--use-angle=d3d11', '--ignore-gpu-blocklist'] },   // Windows; use the platform equivalent elsewhere
+    launchOptions: { args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--force_high_performance_gpu'] },   // Windows; use the platform equivalent elsewhere
   },
   webServer: { command: 'npx vite --config vite.evidence.config.mjs', url: 'http://127.0.0.1:5199', reuseExistingServer: false },
 });
 ```
+
+On a laptop with two GPUs the first two flags are not enough. [tested] On Windows 11 with an Intel integrated GPU and an
+NVIDIA RTX 5070 Ti Laptop GPU (Playwright 1.63.0, Chromium 153): no flags rendered on SwiftShader, `--use-angle=d3d11
+--ignore-gpu-blocklist` on the Intel GPU, and adding `--force_high_performance_gpu` on the NVIDIA GPU (Sector Run, and
+repeated with `examples/web/verify.mjs`). Print the renderer string on every run and fail on software (below), since software WebGL raises
+no error.
 
 For frozen acceptance, own the server, source root, configuration and cache identity. Choose a free strict port and a fresh cache directory;
 do not attach to an unidentified existing server. Keep full raw server stdout/stderr from before process spawn, not only a tail sample.
@@ -72,7 +78,7 @@ Expose the game for tests with `globalThis.__game = game`. Assert that the rende
 
 ```ts
 const gl = game.renderer.gl; const ext = gl.getExtension('WEBGL_debug_renderer_info');
-expect(String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))).not.toMatch(/swiftshader|llvmpipe|software/i);
+expect(String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))).not.toMatch(/swiftshader|llvmpipe|software|basic render/i);
 ```
 
 ## What to assert
