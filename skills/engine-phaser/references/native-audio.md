@@ -35,6 +35,30 @@ Use native sound volume and native tweens for ordinary fades. Compose each sound
 - Check the pinned backend's blur/focus behavior and the game's hidden/visible events separately. Preserve intentional preview/menu holds; a blanket resume can restart sounds meant to remain paused. Pair every owned listener with teardown.
 - Select supported formats from the delivered assets. Codec conversion, loop repair and export validation belong to beeps. WebAudio and HTML5Audio have different loop/overlap behavior; source inspection is not mobile or audible certification.
 
+## Phaser 4.2.1 decode rejection correction
+
+Phaser 4.2.1's native `AudioFile.onProcess` supplies success and error callbacks to `decodeAudioData` but ignores its returned Promise. The [Web Audio specification](https://www.w3.org/TR/webaudio-1.1/#dom-baseaudiocontext-decodeaudiodata) requires an undecodable recording to reject that Promise with `EncodingError` and invoke the error callback. An HTTP 200 invalid recording therefore reaches Phaser's ordinary `FILE_ERRORED` processing path and Loader `COMPLETE`, then produces an uncaught rejection. Loader `totalFailed` counts HTTP failures; it remains zero in this case. The missing audio-cache key is still the readiness/retry signal.
+
+Use the released [install-time correction](../scripts/assets/phaser-audio-decode-patch.mjs) as a temporary dependency band-aid. Copy that exact artifact into the consuming project's scripts directory and call it from the existing postinstall after Phaser is installed:
+
+```sh
+node scripts/phaser-audio-decode-patch.mjs node_modules/phaser
+```
+
+An existing Node postinstall can instead import `patchAudioDecode` from that copied module and `await patchAudioDecode(installedPhaserDirectory)`. Importing alone has no side effect. The installer requires package name `phaser` and exactly version `4.2.1`; it preflights the known, unique original or corrected AudioFile fragment in `src/loader/filetypes/AudioFile.js`, `dist/phaser.esm.js` and `dist/phaser.js` before any write. Unknown, ambiguous or mixed-newline target fragments fail installation. Repeated installation is idempotent; LF or CRLF and all bytes outside the target fragment are preserved. This permits composition with an existing held-input correction elsewhere in a bundle. Keep any consuming project's independent integrity guards consistent with both released corrections.
+
+The correction immediately attaches a no-op rejection handler to the returned native decode Promise. Both native callback bodies remain unchanged and own success/failure processing exactly once. Callback-only implementations returning `undefined` remain supported. Native decode errors remain visible in the console and failed recordings remain outside the cache; the correction does not retry, suppress global errors, change playback, or modify `WebAudioSoundManager.decodeAudio`.
+
+Remove this band-aid when a reviewed upstream Phaser release handles the AudioFile decode Promise, then verify failure and valid retry on the new pinned version. The current installer deliberately refuses that version rather than guessing whether a changed function needs patching. The guarded source is the [pinned 4.2.1 AudioFile](https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AudioFile.js), not a replacement decoder.
+
+Maintenance verification is focused: `node --test tests/phaser-audio-decode.test.mjs` exercises the extracted pinned function, paired Promise/callback outcomes, callback-only returns, all three targets, refusal without partial writes, newline/byte preservation and idempotence. For the [native Chromium probe](../../../examples/web/phaser-probes/audio-decode.mjs), obtain a pristine `npm pack phaser@4.2.1` package and a separate patched copy containing its package manifest and all three target files, then run from this repository:
+
+```sh
+node examples/web/phaser-probes/audio-decode.mjs <project-with-playwright> <pristine-phaser-directory> <patched-phaser-directory> <new-evidence-directory>
+```
+
+The host project supplies only `@playwright/test`; its Phaser installation and game are untouched. The probe runs sequentially with no retries in one Chromium page/context, serves actual ESM bundles and HTTP 200 invalid/valid recording fixtures, and records native processing, Loader completion, missing-cache failure and cached retry. It compares the pristine uncaught rejection with the corrected result, retaining native console errors, actual canvas renderer, raw events, trace, source/fixture hashes and owned-process cleanup. This is desktop Chromium native-loader evidence, not audible playback, mobile/HTML5Audio, codec coverage or a physical-device pass. Callback-only compatibility is a unit fixture check.
+
 ## When the beeps player is the right owner
 
 Live synthesis or existing beeps-specific adaptive layers, variant selection, priority handling or processing may require its player or a released integration API. First check the concrete requirement against native Phaser behavior. Preserve required beeps behavior instead of copying it into an engine helper. If a reusable beeps adapter/export capability is missing, fix and release it in agent-beeps; agent-engine documents how the engine consumes it.
