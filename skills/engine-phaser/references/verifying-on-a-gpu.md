@@ -10,13 +10,63 @@ screen. Verify on the GPU and assert on pixels.
 export default defineConfig({
   testDir: 'tests/browser',
   use: {
-    baseURL: 'http://localhost:5199',
+    baseURL: 'http://127.0.0.1:5199',
     viewport: { width: 1280, height: 720 },
     launchOptions: { args: ['--use-angle=d3d11', '--ignore-gpu-blocklist'] },   // Windows; use the platform equivalent elsewhere
   },
-  webServer: { command: 'npx vite --port 5199 --strictPort', url: 'http://localhost:5199', reuseExistingServer: true },
+  webServer: { command: 'npx vite --config vite.evidence.config.mjs', url: 'http://127.0.0.1:5199', reuseExistingServer: false },
 });
 ```
+
+For frozen acceptance, own the server, source root, configuration and cache identity. Choose a free strict port and a fresh cache directory;
+do not attach to an unidentified existing server. Keep full raw server stdout/stderr from before process spawn, not only a tail sample.
+Record the PID, pinned Vite version/module hashes, source/config hashes, origin and actual served optimized dependency URL/response hash
+alongside its cache metadata and file hash. A source freeze alone does not identify the optimized code served to the browser.
+
+### Keep frozen evidence outside Vite's live inputs
+
+Prefer source snapshots, logs and trace resources outside the Vite root. Git-ignore is not watcher isolation; a unique `cacheDir` only
+isolates that cache, not evidence elsewhere. Vite 8.3.3's [watcher defaults](https://raw.githubusercontent.com/vitejs/vite/v8.3.3/docs/config/server-options.md)
+omit `.local`. A watched copied `tsconfig.json` forces a full reload, and captured HTML can emit reloads. This can reset game/audio state
+without changing product source. The separate [HTML dependency scan](https://raw.githubusercontent.com/vitejs/vite/v8.3.3/docs/config/dep-optimization-options.md)
+also needs exact real entry points; watcher ignores do not set scanner entries.
+
+If evidence must live in `.local`, reserve that subtree for evidence/tooling and explicitly exclude it. Extend the app's config instead
+of replacing its plugins or aliases; this example assumes the existing config is `vite.config.mjs`. Replace `index.html` with every real
+app HTML entry (for example, `['index.html', 'phaser.html']`), choose an unused port and change the run ID for each frozen acceptance:
+
+```js
+// vite.evidence.config.mjs: keep the app's plugins, aliases and other settings.
+import {defineConfig,mergeConfig,normalizePath} from 'vite';
+import {resolve} from 'node:path';
+import appConfig from './vite.config.mjs';
+
+export default defineConfig(async env=>{
+  const app=await (typeof appConfig==='function'?appConfig(env):appConfig);
+  const root=resolve(app.root??'.');
+  const evidence=normalizePath(resolve(root,'.local'));
+  const config=mergeConfig(app,{
+    cacheDir:resolve(root,'../.vite-evidence-cache/run-20261007-a'), // Fresh run ID.
+    server:{host:'127.0.0.1',port:5199,strictPort:true,watch:{ignored:[file=>{
+      const path=normalizePath(file);
+      return path===evidence||path.startsWith(evidence+'/');
+    }]}}
+  });
+  // Replace after merging: mergeConfig concatenates arrays, including entries.
+  config.optimizeDeps={...config.optimizeDeps,entries:['index.html']}; // All real app HTML entries.
+  return config;
+});
+```
+
+Keep native HMR and dependency optimization enabled for actual app source. Before freezing, verify the configuration in a small isolated
+fixture using the installed Vite: copied `.local` tsconfig/trace-HTML writes must produce no watcher/HMR events during a bounded observation,
+while an actual app HTML/source edit still produces native reload/update events. Check native cache metadata for app dependencies and the
+absence of snapshot-only dependencies, then fetch the app's actual optimized import. Close owned sockets, watchers and server and verify
+the PID/port cleanup. Do not mutate frozen product source for this positive control.
+
+A Windows Node 24/Vite 8.3.3 fixture verified these behaviors with native WebSocket events and one-second negative observation windows.
+Its scan proof used visible snapshot HTML; hidden `.local` HTML was not a default scan entry there. This proves the configuration boundary,
+not the historical cause of every game failure or a fresh Phaser/audio/GPU pass. Recheck the bounded controls after a Vite upgrade.
 
 Expose the game for tests with `globalThis.__game = game`. Assert that the renderer string is not software:
 
