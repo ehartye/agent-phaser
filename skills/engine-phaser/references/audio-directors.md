@@ -63,8 +63,9 @@ example: `src/game/audio/MusicDirector.ts` (`Ladder`, `timeOfDay`), `tests/audio
   0 audio bytes before the gesture; 14 files and 4.1 MB after the first cue out of a 33 MB build.
 - The historical sample checked Ogg Opus in Chromium and Firefox; Safari decoding was unmeasured there. In the released player, fetch or decode failure reports `E_LOAD`; report it through the existing status UI and preserve its retry path.
 - `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
-- Render the audio in CI with caching keyed by the renderer version and a hash of the sources; render caches keyed by patch content let a
-  one-patch change re-render one patch. Gate the hosted build on a test that every catalogue entry has its file and the folder stays
+- Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
+  template `examples/web/ci/pages-audio.yml`). The decoded set is the memory budget and the player never evicts
+  ([audio integration](../../engine-asset-import/references/audio-integration.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
   inside a size budget.
 
 example: `src/game/audio/BeepsPlayerAdapter.ts`, `.github/workflows/pages.yml`, `tests/browser/pages-audio.spec.ts`.

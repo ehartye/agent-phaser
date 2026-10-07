@@ -28,6 +28,7 @@ Read the reference that matches the work. Do not load all of them.
 | Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md) |
 | Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
+| Ship audio: lock, store, Opus-only format, unsupported-browser notice, decoded-memory budget, a CI that fetches instead of rendering | [audio integration](../engine-asset-import/references/audio-integration.md), [CI for generated assets](../engine-asset-import/references/ci-for-generated-assets.md) |
 
 ## First five minutes
 

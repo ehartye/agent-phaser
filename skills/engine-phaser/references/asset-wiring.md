@@ -30,6 +30,7 @@
   or silence with a reason. Layering, ducking and hysteresis apply where the game requires them; preserve its existing policy.
   A compile-time check can ensure each game event has a decision.
 - In the beeps player, voice priority follows `meta.priority` (1 most important). A full budget may steal a less-important voice; it returns null when no eligible voice can be stolen. Let the player own that decision; null is not by itself a load failure.
+- Ship it: a committed lock and a store, fetched in CI by hash and never rendered there. See [audio integration](../../engine-asset-import/references/audio-integration.md) and [CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md).
 - Sound is judged by ear. An agent can measure, lint and look at renders, then prepare an audition, but must report
   sounds as "measured, not heard".
 
