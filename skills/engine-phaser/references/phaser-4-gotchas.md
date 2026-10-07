@@ -237,3 +237,13 @@ touch the camera). Cost: a visible CPU layer then walks all its tiles every fram
 matters ([performance](performance.md)). Related: the CPU layer renderer reads `src.alpha` (the layer's own, `src/tilemaps/TilemapLayerWebGLRenderer.js#L50`),
 which is why a container's alpha does not reach it (gotcha 8). Test: read the pixel at a landmark tile in a far chunk (yellow hatch handle in the
 example), with and without `skipCull`.
+
+## 19. Never destroy and recreate interactive objects in response to input
+
+A "dirty flag, rebuild everything once per tick" UI is lossy for the mouse in two ways. (1) Phaser's click is down plus up on the same object, so a
+rebuild between them hands the release to a new object that never saw the press. (2) Phaser adds a new interactive object to the input list in the
+scene's PRE_UPDATE, after that frame's queued pointer events are processed, so the frame after a rebuild is deaf: `pointerdown` fires on the scene but
+no `gameobjectdown`. Hover is the usual trigger (it sets the dirty flag just before the click), and it costs about 1 click in 20 with Playwright's
+instant move, down, up under load. Build zones and buttons once per layout and update them in place (`setLabel`, `setFocused`, `setVisible`); rebuild only
+the passive art on state changes. Test it deterministically: `game.loop.sleep()`, `mouse.move`, `mouse.down`, `game.loop.wake()`, wait a few frames,
+`mouse.up`; assert the scene's `input._list` is unchanged after state changes. Found in Fallow Valley's wardrobe (`CreatorPanel`: `build()` once, `refresh()` in place).
