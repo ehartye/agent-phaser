@@ -1,13 +1,16 @@
 # Pixel-perfect rendering and a pixel-only UI layer (Phaser 4.2.1)
 
 For a game whose every visible pixel, including text and menus, must come from authored pixel assets. The rules generalise: one
-integer scale per layer, device pixels not CSS pixels, no resampling anywhere. Verified on a real GPU at devicePixelRatio 1, 1.25,
+integer source-pixel scale per layer, device pixels not CSS pixels, no resampling anywhere. Verified on a real GPU at devicePixelRatio 1, 1.25,
 1.5 and 3.
 
 ## 1. One integer scale per layer, chosen from device pixels
 
-- **World layer**: camera zoom `clamp(floor(canvasWidth / (tilesAcross * TILE)), min, max)`, whole numbers only. A source pixel is
-  then Z by Z device pixels everywhere.
+- **World layer**: choose a whole source-pixel multiplier `N`. For a layer using a uniform `A` world units per source pixel,
+  camera zoom is `N / A`, not necessarily a whole number. With the device-pixel canvas policy below, a requested CSS/world zoom
+  can use `N = max(1, round(A * requestedCssZoom / scene.scale.zoom))`; the actual CSS/world footprint is `N * scene.scale.zoom / A`.
+  Report that quantized footprint at fractional DPR. A source-scale-1 tile world may still choose its integer camera zoom from
+  `clamp(floor(canvasWidth / (tilesAcross * TILE)), min, max)`; that fit policy is an example, not a requirement for every game.
 - **UI layer**: a separate scene with its own camera at its own whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
   gives 2x at 1280x720, 3x at 1600x900, 4x at 1080p and 1x on a 390 px phone. Lay out in **logical pixels** (canvas / S, rounded
   down); at most `S - 1` device pixels are left over at the right and bottom and nothing draws there.
@@ -22,11 +25,18 @@ cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0); cam.roun
 
 example: fallow-valley-next `src/game/ui/UiScale.ts` (pure, tested), `UiCamera.ts`, `scenes/WorldScene.ts#fit`.
 
+Phaser 4.2.1 sets `camera.renderRoundPixels` only when both camera zoom axes are integers (`src/cameras/2d/Camera.js`). That flag
+does not inspect art scale: at `A = 2`, camera zoom 3.5 gives 7-device-pixel source blocks even while the flag is false. Use native
+camera bounds, centering/following and `getWorldPoint`; a false flag alone does not justify a renderer patch or copied transform.
+Verify actual sprites, labels, origins and camera motion with framebuffer samples before adding any alignment policy.
+The standalone [source-pixel probe](../../../examples/web/phaser-probes/source-pixels.mjs) measures integer and half-integer camera
+zooms on scaled art, alongside a fractional source-scale-1 UI counterexample. Its tiny texture does not certify a whole game or phone.
+
 ## 2. Device pixels, not CSS pixels
 
 `Scale.RESIZE` sizes the canvas in CSS pixels. On a display with `devicePixelRatio` 1.25 or 1.5 the browser stretches that canvas by a
 fraction and every art pixel becomes a different width. Size the canvas to the page times the ratio and set Phaser's CSS zoom to the
-inverse, so the cameras pick integer zooms from device pixels:
+inverse, so each layer picks its integer source-pixel footprint from device pixels:
 
 ```ts
 scale.scaleMode = Phaser.Scale.NONE;

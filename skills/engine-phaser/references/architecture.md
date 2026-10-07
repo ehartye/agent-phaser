@@ -54,7 +54,7 @@ compile-time check that every event has a decision: adding an event then fails t
 | Registry | settings and cross-scene read models; never game state |
 | Aseprite loader | `load.aseprite` then `anims.createFromAseprite` for agent-sprites sheets |
 | Tilemap layers, pooled | one pooled view per visible chunk, rebound as the camera moves, so scrolling allocates nothing |
-| Cameras | integer zoom only (whole source pixels), visible chunks from `camera.worldView` |
+| Cameras | integer source-pixel footprint (art scale × camera zoom), visible chunks from `camera.worldView`; see [pixel scaling](pixel-perfect-and-ui.md) |
 | Particle emitters | one reused emitter per effect; `explode` for bursts; weather is one emitter reconfigured per weather |
 | Tweens and `time` events | feedback and timers in the view; `setTimeout` only outside the world (delayed audio cues, debug polling) |
 

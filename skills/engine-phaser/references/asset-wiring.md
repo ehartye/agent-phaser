@@ -19,7 +19,7 @@
   installed.
 - Check in generated sheets and atlases with the build's ownership marker; gitignore large derived files
   (`*.project.json`, `operations.json`) because every build regenerates them.
-- Draw at integer zoom with `pixelArt: true` and `roundPixels: true`; never let a camera zoom fractionally.
+- Use `pixelArt: true` and `roundPixels: true`, and choose an integer **source-pixel footprint**: art units per source pixel × camera zoom. A layer drawn at art scale 2 can use camera zoom 3.5 for 7-device-pixel blocks. Keep source-scale-1 UI camera zoom integral. Measure actual framebuffer blocks before adding a renderer workaround; see [pixel scaling](pixel-perfect-and-ui.md).
 
 ## agent-beeps
 

@@ -18,3 +18,9 @@ game debug API. The host project supplies `phaser` and `@playwright/test`. Set `
 otherwise install Playwright Chromium. It requires a hardware GPU and prints its renderer string. It proves the legacy WebGL mask
 failure beside native external-filter clipping, scrolling, zoom, viewport-only input and ten scene restarts. See pixel-perfect-and-ui
 section 8 for the production recipe, resource policy and behaviors this focused probe does not cover.
+
+`source-pixels.mjs /absolute/path/to/host-project` is also standalone. It measures six distinct texels at art scale 2 and
+camera zooms 3, 3.5, 4, 4.5 and 7.5, including fractional follow coordinates, at DPR 1 and 1.5. Each source texel must occupy
+the exact integer device-pixel rectangle. It also compares fractional source-scale-1 UI zoom with its integer correction.
+It prints the actual hardware renderer and all block measurements; it does not test a game's complete artwork, pointer targets,
+mobile browser, or sustained performance. Use the same host dependencies and `CHROME_CHANNEL` option as the scroll probe.
