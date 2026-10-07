@@ -247,3 +247,25 @@ no `gameobjectdown`. Hover is the usual trigger (it sets the dirty flag just bef
 instant move, down, up under load. Build zones and buttons once per layout and update them in place (`setLabel`, `setFocused`, `setVisible`); rebuild only
 the passive art on state changes. Test it deterministically: `game.loop.sleep()`, `mouse.move`, `mouse.down`, `game.loop.wake()`, wait a few frames,
 `mouse.up`; assert the scene's `input._list` is unchanged after state changes. Found in Fallow Valley's wardrobe (`CreatorPanel`: `build()` once, `refresh()` in place).
+
+## 20. Per-plant motion on tilemaps: split the layer by phase, move the parent container
+
+A tilemap layer has no per-tile transform, so "every plant sways by its own phase" cannot be a vertex tweak. What works with no per-tile work and no per-frame
+allocation: quantise the phase (four classes of `(tx + (ty >> 1)) mod 4`), keep one **GPU tile layer per class**, route each tile into its class's layer when it is
+painted (remember the slot per tile so a tile that changes class leaves the old layer), and put each layer in its own `Container` whose `x` is that class's whole-pixel
+offset this frame. Facts measured on 4.2.1:
+
+- Move the **container**, not the layer: a `TilemapGPULayer` applies its own x/y twice (gotcha 1); a nested container composes correctly with the chunk container above it.
+- A GPU layer holding no tiles must be `setVisible(false)`, or Phaser still submits a quad for it; keep a live-tile count per layer. Eight extra GPU layers per chunk cost
+  31 more draw calls on screen and no measurable CPU time (2.2 ms vs 2.15 ms a frame).
+- A mutation behind the sim's back (writing chunk arrays) does not repaint; only change events and a rebind do. In a test, release and rebind the streamer.
+- With the sim **paused** the view interpolates `prev` to `player` with alpha 0, so a teleported player is drawn where it was and the camera never arrives: take one tick, run ~30 frames, then pause.
+- Gate the effect from the view side only (weather, the view clock, tile coordinates, Reduce motion); never read the sim for time, so frame-stepped tests are exact.
+- The whole 16 px tile moves as a unit (crowns slide over a still trunk); a true bend needs a vertex shader on the tilemap layers.
+
+## 21. Reactive companion art on a prop (a level meter): atlas frames owned by the prop's view
+
+Draw a level meter, status pip row or similar as extra atlas-frame images owned by the prop's view: create them lazily, `setFrame` only when the frame name changes, destroy
+them in the same pass as the prop image. Author the meter as small pips with the build's outline flag so gaps fill with outline colour (a dark strip, no extra pixels). Detect
+lit pips in browser tests by hue, not exact colour (the lighting pass tints the world). `screenOf(tileX, tileY)` already returns the middle of the tile; adding 0.5 puts it half a tile off.
+Found in Fallow Valley's troughs (`docs/PHASER-NOTES.md`).
