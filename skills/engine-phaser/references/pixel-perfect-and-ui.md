@@ -19,11 +19,21 @@ integer source-pixel scale per layer, device pixels not CSS pixels, no resamplin
 - Apply the UI scale with the camera, not by scaling objects:
 
 ```ts
-cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0); cam.roundPixels = true;
+cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0);
+cam.roundPixels = scene.game.renderer.type !== Phaser.CANVAS;
 // re-run on Scale.Events.RESIZE and on your own "scale changed" event; remove both on SHUTDOWN
 ```
 
 example: fallow-valley-next `src/game/ui/UiScale.ts` (pure, tested), `UiCamera.ts`, `scenes/WorldScene.ts#fit`.
+
+For pinned Phaser 4.2.1 native Canvas, use explicit integer object geometry with `roundPixels=false`;
+WebGL uses `true`. Canvas `batchSprite` adds 0.5 to destination frame width and height when camera rounding
+is enabled; `BitmapTextCanvasRenderer` separately rounds glyph x/y. Those branches are separate from snapping object placements. Cyberpunkt's
+native bitmap, tiled panel and trimmed Image crop controls qualify both backends at integer UI camera zooms,
+including fractional DPR. Recheck actual source pixels when changing Phaser versions; do not patch the renderer
+or add a second text compositor. Source: Phaser 4.2.1 `src/renderer/canvas/CanvasRenderer.js` (`batchSprite`),
+`src/gameobjects/bitmaptext/static/BitmapTextCanvasRenderer.js`; project controls:
+Cyberpunkt `tests/phaser-ui-browser.test.mjs` and `src/phaser/pixel-camera.js` (accepted Task 13).
 
 Phaser 4.2.1 sets `camera.renderRoundPixels` only when both camera zoom axes are integers (`src/cameras/2d/Camera.js`). That flag
 does not inspect art scale: at `A = 2`, camera zoom 3.5 gives 7-device-pixel source blocks even while the flag is false. Use native
