@@ -23,15 +23,13 @@
 
 ## agent-beeps
 
-- Build with `beeps` (export every sound and song to one folder, `beeps bundle` for `index.json`, `beeps player export`
-  to vendor the browser player). Keep the audio output directory out of git (it can be large) and build it in CI or on
-  demand.
-- `player.unlock()` must run from a real user gesture. A title screen's key press counts.
-- Keep a **sound director** between sim events and the player: it maps every event to a decision (a cue, a variant set,
-  or silence with a reason), layers ambience (base, weather, biome) with separate crossfades, ducks beds under weather,
-  and follows daylight with hysteresis. Give it a compile-time check that every event type has a decision.
-- Voice priority follows `meta.priority` (1 most important); the player has a voice budget and returns null when a burst
-  exceeds it. That is correct behaviour, not a failure.
+- Beeps owns authoring, rendering and export contracts. Use its managed export/bundle workflow and retain the recordings with their sidecars; generated audio ownership and CI caching follow the project's build policy.
+- For exported recordings, use Phaser's native Loader/cache/SoundManager as described in [native recorded audio](native-audio.md). A beeps-authored WAV does not require vendoring its browser player or disabling Phaser audio.
+- If the project requires the beeps procedural/adaptive player, consume the released player/API and follow [its engine integration](audio-directors.md). `player.unlock()` then runs from a real user gesture; a title screen's key press counts. Do not copy beeps runtime behavior into an engine helper.
+- Keep game-specific **sound decisions** between sim events and the chosen playback owner: a cue, a variant set,
+  or silence with a reason. Layering, ducking and hysteresis apply where the game requires them; preserve its existing policy.
+  A compile-time check can ensure each game event has a decision.
+- In the beeps player, voice priority follows `meta.priority` (1 most important). A full budget may steal a less-important voice; it returns null when no eligible voice can be stolen. Let the player own that decision; null is not by itself a load failure.
 - Sound is judged by ear. An agent can measure, lint and look at renders, then prepare an audition, but must report
   sounds as "measured, not heard".
 
