@@ -1,0 +1,25 @@
+// Extracted byte-for-byte (newline-normalized) from npm phaser@4.2.1 src/sound/webaudio/WebAudioSoundManager.js
+// Richard Davey; Copyright 2013-2026 Phaser Studio Inc.; MIT https://opensource.org/licenses/MIT
+// Source SHA256 31aae73aad489960400062019af0220719e689372cb489084362f445baece2fd
+     * @method Phaser.Sound.WebAudioSoundManager#onGameVisible
+     * @private
+     * @since 3.88.0
+     */
+    onGameVisible: function ()
+    {
+        var context = this.context;
+
+        //  setTimeout to avoid weird audio artifacts (thanks Apple)
+        window.setTimeout(function ()
+        {
+
+            if (context)
+            {
+                context.suspend();
+                context.resume();
+            }
+
+        }, 100);
+    },
+
+// End extracted native fragment.
