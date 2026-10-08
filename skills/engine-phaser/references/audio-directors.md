@@ -76,8 +76,12 @@ example: `src/game/audio/MusicDirector.ts` (`Ladder`, `timeOfDay`), `tests/audio
   With a hand-driven frame loop (`game.loop.sleep()` plus `game.step`), keep running frames while waiting for audio: decoding finishes on the event loop. In the released player, fetch or decode failure reports `E_LOAD`; report it through the existing status UI and preserve its retry path.
 - `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
 - Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
-  template `examples/web/ci/pages-audio.yml`). The decoded set is the memory budget and the player never evicts
-  ([audio integration](../../engine-asset-import/references/audio-integration.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
+  template `examples/web/ci/pages-audio.yml`). The decoded set is the memory budget; since player 4 (agent-beeps 0.9.0) it evicts least-recently-used
+  assets past `memoryBudgetBytes` ([audio integration](../../engine-asset-import/references/audio-integration.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
   inside a size budget.
+- **Memory budget** (measured in Fallow Valley, `docs/AUDIO.md` "Memory"): a crossfade holds the old and the new song at once, so the budget must cover that peak, not the steady state
+  (a song at rest 53 MB, a fight-to-world crossfade 166 MB; a phone budget of 150 MB failed, 240 MB held with a 2% margin). Find the floor by starving the budget in a test that plays the real
+  score and waits on the player's own state, never on time. Prefetch only what is near in time (the next time of day, the biome ahead, a fight about to start): early asks only evict what is needed sooner.
+  Unload whole assets you have left; do not call per-asset `unload` for layers inside a song that is still playing, because it also drops the layer you just prefetched.
 
 example: `src/game/audio/BeepsPlayerAdapter.ts`, `.github/workflows/pages.yml`, `tests/browser/pages-audio.spec.ts`.
