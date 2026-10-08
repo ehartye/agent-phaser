@@ -1,0 +1,67 @@
+name: Browser smoke
+# Template: the test harness on GitHub Actions. Copy to .github/workflows/smoke.yml and change the values marked EDIT.
+#
+# Two jobs with different jobs to do:
+#   smoke     GATING. Chromium on its own SwiftShader (software WebGL, no GPU on the runner). Proves the game boots, steps, draws and has
+#             a clean console. Tests tagged @gpu (exact colours, frame rate, visual baselines) are skipped (SOFTWARE_GL=1). Fast and stable
+#             enough to block a merge.
+#   browsers  ADVISORY (continue-on-error). Firefox and WebKit, which fail for reasons that are the runner's, not the game's, until proven
+#             green for a while. Nothing `needs:` it, so a green deploy means the site deployed. Promote it to blocking later by removing
+#             `continue-on-error` and adding it to the required checks.
+# The real-GPU suite (the @gpu tests, visual baselines, perf budgets) stays a local, pre-merge step. A CI that runs 2 of 19 browser specs
+# hides regressions: list the specs that make the smoke set deliberately, and include the scene-restart leak spec.
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: node --test tests/no-sleeps.test.mjs          # EDIT: your guard path; a sleep is a build failure
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=chromium --workers=2   # EDIT: or name the smoke specs
+        env:
+          CI: '1'
+          SOFTWARE_GL: '1'
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+  browsers:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps firefox webkit
+      # Firefox's AudioContext stays suspended for ever with no sound card: give it a PulseAudio null sink (drop this step if the game has no audio).
+      - name: 'Sound card for Firefox (PulseAudio null sink)'
+        run: |
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=ci
+      # Firefox has no WebGL on a headless runner ("Exhausted GL driver options"): run under a virtual display with Mesa software GL.
+      # WebKit is fine with the same. Do NOT do this for Chromium: forced Mesa makes its own SwiftShader several times slower.
+      # EDIT: name your projects and specs. A software-GL runner draws about one frame a second, so wait on page time (elapsed), not frames.
+      - run: xvfb-run -a -s '-screen 0 1280x720x24' npx playwright test --project=firefox --project=webkit
+        env:
+          CI: '1'
+          SOFTWARE_GL: '1'
+          LIBGL_ALWAYS_SOFTWARE: '1'

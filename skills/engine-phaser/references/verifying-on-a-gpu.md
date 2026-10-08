@@ -108,7 +108,7 @@ confirm it fails with a clear number (the dark-pixel ratio went from over 0.08 t
   floor clay.
 - Pass JavaScript through `page.evaluate` as one line without `//` comments (joining lines turns the rest into a comment).
 
-See `examples/web/phaser-probes` for generic versions.
+See `examples/web/phaser-probes` for generic versions. For a whole runnable harness (debug API, manual loop, condition waits, no-sleeps guard, GPU smoke spec, CI workflow) copy `examples/web/harness`.
 
 ## Gotchas in the harness itself
 
@@ -156,6 +156,23 @@ scene `time` clock, particles and the fixed-step stepper all follow it, so tests
 
 example: `src/game/debug/*`, `tests/harness/*`, `tools/fv.mjs`, `docs/HARNESS.md`.
 
+## Waiting: conditions, frames and page time, never sleeps
+
+`page.waitForTimeout` is a bet about today's machine speed: it broke when a bigger atlas slowed the first boot, hides what is being waited for inside a number, and
+on a software-GL runner (about one frame a second) it is wrong by an order of magnitude. Replace it, in this order:
+
+| Waiting for | Use |
+| --- | --- |
+| a scene, modal or object you can name | `until(page, fn, arg)`: `waitForFunction` with `polling: 'raf'` |
+| a genuine animation (fade, tween, camera ease) | `settle(page, frames)`: counts display frames, so a slow machine stretches the wait |
+| the sim to have run | ticks of the sim's own clock, capped when it is paused |
+| a duration that is the thing under test | `elapsed(page, ms)`: `performance.now()` polled in the page. Never "after 90 frames" on software GL |
+| a condition while the loop is manual | `framesUntil`: run frames inside the page until it holds, yielding to the event loop between batches |
+
+Add a **no-sleeps test** (scan the specs for `waitForTimeout` and in-page `setTimeout` promises; allow only a perf sample; make it prove it can fail). Specs that
+`goto` then sleep then press Enter fail under load with "no game in progress": start the game through the debug API once the title scene is active.
+Code: `examples/web/harness/tests/wait.mjs`, `no-sleeps.test.mjs`.
+
 ## Determinism proofs and regression tests worth having
 
 - **Record and replay**: the sim is `f(seed, command log)`. A recording is the seed, commands with their tick and a state hash every 100 ticks;
@@ -169,6 +186,9 @@ example: `src/game/debug/*`, `tests/harness/*`, `tools/fv.mjs`, `docs/HARNESS.md
   sleep. Wait on state (the title scene being active), never on time; one retry locally, reported as flaky.
 - **Mutation scripts for pure logic**: a script holds `[name, file, exact text, replacement]` rows, rewrites one line, runs the unit tests, requires
   failure, and always restores the file. A survivor means the tests do not guard that line.
+
+Run the suite twice: **gating** on SwiftShader (`@gpu` tests skipped) and the real-GPU suite locally before merge. A CI job for Firefox and WebKit needs `xvfb-run` with
+`LIBGL_ALWAYS_SOFTWARE=1` and a PulseAudio null sink, and stays advisory until it has been green for a while ([CI traps](../../engine-asset-import/references/ci-for-generated-assets.md)); template `examples/web/harness/ci/smoke.yml`.
 
 example: `tools/mutation-input.mjs`, `tests/visual/scenes.spec.ts`, `tests/perf/budget.spec.ts`, `playwright.config.ts`.
 

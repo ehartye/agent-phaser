@@ -1,0 +1,18 @@
+{
+  "name": "agent-engine-phaser-test-harness",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A runnable template for testing a Phaser 4 game: debug API, manual frame loop, condition waits, no-sleeps guard, GPU smoke spec, CI workflow",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --project=chromium",
+    "test:guard": "node --test tests/no-sleeps.test.mjs"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

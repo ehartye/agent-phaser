@@ -6,6 +6,7 @@ verifier. three.js churns its API often (0.186 deprecated `THREE.Clock`), so the
 - `phaser/` the campfire and courier through Phaser's Aseprite loader, audio through the agent-beeps player. 2D only.
 - `three/` the 3D fox GLB with its `walk` clip, the campfire and courier as billboard flipbooks, the same audio.
 - `ci/pages-audio.yml` a GitHub Pages workflow template for a game whose agent-beeps audio is fetched by lock and verified, never rendered in CI (see `skills/engine-asset-import/references/ci-for-generated-assets.md`).
+- `harness/` a runnable Phaser 4.2.1 test-harness template: debug API, manual frame loop, condition waits (`until`, `settle`, `elapsed`, `framesUntil`), a no-sleeps guard, a GPU smoke spec with `@gpu` tagging, and a CI workflow with a gating SwiftShader job and an advisory Firefox/WebKit job (see its README; tested on Chromium with a real GPU and SwiftShader, Firefox and WebKit untested).
 - `serve.mjs` a no-dependency static server for the workspace root. `verify.mjs` drives a page and writes a report.
 
 The pages expect the scenes workspace layout used by the Unreal scripts: `assets/meshes/fox.glb`,
