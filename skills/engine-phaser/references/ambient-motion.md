@@ -33,6 +33,13 @@ integer scale that covers the view, centred on the rounded camera centre.
 - Particles that glow (fireflies, sparks) should hand real light sources to the lighting pass, not just draw bright dots.
 - Kill particles outside the view plus a margin: cost follows the screen, not the world.
 
+## Wind: a pure field, whole-pixel sway
+
+Wind is a pure `windAt(weather, t, x, y)` with a travelling gust wave, so two places differ at one instant, plus a forced-wind control for
+the harness. Plants sway by whole pixels through four phase containers per layer set (a tilemap layer has no per-tile transform: see
+[gotchas](phaser-4-gotchas.md) 20); roofed tiles go to non-swaying layers; a Reduce motion setting zeroes the offsets and cuts gusts to
+about 40%. Prove it with three specs: calm is pixel-identical to no sway, a gale peak moves the pixels, a roofed field does not move.
+
 ## Test it
 
 - Frame diff: screenshot twice 0.9 s apart in a scene where nothing else moves; it must differ by a measured fraction

@@ -100,7 +100,20 @@ the device ratio by a **whole number** instead (3x: 1.0 with 3x3 device blocks; 
 the canvas width) then changes too: dividing a 3x phone's ratio by 2 would shrink the interface to two thirds. Keep the tier that divides by
 the ratio's whole part (the interface keeps its CSS size, the pixels get chunkier), and skip steps that change nothing. Drive it from a
 setting plus a frame-time governor (windows of N frames, strikes, ignore hitches over 250 ms) and halve the weather particles in the lowest
-tier. Pure functions, unit-tested.
+tier. Pure functions, unit-tested. Numbers that worked: the governor steps down after two consecutive windows of 90 frames averaging over 26 ms
+(once more on screens 3.5x or denser), at most twice; expose Full, Light and Auto as a setting; Light divides the ratio by its whole part and
+halves weather particles.
+
+## Accidental input, haptics and install
+
+- Ignore touches within about 8 CSS px of the left, right and bottom edges: the OS uses them for back and home gestures. A finger that slides
+  off a button must not fire it (aim buttons are the exception). Lists activate on release for touch and on press for a mouse; a narrow tablet
+  needs a minimum left offset for the hotbar. Show first-touch tips once and remember that in storage.
+- Haptics: `navigator.vibrate` with durations per event and a Vibration setting; absent on iOS Safari, so it must be optional and silent.
+- Install as an app: a manifest, icons and a theme colour are enough on both platforms (no service worker, so players never see a stale
+  build). Maskable icon art stays inside the 80% safe zone; `apple-touch-icon` has no alpha channel (iOS fills transparency with black);
+  redraw favicons at their own sizes rather than downscaling; `og:image` needs an absolute URL. Render icons with whole-number scales only and
+  keep a `--check` test that re-renders and compares pixels.
 
 ## Testing touch with Playwright
 

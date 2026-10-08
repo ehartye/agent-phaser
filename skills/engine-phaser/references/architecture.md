@@ -70,6 +70,20 @@ compile-time check that every event has a decision: adding an event then fails t
   view releases every bound chunk on a level change.
 - **Pens fall out of collision.** Animals respect solid tiles, so player-built fences contain them with no pen system.
 
+## Saves: versioned, migrated, quarantined
+
+A save is `{version, seed, rng, delta}`: the seed regenerates the world, the delta holds only what the player changed, the RNG words keep the
+random stream from restarting. Keep the format and `migrate(snapshot)` in a pure module (no Phaser, no storage) with one fixture per old version.
+- Reject a save from a newer version untouched; never downgrade it.
+- A `checkSnapshot` validator names the first malformed field. A damaged slot is moved aside (quarantined), never thrown at the player or erased.
+- Keep a slot index so listing never parses saves; read back after each write to verify it; apply side effects (difficulty, settings) only after the restore succeeded.
+- Autosave on a timer, day change, level change, sleep and tab hidden; never while dead.
+- Export and import a slot as a file (hidden anchor download, detached file input, `migrate` on the way in, confirm before replacing) and watch storage:
+  count what the game keeps in `localStorage`, warn above about 85% of the 5,000,000-character quota and say why a write was refused. A 6 to 16 KB slot makes
+  compression or IndexedDB not worth building; say that you chose not to.
+
+example: fallow-valley-next `src/sim/save.ts`, `SaveStore.ts`, `SaveFiles.ts`, `tests/save.test.ts`.
+
 ## Testing shape
 
 Unit tests (Node, milliseconds) for rules, generation, saves and layer boundaries. Browser tests on a real GPU for

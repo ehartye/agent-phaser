@@ -62,6 +62,13 @@ reason. Smooth falloff fights hard-banded art, there is no occlusion, it is per-
 re-enabling on every rebind), and it cannot express a grade (saturation, haze, flicker). It does work on tilemap layers, sprites and
 images. If you want smooth lamps and have no pixel constraint, use it.
 
+## Stacked dimming and lightning
+
+Grade, fog, vignette and cloud bands each looked fine alone and made the starter view dull when stacked (Fallow Valley moved the vignette
+from 0.42 to 0.22 and the cloud darkness from 0.7 to 0.78). Tune treatments together and assert the starter view's mean luma against a floor.
+Lightning flashes through the grade in whole brightness steps, at most two strokes in half a second; drop a strike within 1 s of the last
+(WCAG 2.3.1) and soften it to about 40% under Reduce motion. Weather is a sim fact the view follows, so a harness trigger needs no view code.
+
 ## 5. Test it on the GPU
 
 Read real pixels (see [verifying](verifying-on-a-gpu.md)): night over noon luminance ratio (0.33 measured; assert under 0.6); the

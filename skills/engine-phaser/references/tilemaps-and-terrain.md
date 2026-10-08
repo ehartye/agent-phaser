@@ -21,7 +21,8 @@ All GPU layers stay at (0, 0) and are positioned by a parent `Container` (see go
 ## Pooling and streaming
 
 - Visible chunk range from `camera.worldView` plus a margin of one chunk.
-- Bind a pooled view to each wanted chunk; release views that leave. Scrolling then allocates nothing.
+- Bind a pooled view to each wanted chunk; release views that leave. Scrolling then allocates nothing. Bind through a distance-sorted queue
+  with a per-frame time budget, not the whole ring in one frame ([performance](performance.md)).
 - On a tile edit, repaint that tile **and its eight neighbours** (blend overlays depend on neighbours) and flush the
   GPU layer once per frame.
 - Things that change without an event (moisture, growth) are reconciled on a timer over the sim's *active* tile set for

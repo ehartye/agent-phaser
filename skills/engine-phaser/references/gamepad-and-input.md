@@ -111,6 +111,10 @@ alone is not the removal test.
   keyboard) and rebuild every glyph on a change. Drift inside the dead zone is not input.
 - **Pause stops the sim** through a flag the world scene reads; modal capture swallows pad edges for a few frames after a screen
   closes so the press that closed it does not also act.
+- **Spatial focus rule**: Up and Down go to something higher or lower on screen, Left and Right to something left or right, and nothing
+  else; never lay out two columns while the keys walk a list. Measure it by testing the rectangles a screen reports at several window
+  sizes. A cycle ring (tools, weapons) is ordered by what an item is, not where it sits: equipping swaps slots, and a slot-ordered ring
+  reshuffles so the third item is never reached.
 - **Name entry** needs an on-screen keyboard: a grid of skin buttons with spatial focus (nearest in a direction, drift across the axis
   counts double, wraps) kept as pure functions so they unit-test.
 

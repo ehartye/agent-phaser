@@ -39,7 +39,9 @@ example: fallow-valley-next `src/game/debug/perf.ts` (counter and window), `debu
 | **Filters cost nothing while inactive** | `setActive(false)` | turn on only while needed |
 | **Rate-limit expensive CPU effects** | heat map repaint at 12 Hz; solid grid rebuilt only when the view crosses a tile | cache and key on view tile |
 | **Lights cost one quad each** | 48 cap | cull and cap by distance to the view centre |
-| **Chunk binding is the remaining spike** | one task of 0.9 to 1.5 s at 4x throttle for 16 views | bind in time slices (open item) |
+| **Bind chunks in time slices** | binding the whole ring in one frame was one task of 0.9 to 1.5 s at 4x throttle for 16 views | keep a queue of wanted chunks sorted by distance from the camera centre and work through it until a budget (5 ms) is spent, at least one step per frame; a step is making a view, painting two rows, or finishing a chunk; keep a chunk hidden until ready. Result at 4x throttle: longest task 517 to 143 ms, chunks on screen painted in 19 frames. In manual or test mode set the budget to Infinity so a stepped frame binds everything and a screenshot never depends on machine speed; guard with a spec that the real loop fills the ring nearest first with no half-painted chunk visible, and a perf budget on the longest task under 4x CPU throttle |
+| **More GPU layers are cheap if hidden when empty** | eight extra layers per chunk added about 30 quads and 31 draw calls, CPU flat at 2.2 ms (2.15 before) | moving sparse content off a 1024-tile CPU layer paid for them; set the draw-call test limit about 1.5 ms over calm, not at the measured number |
+
 
 Things measured and cleared (do not chase): audio unlock (decodes run off the main thread), title UI rebuild (about 2 ms), devicePixelRatio (CPU
 bound, not fill bound).

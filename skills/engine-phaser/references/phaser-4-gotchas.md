@@ -269,3 +269,7 @@ Draw a level meter, status pip row or similar as extra atlas-frame images owned 
 them in the same pass as the prop image. Author the meter as small pips with the build's outline flag so gaps fill with outline colour (a dark strip, no extra pixels). Detect
 lit pips in browser tests by hue, not exact colour (the lighting pass tints the world). `screenOf(tileX, tileY)` already returns the middle of the tile; adding 0.5 puts it half a tile off.
 Found in Fallow Valley's troughs (`docs/PHASER-NOTES.md`).
+
+## 22. A Scene object is reused, so state keyed to it survives with destroyed display objects
+
+Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows in Fallow Valley). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.

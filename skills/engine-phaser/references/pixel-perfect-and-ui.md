@@ -99,8 +99,17 @@ A string that runs off its box is a bug the type system cannot see. What worked:
 3. **GPU walk-through**: open every screen with worst-case content at several viewport sizes and scales; compare pixels outside the
    window rectangle with the window hidden and shown.
 
-example: the `feat/text-fit` branch of fallow-valley-next (`ui/TextGuard.ts`, `ui/FontMetrics.ts#layout`,
-`tests/text-fit.test.ts`); not merged to the main line when this was written.
+Details that mattered: wrap to `maxLines` and end in an ellipsis; take width and height from the container, never from the text; let a clip
+container declare its bounds; hide what a stepper covers so the guard never sees two texts on one pixel; keep a minimum logical height for the
+scale override. Add a **glyph-repertoire test**: collect every string the game can show and require the bitmap font to draw all of it (there is
+no system-font fallback, so a missing glyph shows as `?`). Key read-model deny tables by the sim's union so a new deny reason fails to compile
+without words. A screen that rebuilds itself on a key must re-centre its window. Toasts: cap at two, merge identical messages, and give changes
+already visible elsewhere a quiet flag.
+
+A `Container` measures its hit area from its centre: `setInteractive(new Rectangle(0, 0, w, h))` on a container is offset by half its size, so a
+click on a slot's centre selects the neighbour. Offset the rectangle (or put the zone on a child) and test by clicking centres.
+
+example: fallow-valley-next `ui/TextGuard.ts`, `ui/FontMetrics.ts#layout`, `tests/text-fit.test.ts`, `tests/browser/text-fit.spec.ts`.
 
 ## 6. Input capture and the keyboard queue
 
