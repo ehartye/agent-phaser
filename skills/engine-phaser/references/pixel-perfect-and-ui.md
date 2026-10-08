@@ -152,6 +152,19 @@ nothing (`src/gameobjects/components/Mask.js`). It remains a Canvas API. Use nat
 scissors or upload a DOM/canvas UI image each frame. A dedicated camera viewport is another native option for a rectangular pane
 when the screen already has clean camera ownership; keep its display/input exclusions explicit.
 
+For the camera-viewport option, render a pane's panel, text, icons, button faces and focus indicators through
+the same pane camera. Cameras render in their array order; object depth cannot put a main-camera button
+above an opaque panel drawn by a later camera. Keep fixed chrome outside the pane and use explicit
+`Camera.ignore` exclusions to prevent duplicate draws. When reusing pooled objects, reset their camera
+exclusions before assigning their current owner. Remove owned pane cameras on scene shutdown.
+
+Use the same clipped rectangle and scroll offset for pointer zones and visual controls. Verify actual
+button/focus pixels with the pane visible, then without it; a working click zone does not prove a visible
+control. Repeat after scrolling, resizing and scene restart on both native backends. Cyberpunkt's UI
+usability correction supplies this diagnostic, not performance or physical-device acceptance.
+Pinned source: [CameraManager.render](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/CameraManager.js)
+and [BaseCamera.ignore](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js).
+
 For a scrollable Container within the existing UI camera, keep a fixed parent and move only its content. This recipe uses a
 GameObject mask as invisible rendering machinery, not drawn UI chrome:
 
