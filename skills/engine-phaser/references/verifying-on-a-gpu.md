@@ -29,6 +29,13 @@ do not attach to an unidentified existing server. Keep full raw server stdout/st
 Record the PID, pinned Vite version/module hashes, source/config hashes, origin and actual served optimized dependency URL/response hash
 alongside its cache metadata and file hash. A source freeze alone does not identify the optimized code served to the browser.
 
+[tested] Vite 8.3.3 served the standalone Phaser fixture's exact cached-code prefix followed by an inline base64 source map;
+the full response therefore had a different hash from the cache file. Record both hashes, compare the code prefix exactly,
+decode the served map and tie its embedded source bytes to the actual consumed `phaser.esm.js`. That served map added only
+`x_google_ignoreList: [0]` to the parsed cache map. Validate this observed addition and compare every other field exactly;
+do not require raw map byte equality or normalize unknown differences. This is evidence for that pinned Vite fixture,
+not a guarantee about other versions or dependency graphs.
+
 ### Keep frozen evidence outside Vite's live inputs
 
 Prefer source snapshots, logs and trace resources outside the Vite root. Git-ignore is not watcher isolation; a unique `cacheDir` only

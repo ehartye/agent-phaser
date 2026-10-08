@@ -273,3 +273,41 @@ Found in Fallow Valley's troughs (`docs/PHASER-NOTES.md`).
 ## 22. A Scene object is reused, so state keyed to it survives with destroyed display objects
 
 Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows in Fallow Valley). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.
+
+## 23. Filter-mask framebuffers delete invalid handles during WebGL context restore
+
+**Symptom and cause.** On pinned npm Phaser 4.2.1, a native `Container`/`Rectangle` with an external `Graphics` filter mask
+draws again after actual `WEBGL_lose_context` restoration, but logs `INVALID_OPERATION` for `deleteFramebuffer` and
+`deleteRenderbuffer`. `WebGLRenderer.dispatchContextRestored()` recreates wrapper resources while `renderer.contextLost`
+is still true. `WebGLFramebufferWrapper.createResource()` first deletes its previous-context framebuffer and owned
+renderbuffers, which the browser has already invalidated. A plain scene without the mask does not reproduce these calls.
+
+**Temporary dependency band-aid.** Copy the exact released
+[phaser-framebuffer-restore-patch.mjs](../scripts/assets/phaser-framebuffer-restore-patch.mjs) into the consuming project's
+scripts directory and invoke it from the existing postinstall after Phaser is installed:
+
+```sh
+node scripts/phaser-framebuffer-restore-patch.mjs node_modules/phaser
+```
+
+An existing Node postinstall can instead import `patchFramebufferRestore` from that copied module and
+`await patchFramebufferRestore(installedPhaserDirectory)`. Import alone has no side effect. It requires exactly package
+name `phaser` and version `4.2.1`, and preflights the unique original or corrected native fragment in
+`src/renderer/webgl/wrappers/WebGLFramebufferWrapper.js`, `dist/phaser.esm.js` and `dist/phaser.js` before any write.
+Unknown, ambiguous, mixed original/corrected states or mixed target newlines fail installation without partial edits.
+LF/CRLF and every byte outside the fragment are preserved; repeated installation is idempotent. The helper composes
+with the separate audio, gamepad lifecycle and held-input corrections. Keep the consuming project's integrity guards
+consistent with the released helper and invalidate any existing bundler dependency cache after correcting its input.
+
+The guard skips invalid previous-context handles during restore, using native `gl.isFramebuffer` validity. It still
+deletes live handles recreated during that same restore phase: native renderer resize listeners run before
+`contextLost` is cleared, so the flag alone is insufficient. Ordinary live recreation, resize, attachment creation,
+canvas use and destroy keep their native behavior. This corrects resource ownership; it does not suppress GL warnings.
+
+**Evidence and limits.** Node tests execute the complete pinned native wrapper and its actual `Class` dependency,
+with exact npm source hashes recorded in the fixture. They cover stale and live restore-phase handles, texture versus
+renderbuffer ownership, repeat restore/recreate, resize, canvas use, destroy and installer refusal/composition.
+A standalone native mask and plain control were also checked on NVIDIA through ANGLE/D3D11, with two actual context
+loss/restore cycles, identical nonempty restored pixels, live recreate/resize and teardown. This is bounded evidence
+for Phaser 4.2.1 and that GPU/backend, not a claim about every browser or renderer. Remove this band-aid only after an
+equivalent reviewed, pinned upstream fix passes both stale-handle restore and live-handle disposal checks.
