@@ -122,9 +122,20 @@ jobs:
           name: audio
           path: ${{ env.AUDIO_OUT }}
       - run: npx playwright install --with-deps chromium firefox webkit
-      # EDIT: your specs and project names.
+      # A headless runner has no GPU, no display and no sound card. Firefox needs a display and software GL to make a WebGL
+      # context at all, and a PulseAudio null sink or its AudioContext stays suspended for ever. Chromium brings its own
+      # SwiftShader (forcing Mesa makes it several times slower), so it runs without either. Specs must wait on page time,
+      # not frame counts: software GL draws about one frame a second.
+      - name: 'Sound card for Firefox (PulseAudio null sink)'
+        run: |
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=ci
+      # EDIT: your specs and project names. Decode and unsupported-notice specs do not boot the game, so they pass in any engine.
       - name: 'Hosted audio plays and decodes; WebKit shows the unsupported notice'
-        run: npx playwright test --project=chromium --project=firefox --project=webkit tests/browser/audio-decode.spec.ts tests/browser/audio-unsupported.spec.ts
+        run: |
+          xvfb-run -a -s '-screen 0 1280x720x24' env LIBGL_ALWAYS_SOFTWARE=1 npx playwright test --project=firefox --project=webkit tests/browser/audio-decode.spec.ts tests/browser/audio-unsupported.spec.ts
+          npx playwright test --project=chromium tests/browser/audio-decode.spec.ts tests/browser/audio-unsupported.spec.ts
   deploy:
     needs: [test, build]
     permissions:
