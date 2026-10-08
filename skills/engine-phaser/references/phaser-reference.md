@@ -68,6 +68,7 @@ choices that paid off, not engine facts.
 | Rule | Where | Example |
 | --- | --- | --- |
 | Real GPU, assert pixels (`snapshotPixel` in the page), mutation-prove every regression test | [verifying](verifying-on-a-gpu.md) | `tests/browser/phaser-evidence.spec.ts` |
+| Retain the native sampler placeholder during rendering; release it through its owner on live reinit and renderer destruction (*verified*, Phaser 4.2.1) | [gotcha 25](phaser-4-gotchas.md#25-renderer-destruction-leaves-the-texture-unit-sampler-placeholder-live), [GPU lifecycle checks](verifying-on-a-gpu.md) | Pinned native owner tests and isolated NVIDIA context-epoch proof in agent-engine |
 | Drive the real loop by hand (`loop.sleep`, `game.step`), one gated debug API for panel, tests, tools and demos | verifying | `src/game/debug/*`, `docs/HARNESS.md` |
 | Record and replay with state hashes; visual regression; perf budgets; two workers | verifying | `src/game/debug/replay.ts`, `tests/visual`, `tests/perf` |
 | Measure first: vsync off, CPU frame ms, wrapped draw-call counter, layer toggles, CPU throttle | [performance](performance.md) | `src/game/debug/perf.ts` |

@@ -105,6 +105,17 @@ expect(String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))).not.toMatch(/swifts
    Draw to a native RenderTexture and inspect its pixels and on-screen output before destruction, proving the
    retained drawing-context texture still renders. Verify scene/game teardown releases native handles and wrappers.
    Keep these resource checks separate from a sustained memory or complete game acceptance claim.
+   Include bare native allocations: Phaser 4.2.1's texture-unit placeholder is outside `glTextureWrappers`
+   ([gotcha 25](phaser-4-gotchas.md#25-renderer-destruction-leaves-the-texture-unit-sampler-placeholder-live)).
+   Instrument texture/framebuffer creation and deletion before Game construction through final destruction,
+   covering both WebGL context prototypes; this pin defaults to WebGL 1 even when WebGL 2 is available.
+   Record the actual GL version. Preserve and check the live placeholder rather than deleting it immediately.
+   Mark every real context-loss epoch as invalidated: those handles are WebGL-freed and cannot support a balanced-delete
+   claim. Require balanced creates/deletes and zero valid handles in the final non-invalidated epoch, and zero registered
+   LIVE wrappers. Native destruction may retain arrays of dead framebuffer wrappers; their array length is not a live-resource
+   count and does not justify clearing native arrays. Verify restored authored pixels, game/canvas removal and native audio closure.
+   Keep the exact expected native loss/restore messages separately from unintended browser/GL warnings; retain failed probe
+   attempts with their actual cause and source identity, and rerun only the affected checks after a correction.
 
 ## Prove the test by mutation
 
