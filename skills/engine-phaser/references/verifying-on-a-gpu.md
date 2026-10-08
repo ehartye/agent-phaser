@@ -98,6 +98,13 @@ expect(String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))).not.toMatch(/swifts
 4. **Pooling and streaming**: walk for several seconds and assert the number of containers or views stays bounded.
 5. **Entity views appear and are released** when a creature leaves the camera.
 6. **Frame rate and renderer** are recorded, not asserted tightly.
+7. **Native GPU resource lifecycle**: for repeated DynamicTexture removal and RenderTexture destruction, require
+   `renderer.glTextureWrappers` and framebuffer counts to return to baseline, no additional live `gl.isTexture`
+   handles, and balanced native texture creates/deletes. Also compare texture keys and display objects, but keys
+   alone miss replaced source wrappers ([gotcha 24](phaser-4-gotchas.md#24-dynamictexture-and-rendertexture-creation-leaves-a-live-gpu-texture-wrapper-behind)).
+   Draw to a native RenderTexture and inspect its pixels and on-screen output before destruction, proving the
+   retained drawing-context texture still renders. Verify scene/game teardown releases native handles and wrappers.
+   Keep these resource checks separate from a sustained memory or complete game acceptance claim.
 
 ## Prove the test by mutation
 

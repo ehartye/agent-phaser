@@ -1,9 +1,9 @@
 # Phaser 4.2.1 gotchas
 
-Each entry: symptom, cause, evidence, workaround. All observed on Phaser 4.2.1 (the `latest` release, published
-2026-07-09) in WebGL on an NVIDIA GPU through ANGLE/D3D11, in the Fallow Valley project. Where a bug is Phaser's, the
-upstream `master` source was checked on 2026-10-05; none of these is reported upstream yet, and the suggested fixes are
-ours.
+Each entry: symptom, cause, evidence, workaround. The original Fallow Valley entries were observed on Phaser 4.2.1
+(published 2026-07-09), in WebGL on an NVIDIA GPU through ANGLE/D3D11; their upstream `master` source was checked on
+2026-10-05 and their suggested fixes are ours. Later entries identify their own bounded native evidence and related
+upstream reports.
 
 ## 1. `TilemapGPULayer` draws at twice its position
 
@@ -311,3 +311,48 @@ A standalone native mask and plain control were also checked on NVIDIA through A
 loss/restore cycles, identical nonempty restored pixels, live recreate/resize and teardown. This is bounded evidence
 for Phaser 4.2.1 and that GPU/backend, not a claim about every browser or renderer. Remove this band-aid only after an
 equivalent reviewed, pinned upstream fix passes both stale-handle restore and live-handle disposal checks.
+
+## 24. DynamicTexture and RenderTexture creation leaves a live GPU texture wrapper behind
+
+**Symptom and cause.** Pinned npm Phaser 4.2.1 creates a TextureSource GL wrapper in the base Texture constructor,
+then replaces `frame.source.glTexture` with `this.drawingContext.texture` without disposing the first wrapper.
+Removing the DynamicTexture, or destroying its native RenderTexture owner, disposes the replacement while the
+original remains registered and live. Texture-manager keys return to baseline, so counting keys alone misses it.
+Related primary [report #7379](https://github.com/phaserjs/phaser/issues/7379) and proposed
+[upstream fix #7381](https://github.com/phaserjs/phaser/pull/7381) describe this replacement path; their status is not
+a substitute for testing the consumed pin.
+
+**Temporary dependency band-aid.** Copy the exact released
+[phaser-dynamic-texture-patch.mjs](../scripts/assets/phaser-dynamic-texture-patch.mjs) into the consuming project's
+scripts directory and invoke it from the existing postinstall after Phaser is installed:
+
+```sh
+node scripts/phaser-dynamic-texture-patch.mjs node_modules/phaser
+```
+
+An existing Node postinstall can instead import `patchDynamicTexture` and
+`await patchDynamicTexture(installedPhaserDirectory)` from the copied module. Import alone has no side effect.
+The helper requires exactly package name `phaser` and version `4.2.1`, and preflights one known native constructor
+fragment in `src/textures/DynamicTexture.js`, `dist/phaser.esm.js` and `dist/phaser.js` before any write. Missing,
+unknown, ambiguous, mixed original/corrected targets or mixed target newlines fail without partial edits. All targets
+must share one original or corrected state and LF/CRLF style. Every outside byte is preserved, and repeated
+installation is idempotent. It composes with the separate audio decode, audio visibility, gamepad lifecycle,
+held-input and framebuffer restore corrections. Keep the consuming project's integrity guards consistent with the
+released helper and invalidate any existing bundler dependency cache after correcting its input.
+
+The correction calls native `renderer.deleteTexture(frame.source.glTexture)` immediately before assignment within
+the existing WebGL-only branch. Native DynamicTexture/RenderTexture ownership and APIs remain in charge; this is
+an install-time dependency correction, not a game-side runtime shim or warning suppression. Remove this band-aid
+only after an equivalent reviewed, pinned upstream fix passes both allocation/disposal and retained-texture pixel
+checks.
+
+**Evidence and limits.** The Node fixture stores exact npm 4.2.1 DynamicTexture and Class source hashes and executes
+the native constructor and destroy method with minimal external dependency doubles. In an isolated native NVIDIA
+RTX 5070 Ti ANGLE/D3D11 probe, eight DynamicTexture removals and eight RenderTexture destructions grew registered
+wrappers from 4 to 20 before correction; GL texture counts were 32 creates and 16 deletes, with all sixteen orphans
+live. The corrected separate package copy kept wrappers at 4 and balanced 32 creates with 32 deletes. Texture keys,
+framebuffers and scene display counts returned to their original state after each cycle. Eight native RenderTexture
+draws and their on-screen samples returned expected RGBA `(98, 201, 168, 255)`, preserving the drawing-context
+texture. Actual served optimizer code and source map were bound to the corrected ESM; native browser warnings and
+errors were zero, and scene/game resources, owned browser and server were closed. This is bounded pin/backend
+evidence, not full game acceptance, sustained memory measurement, context recovery or phone certification.
