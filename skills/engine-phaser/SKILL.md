@@ -12,6 +12,7 @@ Read the reference that matches the work. Do not load all of them.
 
 | You are about to | Read |
 | --- | --- |
+| Coordinate shared contracts or testing/publication costs across Phaser games and tools | [Phaser architecture coordination](../phaser-architecture/SKILL.md) |
 | Scan every rule on one page (index with evidence and examples) | [phaser reference](references/phaser-reference.md) |
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
 | Boot, scenes, a global plugin, the fixed-step loop and interpolation | [scenes, loop and plugins](references/scenes-loop-and-plugins.md) |
