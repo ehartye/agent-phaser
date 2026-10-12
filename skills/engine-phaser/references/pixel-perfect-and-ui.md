@@ -1,22 +1,24 @@
 # Pixel-perfect rendering and a pixel-only UI layer (Phaser 4.2.1)
 
-For a game whose every visible pixel, including text and menus, must come from authored pixel assets. The rules generalise: one
-integer source-pixel scale per layer, device pixels not CSS pixels, no resampling anywhere. Verified on a real GPU at devicePixelRatio 1, 1.25,
-1.5 and 3.
+For a game whose every visible pixel, including text and menus, must come from authored pixel assets. Keep one integer physical
+footprint per authored source pixel in each resolution context, device pixels not CSS pixels, and no resampling. Component-local
+units and camera zoom need not be integers. The existing native camera policy was verified on a real GPU at devicePixelRatio 1,
+1.25, 1.5 and 3; that evidence does not establish mixed-density interactive controls.
 
-## 1. One integer scale per layer, chosen from device pixels
+## 1. One integer source-pixel footprint per context, chosen from device pixels
 
 - **World layer**: choose a whole source-pixel multiplier `N`. For a layer using a uniform `A` world units per source pixel,
   camera zoom is `N / A`, not necessarily a whole number. With the device-pixel canvas policy below, a requested CSS/world zoom
   can use `N = max(1, round(A * requestedCssZoom / scene.scale.zoom))`; the actual CSS/world footprint is `N * scene.scale.zoom / A`.
   Report that quantized footprint at fractional DPR. A source-scale-1 tile world may still choose its integer camera zoom from
   `clamp(floor(canvasWidth / (tilesAcross * TILE)), min, max)`; that fit policy is an example, not a requirement for every game.
-- **UI layer**: a separate scene with its own camera at its own whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
+- **UI layer**: a separate scene with its own camera. A common single-density path uses whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
   gives 2x at 1280x720, 3x at 1600x900, 4x at 1080p and 1x on a 390 px phone. Lay out in **logical pixels** (canvas / S, rounded
   down); at most `S - 1` device pixels are left over at the right and bottom and nothing draws there.
-- **The two layers may differ** (world 3x, UI 2x). Within a layer there is exactly one scale: no 2x logo next to 1x text, no rotated or
-  half-pixel text. A bigger title uses a separately authored bigger face, not the regular face enlarged.
-- Apply the UI scale with the camera, not by scaling objects:
+- **Resolution contexts may differ** (world 3x, menu 4x, HUD 3x, cards 2x). Define each density and transform with a named native owner;
+  reuse compatible pane cameras instead of allocating a camera per widget. Within a context, preserve its authored source-pixel
+  footprint. A bigger title uses a separately authored bigger face. Do not infer density from the theme or silently enlarge a face.
+- For the common single-density path, apply the UI scale with the camera:
 
 ```ts
 cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0);
@@ -26,8 +28,9 @@ cam.roundPixels = scene.game.renderer.type !== Phaser.CANVAS;
 
 example: fallow-valley-next `src/game/ui/UiScale.ts` (pure, tested), `UiCamera.ts`, `scenes/WorldScene.ts#fit`.
 
-For pinned Phaser 4.2.1 native Canvas, use explicit integer object geometry with `roundPixels=false`;
-WebGL uses `true`. Canvas `batchSprite` adds 0.5 to destination frame width and height when camera rounding
+For pinned Phaser 4.2.1 native Canvas, keep `roundPixels=false`; the common whole-zoom/single-density path with physically aligned
+origins uses explicit integer local object geometry. Contextual geometry instead follows the physical paint quantization below.
+WebGL uses `true` in that common path. Canvas `batchSprite` adds 0.5 to destination frame width and height when camera rounding
 is enabled; `BitmapTextCanvasRenderer` separately rounds glyph x/y. Those branches are separate from snapping object placements. Cyberpunkt's
 native bitmap, tiled panel and trimmed Image crop controls qualify both backends at integer UI camera zooms,
 including fractional DPR. Recheck actual source pixels when changing Phaser versions; do not patch the renderer
@@ -41,6 +44,48 @@ camera bounds, centering/following and `getWorldPoint`; a false flag alone does 
 Verify actual sprites, labels, origins and camera motion with framebuffer samples before adding any alignment policy.
 The standalone [source-pixel probe](../../../examples/web/phaser-probes/source-pixels.mjs) measures integer and half-integer camera
 zooms on scaled art, alongside a fractional source-scale-1 UI counterexample. Its tiny texture does not certify a whole game or phone.
+
+### Mixed-density calculation and native binding
+
+Keep three spaces explicit: atlas/font **source pixels**, component **local coordinates**, and backbuffer **physical pixels**.
+Released agent-sprites 0.88.0 exports `pixelResolution`, `projectPixelPoint`, `projectPixelRect`, `quantizePhysicalPoint`
+and `quantizePhysicalRect` in `ui-runtime.mjs`. Pin and verify that export; use its contract rather than inventing a camera transform
+in a shared widget package. Its immutable
+descriptor has a caller-namespaced `id`, nonnegative integer `revision`, uniform positive `localToPhysical.scale`, finite
+`localToPhysical.origin`, and positive integer `physicalPixelsPerSourcePixel`. Rotation, shear and nonuniform transforms reject.
+The game chooses contexts, cameras and density; the helpers neither allocate nor discover them.
+
+For local-to-physical scale `S = 3` and physical source-pixel footprint `P = 2`, source-to-local scale is `P / S = 2/3`.
+This is valid: one source pixel still occupies two whole physical pixels. Do not require integer component-local geometry or
+camera zoom as a substitute for that footprint. Native adapters must feed the planned physical geometry through their final
+transforms; camera rounding alone is not proof. Preserve the pinned Phaser 4.2.1 Canvas exception above.
+
+Projection defaults to `to-physical`; `to-local` is its continuous inverse. Neither snaps points or rectangles, including negative
+or fractional origins. Quantization is an explicit physical-space paint decision. Contextual `placeBitmapText` and `planNineSlice`
+take `{resolution}` instead of `{scale}`; supplying both rejects. Plans carry `context: {id, revision}`, local destinations and
+`physicalDestination`. Text snaps its anchor nearest on grid 1 and fit bounds inward. Skin extents fit whole source-pixel crops
+relative to the snapped origin, so the painted face can be smaller than its requested allocation. Check reported painted overflow;
+a narrow skin can still escape its allocation. These decisions do not fit, ellipsize or clip the content for the game.
+
+Keep **paint, hit, focus and clip bounds separate**. A small painted face can have a full touch/semantic target. Reject cached plans
+whose identity or revision differs from the current context. Advance the descriptor revision whenever the local-to-physical mapping
+or source-pixel footprint changes, including pane scroll, viewport, zoom, origin and density transitions; `Display.revision` alone
+is insufficient. Use continuous inverse projection for pointer, hit and focus geometry; never pass them through paint quantization.
+Gate press and release against the actual interaction clip. Route input through the control's owning camera/context rather than
+assuming every control belongs to the main UI camera.
+
+The game owns CSS canvas extent/offset, DPR conversion, safe areas and resize publication. Convert client coordinates to physical
+pixels once; in a device-pixel Phaser setup, Phaser pointer coordinates are already physical. Convert safe areas once into their
+destination context. Cancel held input before publishing any updated mapping or source-pixel footprint with its context revision,
+including scroll and density transitions. On resize, coherently publish the backbuffer, targets, camera transforms and revised
+contexts through that same cancellation barrier. Preserve input cancellation on close, blur, pointer cancellation and shutdown,
+and dispose owned listeners, objects and cameras, including partial mount failure.
+
+Cyberpunkt's existing low-density informational cards have `actions: []`; they do not prove interactive routing at another density.
+Before claiming native adoption, exercise both an informational region and an actual interactive control whose painted face is
+smaller than its full target. Prove visible focus, pointer/keyboard activation, clipping, cancellation, scroll/density/resize
+transitions with stale-plan rejection and repeated disposal on native WebGL and Canvas. Reuse existing display, viewport, camera, HUD-density and input owners.
+Pure projection checks establish calculations; native controls and framebuffer evidence establish downstream rendering/input.
 
 ## 2. Device pixels, not CSS pixels
 
@@ -66,8 +111,15 @@ it. example: `ui/DevicePixels.ts`, `BootScene.ts`.
 - Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
   register each tone as a `BitmapFont` with `cache.bitmapFont.add(key, { data, texture, frame: '__BASE', fromAtlas: false })`. **A tone
   is a different set of glyph frames, never a tint.**
-- Draw at font scale 1, one `BitmapText` per wrapped line at integer offsets inside a `Container`. Keep a Phaser-free copy of the metrics
-  (measure, wrap, fit with an ellipsis, align, "which characters are missing") so layout and a glyph-coverage test run in Node.
+- Prefer released agent-sprites 0.88.0's pinned `ui-runtime.mjs`, which exports `normalizeBitmapFont`, `bitmapLineWidth`, `wrapBitmapText`,
+  `measureBitmapText` and `placeBitmapText`. Normalize once per loaded font; the immutable snapshot preserves advances, authored
+  tones, atlas rectangles and trim offsets. Use the same calculations for Node layout and native binding instead of maintaining
+  another metrics implementation. Keep existing native adapters until their required export and downstream parity are verified.
+- A single-density native path can draw one `BitmapText` per wrapped line at font scale 1 and integer offsets. A contextual adapter
+  consumes the plan in its declared space, including fractional local destinations. Retain game-authored newline/tab/empty,
+  trailing-advance, line-height/spacing and terminal-space policies explicitly; defaults do not prove legacy parity. Keep fitting,
+  ellipsis and glyph-coverage decisions in the game. Missing legacy cell/baseline or ink stays unknown; texture dimensions do not
+  establish it. Trim offsets apply once and cannot substitute for reported source-cell ink bounds.
 - Floating world labels are the same face at the *world* layer's zoom: rise in whole-pixel steps, blink out instead of fading.
 
 example: `ui/PixelFont.ts`, `ui/FontMetrics.ts`, `view/FxDirector.ts#float`.
@@ -80,9 +132,19 @@ from nine whole-pixel pieces instead: four corners at their own size, and the ed
 whole source pixels. Take insets, padding, minimum sizes and painted bounds from the tool's export; there should be no size in the UI
 code that came from looking at the art. (A flat single-colour shadow plate has no detail, so `NineSlice` is fine there.)
 
+Prefer the same pinned sprites runtime's `planNineSlice` and `iterateNineSliceTiles` for portable skin geometry, then bind the
+source crops and local/physical destinations to native rendering. Preserve authored padding/minimum-size policy in the adapter;
+the pure planner does not infer a minimum. Existing Canvas wrappers keep their positive-integer guards and defaults.
+Attribute a copied runtime's software source/version separately from the font/skin art manifest. Updating pure helper code does
+not require regenerating font images or relabeling historical PNGs with a new producer version.
+
 - Dim behind a modal with the skin's **dithered scrim** (a hard-alpha checkerboard) in a `TileSprite`, not a translucent rectangle.
-- Slide with a tween that rounds every frame (`setPosition(Math.round(fx + (tx - fx) * t), ...)`); leave by sliding. Nothing fades:
-  a half-transparent pixel is a colour the art does not contain.
+- In the common whole-zoom/single-density path with physically aligned origins, slide with a tween that rounds local positions
+  every frame (`setPosition(Math.round(fx + (tx - fx) * t), ...)`). For contextual motion, project the intended position to physical
+  space, apply the declared physical paint quantization, then project back for native placement. Do not round local coordinates:
+  at `S = 1.5`, local x = 1 becomes physical x = 1.5 even when `P = 2`. Preserve continuous semantic geometry independently; when
+  motion changes a context mapping, advance its revision and cancel held input before publishing it as described in section 1.
+  Leave by sliding. Nothing fades: a half-transparent pixel is a colour the art does not contain.
 - Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
 
 example: `ui/Skin.ts#panel`, `ui/widgets.ts#tweenInt`, `ui/Window.ts` (ModalStack, scrim).
@@ -165,8 +227,9 @@ usability correction supplies this diagnostic, not performance or physical-devic
 Pinned source: [CameraManager.render](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/CameraManager.js)
 and [BaseCamera.ignore](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js).
 
-For a scrollable Container within the existing UI camera, keep a fixed parent and move only its content. This recipe uses a
-GameObject mask as invisible rendering machinery, not drawn UI chrome:
+For a scrollable Container within the existing UI camera, keep a fixed parent and move only its content. This whole-zoom,
+single-density recipe assumes physically aligned origins; its local scroll rounding does not apply to contextual rendering.
+The GameObject mask is invisible rendering machinery, not drawn UI chrome:
 
 ```ts
 const viewCamera = scene.cameras.main;
@@ -181,13 +244,19 @@ panel.filterCamera!.setOrigin(viewCamera.originX, viewCamera.originY);
 const mask = panel.filters!.external.addMask(shape, false, viewCamera);
 mask.autoUpdate = false; // fixed viewport; invalidate after changes below
 
-// Each scroll/focus change, clamp to [0, max(0, contentHeight - height)]:
+// Whole-zoom/single-density only: clamp to [0, max(0, contentHeight - height)]:
 content.y = -Math.round(scrollY);
 
 // After camera origin/zoom/scroll, viewport geometry, resize or context restore:
 panel.filterCamera!.setOrigin(viewCamera.originX, viewCamera.originY);
 mask.needsUpdate = true;
 ```
+
+For contextual scrolling, retain the intended continuous scroll/model geometry separately. Project the intended paint position
+to physical space, apply the declared physical paint quantization, and project back for native placement. Use the continuous
+inverse for hit/focus/clip mapping; never feed them through local scroll rounding or paint snapping. When scrolling changes the
+context mapping, advance its revision, cancel held input before publishing the updated mapping, and reject old-context plans.
+Update the native mask/camera from that same current context; this recipe adds no alternate renderer or widget runtime.
 
 The external mask uses the explicit view camera's coordinates. Keep `shape` outside the scrolling content. Redraw its rectangle
 when the viewport changes, and update the panel position/layout from the same rectangle. In 4.2.1, `focusFiltersOnCamera` copies
