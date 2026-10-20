@@ -4,6 +4,8 @@ Numbers are Fallow Valley on Phaser 4.2.1, a real GPU (D3D11), 1920x1080 at devi
 
 ## 1. How to measure (do this before changing anything)
 
+For a stated frame budget or a planned content increase, design the experiment first with [profiling method](profiling-method.md): frame decomposition, ablation matrix, per-item cost table and exactness ladder. The tools below are its measuring half.
+
 - **Real GPU, vsync off.** Launch Chromium with `--use-angle=d3d11 --ignore-gpu-blocklist --disable-gpu-vsync --disable-frame-rate-limit` (platform
   equivalent elsewhere) and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
 - **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report average,

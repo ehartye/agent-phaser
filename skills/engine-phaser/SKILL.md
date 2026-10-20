@@ -1,6 +1,6 @@
 ---
 name: engine-phaser
-description: Build, structure, debug and verify a Phaser (3 or 4) game, especially one with procedural worlds, tilemaps, GPU rendering or agent-sprites and agent-beeps assets. Use before writing Phaser code, when a Phaser render looks wrong, or when choosing how to split rules from rendering. Not for choosing an engine (use engine-selection) or importing assets into other engines.
+description: Build, structure, debug and verify a Phaser (3 or 4) game, especially one with procedural worlds, tilemaps, GPU rendering or agent-sprites and agent-beeps assets. Use before writing Phaser code, when a Phaser render looks wrong, when a game misses a frame budget, or when choosing how to split rules from rendering. Not for choosing an engine (use engine-selection) or importing assets into other engines.
 ---
 
 # Phaser
@@ -24,6 +24,7 @@ Read the reference that matches the work. Do not load all of them.
 | Play exported recordings, own audio loading and lifecycle in Phaser | [native recorded audio](references/native-audio.md) |
 | Use the beeps procedural/adaptive player and direct game sound decisions | [audio directors](references/audio-directors.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
+| Hit a frame budget (60 or 120 fps) or cost +25% to +50% more content: decompose the frame, run an ablation matrix, build a per-item cost table, prove a fix exact | [profiling method](references/profiling-method.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
 | Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md) |
 | Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md) |

@@ -16,6 +16,7 @@ Read only the reference needed for the decision.
 | Choose contract owners, align sessions, share themed dialogs or add a bespoke panel | [Owners and extensions](references/owners-and-extensions.md) |
 | Align playbot configuration, transports, starting states or acceptance evidence | [Playbot evidence](references/playbot-evidence.md) |
 | Reduce browser/build duplication, select checks or separate publication from deep acceptance | [Resources and validation](references/resources-and-validation.md) |
+| Set or verify a frame budget across games, or cost a content increase against it | [Profiling method](../engine-phaser/references/profiling-method.md) |
 
 ## Establish the actual boundary
 
