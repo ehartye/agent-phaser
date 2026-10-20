@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, relative, extname, sep } from 'node:path';
 
 // Repo root: scripts/.. unless AGENT_ENGINE_ROOT points elsewhere.
 const ROOT = resolve(process.env.AGENT_ENGINE_ROOT ?? join(import.meta.dirname, '..'));
@@ -42,4 +42,39 @@ test('plugin.json keywords name every web 3D stack that has a skill', () => {
   for (const [skill, keyword] of Object.entries(need)) {
     if (skills().includes(skill)) assert.ok(keywords.includes(keyword), `keyword ${keyword} for ${skill}`);
   }
+});
+
+// --- public-repo hygiene -----------------------------------------------------------------------------------------
+// Plugin content stays free of language about our own machines and non-plugin projects; that belongs in the wiki.
+// Generic patterns are checked here. Private project names are not listed in the repo: point
+// AGENT_ENGINE_PRIVATE_TERMS_FILE at a local file with one case-insensitive term per line to check those too.
+const TEXT = new Set(['.md', '.mjs', '.js', '.jsx', '.json', '.yml', '.yaml', '.py', '.gd', '.cs', '.html', '.sh', '.txt', '']);
+const SKIP_DIRS = new Set(['.git', 'node_modules', '.playwright-mcp', 'results', 'dist', 'fixtures']);
+const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+  const full = join(dir, e.name);
+  if (e.isDirectory()) return SKIP_DIRS.has(e.name) ? [] : walk(full);
+  return e.isFile() && e.name !== '.git' && TEXT.has(extname(e.name)) ? [full] : [];
+});
+const HYGIENE = [
+  ['a home-directory path', /[A-Za-z]:[\\/]+Users[\\/]+(?!<)[^\\/\s"']+|\/Users\/(?!<)[a-z][\w.-]*\/|\/home\/(?!runner\/|<)[a-z][\w.-]*\//],
+  ['a GPU model name', /\b(?:GeForce|RTX ?\d{3,4}|Radeon(?: RX)?|Iris Xe|UHD Graphics)\b/],
+  ['a link into a repository that is not a plugin', /github\.com\/ehartye\/(?!agent-|hartye-)[\w.-]+|ehartye\.github\.io\/(?!agent-|hartye-)/],
+  ['a wiki vault path', /wiki\/(?:authored|sources|entities)\//],
+];
+
+test('plugin content names no home directory, GPU model, non-plugin repository or wiki path', () => {
+  const extra = process.env.AGENT_ENGINE_PRIVATE_TERMS_FILE
+    ? readFileSync(process.env.AGENT_ENGINE_PRIVATE_TERMS_FILE, 'utf8').split(/\r?\n/).map((t) => t.trim()).filter(Boolean)
+    : [];
+  const rules = [...HYGIENE, ...extra.map((t) => [`the private term "${t}"`, new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')])];
+  const hits = [];
+  const self = resolve(import.meta.filename);
+  for (const file of walk(ROOT)) {
+    if (resolve(file) === self) continue; // this file holds the patterns
+    const lines = readFileSync(file, 'utf8').split(/\r?\n/);
+    lines.forEach((line, i) => {
+      for (const [what, re] of rules) if (re.test(line)) hits.push(`${relative(ROOT, file).split(sep).join('/')}:${i + 1}: ${what}`);
+    });
+  }
+  assert.deepEqual(hits, []);
 });

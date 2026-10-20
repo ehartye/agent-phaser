@@ -35,7 +35,7 @@ test('chromiumArgs adds the autoplay flag only when asked', () => {
 });
 
 test('classifyRenderer: a hardware GPU', () => {
-  const r = 'ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)';
+  const r = 'ANGLE (Example Vendor, Example Discrete GPU (0x00001234) Direct3D11 vs_5_0 ps_5_0, D3D11)';
   assert.equal(classifyRenderer({ webgl2: true, renderer: r }), 'gpu');
 });
 
