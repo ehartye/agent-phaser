@@ -7,22 +7,25 @@ screen. Verify on the GPU and assert on pixels.
 
 ```ts
 // playwright.config.ts
+// ANGLE backend by platform: d3d11 on Windows, metal on macOS, gl elsewhere
+const angle = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
 export default defineConfig({
   testDir: 'tests/browser',
   use: {
     baseURL: 'http://127.0.0.1:5199',
     viewport: { width: 1280, height: 720 },
-    launchOptions: { args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--force_high_performance_gpu'] },   // Windows; use the platform equivalent elsewhere
+    launchOptions: { args: [`--use-angle=${angle}`, '--ignore-gpu-blocklist', '--force_high_performance_gpu'] },   // same as gpuArgs()
   },
   webServer: { command: 'npx vite --config vite.evidence.config.mjs', url: 'http://127.0.0.1:5199', reuseExistingServer: false },
 });
 ```
 
-On a laptop with two GPUs the first two flags are not enough. [tested] On Windows 11 with an Intel integrated GPU and an
-NVIDIA RTX 5070 Ti Laptop GPU (Playwright 1.63.0, Chromium 153): no flags rendered on SwiftShader, `--use-angle=d3d11
---ignore-gpu-blocklist` on the Intel GPU, and adding `--force_high_performance_gpu` on the NVIDIA GPU (Sector Run, and
-repeated with `examples/web/verify.mjs`). Print the renderer string on every run and fail on software (below), since software WebGL raises
-no error.
+The same three flags are exported as `gpuArgs()` (with `angleBackend()`) from [`examples/web/verify-checks.mjs`](../../../examples/web/verify-checks.mjs).
+On a hybrid-GPU laptop the first two are not enough. [tested] On one Windows 11 laptop with an integrated and a discrete GPU (Playwright 1.63.0,
+Chromium 153): no flags rendered on SwiftShader (software), `--use-angle=d3d11 --ignore-gpu-blocklist` selected the integrated GPU, and adding
+`--force_high_performance_gpu` selected the discrete GPU (reproduced with `examples/web/verify.mjs`). Which GPU Chromium picks varies by machine,
+driver and power state, and the last flag is harmless on single-GPU machines. Print the renderer string on every run and fail on software (below),
+since software WebGL raises no error; assert the string you expect when a test needs the discrete GPU.
 
 For frozen acceptance, own the server, source root, configuration and cache identity. Choose a free strict port and a fresh cache directory;
 do not attach to an unidentified existing server. Keep full raw server stdout/stderr from before process spawn, not only a tail sample.
@@ -91,8 +94,8 @@ expect(String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL))).not.toMatch(/swifts
 ## What to assert
 
 1. **A clean console** (errors and warnings) and **no page errors**.
-2. **Pixel colours, not "not black".** Teleport the player to a place whose terrain you know (a ruins district with dark
-   asphalt, a lake) and assert the share of pixels in a colour range. A "not black" test passed while dust covered the
+2. **Pixel colours, not "not black".** Teleport the player to a place whose terrain you know (a dark
+   paved area, a lake) and assert the share of pixels in a colour range. A "not black" test passed while a particle overlay covered the
    whole terrain.
 3. **Every visible chunk renders**, with a camera parked on a chunk corner so four chunks are visible.
 4. **Pooling and streaming**: walk for several seconds and assert the number of containers or views stays bounded.
@@ -126,11 +129,11 @@ confirm it fails with a clear number (the dark-pixel ratio went from over 0.08 t
 
 - A script that starts the game, optionally runs an expression, screenshots, and prints the renderer string, fps and
   console errors.
-- A script that teleports the player to a named place (seep, vault, a biome) and screenshots it. Chunks are generated on
+- A script that teleports the player to a named place (a biome interior, a distant landmark) and screenshots it. Chunks are generated on
   demand, so this reaches far terrain in seconds.
 - A **pixel check** that finds a tile whose data is known, reads the screenshot pixel there, then toggles layers one at a
-  time and reads it again. That is what found the overlay bug: baseline dust, ground plus overlay dust, ground plus
-  floor clay.
+  time and reads it again. That is what found an overlay bug: the baseline colour, ground plus overlay, ground plus
+  a second overlay.
 - Pass JavaScript through `page.evaluate` as one line without `//` comments (joining lines turns the rest into a comment).
 
 See `examples/web/phaser-probes` for generic versions. For a whole runnable harness (debug API, manual loop, condition waits, no-sleeps guard, GPU smoke spec, CI workflow) copy `examples/web/harness`.
@@ -161,7 +164,7 @@ if one starts failing after an upgrade, the workaround it justifies can be delet
 - An "empty" (`-1`) tile in a GPU layer is the tileset's top-left pixel: an all-empty layer over a sheet whose first pixel is opaque paints that
   colour; over a sheet whose first cell is transparent it paints nothing.
 
-example: fallow-valley-next `tests/browser/phaser-evidence.spec.ts`.
+Runnable: the [harness smoke spec](../../../examples/web/harness/tests/smoke.spec.mjs) reads known colours at known places and asserts the renderer.
 
 ## Drive the real loop by hand, deterministically
 
@@ -174,12 +177,10 @@ scene `time` clock, particles and the fixed-step stepper all follow it, so tests
 - A tight synchronous `while (!ready) game.step()` starves the loader (asset XHRs finish on the event loop). Yield between frames.
 - Expose one typed debug object (`__game.debug`) that the panel, the browser tests, the command-line tools and demo mode all use:
   `frames(n, { dt })`, `ticks(n)`, `tp(place)`, `time(h)`, `weather(w)`, `layer(name, on)`, `state()`, `sample()` (fps, CPU ms, draw calls),
-  `hash()`, `record()`/`stop()`/`replay(rec)`. Gate it: always on the dev server, on a production build only when the URL asks
+  `hash()`, `record()`/`stop()`/`replay(rec)` (a minimal version: [harness `debug.mjs`](../../../examples/web/harness/debug.mjs)). Gate it: always on the dev server, on a production build only when the URL asks
   (`?debug=1`), loaded through a dynamic `import()` so it is a separate chunk.
 - `evaluate` serialises a function: it cannot close over variables, and a TypeScript helper called inside it does not exist in the page.
   Never return a Phaser object from it.
-
-example: `src/game/debug/*`, `tests/harness/*`, `tools/fv.mjs`, `docs/HARNESS.md`.
 
 ## Waiting: conditions, frames and page time, never sleeps
 
@@ -215,16 +216,16 @@ Code: `examples/web/harness/tests/wait.mjs`, `no-sleeps.test.mjs`.
 Run the suite twice: **gating** on SwiftShader (`@gpu` tests skipped) and the real-GPU suite locally before merge. A CI job for Firefox and WebKit needs `xvfb-run` with
 `LIBGL_ALWAYS_SOFTWARE=1` and a PulseAudio null sink, and stays advisory until it has been green for a while ([CI traps](../../engine-asset-import/references/ci-for-generated-assets.md)); template `examples/web/harness/ci/smoke.yml`.
 
-example: `tools/mutation-input.mjs`, `tests/visual/scenes.spec.ts`, `tests/perf/budget.spec.ts`, `playwright.config.ts`.
+The harness covers the Playwright config, waits and no-sleeps guard; mutation scripts, visual regression and perf budgets are not included.
 
 ## A debug API, a manual frame loop and a page object (what replaces the sleeps)
 
 The probes above each repeated "start, wait 600 ms, press Enter, wait 1200 ms". Under parallel workers the title was not up yet, Enter went nowhere, and the next
-line failed with "no game in progress". Build the harness once instead (Fallow Valley: `docs/HARNESS.md`, `src/game/debug`, `tests/harness`):
+line failed with "no game in progress". Build the harness once instead (a minimal runnable one: [`examples/web/harness`](../../../examples/web/harness/)):
 
 - **One typed debug object on the page** (`__game.debug`), loaded only in dev or when the URL asks (`?debug=1`, `?demo=name`) through a dynamic `import()` so a production
   build carries it as a separate chunk. It starts a world (`start({ seed, hour, weather, at, give, god })` once the title scene is active, never by key press), teleports to
-  named places (biome interiors found on the climate field, points of interest, camps, bosses, a vault's rooms), sets the clock and pins weather, gives items, spawns, pauses,
+  named places (biome interiors, points of interest, scripted encounters), sets the clock and pins weather, gives items, spawns, pauses,
   steps and scales time, toggles render layers, inspects the tile under the cursor, hashes the sim, snapshots, records and replays.
 - **A manual frame loop.** `game.loop.sleep()` then `game.step(virtualTime, dt)`: tests and capture advance by ticks and frames, not wall time. Yield to the event loop between
   frames while waiting for scenes (asset loads finish there; a synchronous loop never lets `preload` complete). Keys are consumed at the next frame.

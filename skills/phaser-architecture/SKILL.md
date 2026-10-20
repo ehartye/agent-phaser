@@ -20,7 +20,7 @@ Read only the reference needed for the decision.
 
 ## Establish the actual boundary
 
-- [documented] The donor patterns are Space2grow's model-driven UI, Fallow's headless sim/playbot and Cyberpunkt's native backend/ephemeral-harness controls. They are examples to inspect at a current source identity, not proof that all three share a pure sim or the same APIs.
+- [documented] The donor patterns are a model-driven UI, a headless sim with a playbot, and a native backend with ephemeral-harness controls. They are examples to inspect at a current source identity, not proof that every consumer shares a pure sim or the same APIs.
 - [general] Read the project's current architecture, owner inventory and adoption decisions first; use wiki-master for this owner's canonical wiki when available. Keep project design, roadmap and measured results there. These portable references describe responsibilities without duplicating private rollout records.
 - [general] Separate existing, proposed and proven consumer adoption. A shared module is existing only when its pinned export and applicable checks are present. A donor implementation does not establish a shared interface.
 

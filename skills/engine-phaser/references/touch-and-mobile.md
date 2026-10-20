@@ -1,9 +1,8 @@
 # Touch, tap to move and mobile in a Phaser 4 game
 
-Everything here comes from giving Fallow Valley (Phaser 4.2.1, a pixel-only strict-UI game with a headless deterministic sim) a complete
+Everything here comes from giving one Phaser 4.2.1 game (pixel-only strict UI, headless deterministic sim) a complete
 touch scheme: tap to move, gestures, an on-screen button cluster, a joystick and d-pad option, left-handed layout, safe areas, an
-installable manifest and a phone render-quality tier. The design is `docs/MOBILE.md` in that repo; the code is `src/sim/pathfind.ts`,
-`src/game/input/touch.ts`, `tapIntent.ts`, `InputController.ts` and `src/game/ui/TouchControls.ts`. Tested in Chromium with touch emulation
+installable manifest and a phone render-quality tier. Tested in Chromium with touch emulation
 only: no physical device, no real iOS Safari. Treat the iOS lines as unverified.
 
 ## What Phaser 4.2.1 does with fingers
@@ -100,7 +99,7 @@ the device ratio by a **whole number** instead (3x: 1.0 with 3x3 device blocks; 
 the canvas width) then changes too: dividing a 3x phone's ratio by 2 would shrink the interface to two thirds. Keep the tier that divides by
 the ratio's whole part (the interface keeps its CSS size, the pixels get chunkier), and skip steps that change nothing. Drive it from a
 setting plus a frame-time governor (windows of N frames, strikes, ignore hitches over 250 ms) and halve the weather particles in the lowest
-tier. Pure functions, unit-tested. Numbers that worked: the governor steps down after two consecutive windows of 90 frames averaging over 26 ms
+tier. Pure functions, unit-tested. Numbers that worked in one project (reported, not reproduced here): the governor steps down after two consecutive windows of 90 frames averaging over 26 ms
 (once more on screens 3.5x or denser), at most twice; expose Full, Light and Auto as a setting; Light divides the ratio by its whole part and
 halves weather particles.
 

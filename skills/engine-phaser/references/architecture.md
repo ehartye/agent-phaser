@@ -1,6 +1,6 @@
 # Phaser architecture that scales
 
-This is the structure Fallow Valley uses. It is a pattern, not a framework: copy the shape, not the code. The whole rule set is
+This is a structure that works for a Phaser game with a procedural, saveable world. It is a pattern, not a framework: copy the shape, not the code. The whole rule set is
 indexed in [phaser reference](phaser-reference.md); boot, scenes, plugins and the loop are in [scenes, loop and plugins](scenes-loop-and-plugins.md).
 
 ## The one idea
@@ -17,12 +17,12 @@ Enforce the boundary with a test (scan `src/sim` and `src/content` for imports o
 ## Layers
 
 ```
-content  ->  (nothing)           typed data: items, crops, recipes, biomes, creatures, weather tables
-sim      ->  content             rules, world generation, farming, needs, AI, saves
+content  ->  (nothing)           typed data: items, recipes, biomes, creatures, weather tables
+sim      ->  content             rules, world generation, growth, needs, AI, saves
 game     ->  sim, content, phaser   scenes, plugins, views, input, audio, UI
 ```
 
-Content is data only, so a designer can add a crop without touching a rule.
+Content is data only, so a designer can add an item without touching a rule.
 
 ## Data flow
 
@@ -62,13 +62,13 @@ compile-time check that every event has a decision: adding an event then fails t
 
 - **Tiles are struct-of-arrays in typed arrays per chunk** (`Uint8Array` layers). A chunk records which tiles the player
   edited; that set is the save delta.
-- **Simulate only active things.** Growth iterates a per-chunk set of tilled or planted tiles; out-of-range chunks are
+- **Simulate only active things.** Slow processes such as growth iterate a per-chunk set of active tiles; out-of-range chunks are
   caught up in hour-sized steps when revisited, with a cap so a long absence cannot stall a frame.
 - **Collision belongs to the sim.** Movement and creature AI use the sim's tile grid, not Arcade physics. Say so in the
   docs; the physics engine is simply not part of a deterministic rules layer.
 - **Levels are worlds.** An underground level is another `World` with its own generator; entities carry a `level`; the
   view releases every bound chunk on a level change.
-- **Pens fall out of collision.** Animals respect solid tiles, so player-built fences contain them with no pen system.
+- **Containment falls out of collision.** Creatures respect solid tiles, so player-built fences contain them with no special enclosure system.
 
 ## Saves: versioned, migrated, quarantined
 
@@ -81,8 +81,6 @@ random stream from restarting. Keep the format and `migrate(snapshot)` in a pure
 - Export and import a slot as a file (hidden anchor download, detached file input, `migrate` on the way in, confirm before replacing) and watch storage:
   count what the game keeps in `localStorage`, warn above about 85% of the 5,000,000-character quota and say why a write was refused. A 6 to 16 KB slot makes
   compression or IndexedDB not worth building; say that you chose not to.
-
-example: fallow-valley-next `src/sim/save.ts`, `SaveStore.ts`, `SaveFiles.ts`, `tests/save.test.ts`.
 
 ## Testing shape
 

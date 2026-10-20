@@ -2,7 +2,7 @@
 
 ## Consolidate configuration and results first
 
-- [documented] Fallow supplies useful adapter, policy, telemetry and lab patterns; Space and Cyber have their own directors and game-specific semantics. The proposed reusable contract belongs in agent-tests with native adapter guidance in engine. No common runner or API is introduced by this skill.
+- [documented] Existing consumers supply useful adapter, policy, telemetry and lab patterns; each has its own director and game-specific semantics. The proposed reusable contract belongs in agent-tests with native adapter guidance in engine. No common runner or API is introduced by this skill.
 - [general] A proposed run configuration identifies game/adapter, scenario, game seed, independent bot seed, policy, simulated-time/beat and wall-time budgets, stop predicates and observation cadence. Keep detailed telemetry bounded or streamed; full state/screenshots every beat can dominate cost.
 - [general] Results bind source/build/assets, effective configuration, transport, starting-state origin, progress, intent changes, action attempts/results, refusals, deaths/stalls, termination and evidence paths. Use actual production actions and observed outcomes rather than a bot-side copy of the rules as the oracle.
 - [general] Game adapters supply observations, proposals/actions, stepping/waiting and domain routines. Shared fields must not require hunger, farming, a day cycle or one universal intent list. Preserve optional capabilities and decide director/hysteresis semantics before consolidating implementations.

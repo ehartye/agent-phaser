@@ -1,7 +1,7 @@
 # Ambient motion in a strict pixel game (Phaser 4.2.1)
 
-How Fallow Valley made a procedural world feel alive without breaking a pixel-only look (nearest filtering, one integer
-scale per layer, whole-pixel positions, palette colours). Measured on a real GPU.
+How to make a procedural world feel alive without breaking a pixel-only look (nearest filtering, one integer
+scale per layer, whole-pixel positions, palette colours). Checked on a real GPU in one project.
 
 ## Layers that cover the screen: `TileSprite`, moved in whole pixels
 
@@ -20,7 +20,7 @@ integer scale that covers the view, centred on the rounded camera centre.
 
 ## Particles: one pool, typed arrays, whole pixels
 
-- A fixed pool of `Image`s (640 ran in under 0.3 ms) with struct-of-arrays state (`Float32Array` x, y, z, vx...), a free-list
+- A fixed pool of `Image`s (a few hundred was cheap in one project, reported not reproduced) with struct-of-arrays state (`Float32Array` x, y, z, vx...), a free-list
   stack and per-kind caps. Never create or destroy objects per particle; hide and reuse.
 - Draw frames from one canvas atlas painted at boot from ascii: white or mid-grey frames so `setTint(paletteColour)` gives
   exact colours; bake colour only where a frame needs several (tumbleweed, puddle).
@@ -43,10 +43,10 @@ about 40%. Prove it with three specs: calm is pixel-identical to no sway, a gale
 ## Test it
 
 - Frame diff: screenshot twice 0.9 s apart in a scene where nothing else moves; it must differ by a measured fraction
-  (8.6 percent in a desert noon) and be **identical (0.000 percent)** with the motion layer switched off, so the difference
+  (record it for your scene and assert it stays above a floor) and be **identical (0.000 percent)** with the motion layer switched off, so the difference
   is the motion layer.
 - Ratio: read 16x16 block luma with the layer on and off; assert the deep band's ratio and that open sky is untouched.
 - Palette and grid: read back `image.tintTopLeft`, `x`, `y`, `scaleX`, `rotation`, `alpha` for every visible particle.
 - Fps with everything running, uncapped (`--disable-gpu-vsync --disable-frame-rate-limit`) and capped.
-- A contact sheet of cropped frames (tools/motion-seq.mjs in Fallow Valley) is how you judge "does it feel alive"; look at
+- A contact sheet of cropped frames (a small script that steps the manual loop and saves crops; see the [harness](../../../examples/web/harness/)) is how you judge "does it feel alive"; look at
   whole-screen frames too, because a particle can be correct and invisible against the ground.

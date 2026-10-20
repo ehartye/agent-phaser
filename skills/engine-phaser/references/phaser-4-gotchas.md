@@ -1,8 +1,8 @@
 # Phaser 4.2.1 gotchas
 
-Each entry: symptom, cause, evidence, workaround. The original Fallow Valley entries were observed on Phaser 4.2.1
-(published 2026-07-09), in WebGL on an NVIDIA GPU through ANGLE/D3D11; their upstream `master` source was checked on
-2026-10-05 and their suggested fixes are ours. Later entries identify their own bounded native evidence and related
+Each entry: symptom, cause, evidence, workaround. The early entries were observed on Phaser 4.2.1
+(published 2026-07-09), in WebGL on a discrete GPU through ANGLE/D3D11 on Windows; their upstream `master` source was
+checked on 2026-10-05 and their suggested fixes are ours. Later entries identify their own bounded native evidence and related
 upstream reports.
 
 ## 1. `TilemapGPULayer` draws at twice its position
@@ -32,7 +32,7 @@ configuration.
 
 **Evidence.** A 4x4 GPU layer, left half asphalt and right half `-1`, over a water layer: the right half drew dust (tile
 0) and hid the water. `layer.getTileAt(x, y, true).index` returned `-1`, so the data was right and the draw was wrong.
-In the game, two overlay layers (about 95% empty) hid the real terrain on every chunk; hiding them restored the colours.
+In a real map, two mostly empty overlay layers (about 95% empty) hid the real terrain on every chunk; hiding them restored the colours.
 
 **Workaround.** A GPU layer must be full. Use it for the dense base ground and make the code that fills it incapable of
 emitting -1. Use a CPU `TilemapLayer` for anything sparse (overlays, objects, roofs, floors).
@@ -123,7 +123,7 @@ read of a tile with the effect on and off.
 ## 10. Tile animations: GPU layers only, and the second animation plays the wrong tiles
 
 **Symptom.** After registering several tile animations (swaying plants, pulsing crystals), a row of one plant draws tiles of
-other plants (wildflowers showed glowing mushrooms and dry grass). The first animation registered (our water) was always right.
+other plants (wildflowers showed glowing mushrooms and dry grass). The first animation registered (water) was always right.
 CPU `TilemapLayer`s never animate at all.
 
 **Cause.** Only `TilemapGPULayer` animates tiles (`tileData[i].animation`, read by `Tileset.createAnimationDataTexture`). That
@@ -155,7 +155,7 @@ Found building a title screen that plays the real world scene behind its menu, t
 * Do not "fix" that with `stop` then `start`: stopping a scene mid-load leaves its queued files in the loader, and the second load
   logs `Texture key already in use` for every atlas. Load the scene's assets in an earlier scene instead (one function that queues
   them, called from the preload scene; the loader skips keys already cached, so the scene's own `preload` calling it again is free).
-* If a global object holds the game state (our `SimHost` plugin), do **not** swap it in the scene that decides to start. The running
+* If a global object holds the game state (a global plugin), do **not** swap it in the scene that decides to start. The running
   scene keeps drawing for the rest of that frame and the next, one world's views with the other world's entities. Pass a `boot`
   callback in the start data and call it first thing in the restarted scene's `init`.
 * A modal or panel that rebuilds its own window (a changed row, a new page) must re-centre it: only the stack that opened it knew
@@ -246,7 +246,7 @@ scene's PRE_UPDATE, after that frame's queued pointer events are processed, so t
 no `gameobjectdown`. Hover is the usual trigger (it sets the dirty flag just before the click), and it costs about 1 click in 20 with Playwright's
 instant move, down, up under load. Build zones and buttons once per layout and update them in place (`setLabel`, `setFocused`, `setVisible`); rebuild only
 the passive art on state changes. Test it deterministically: `game.loop.sleep()`, `mouse.move`, `mouse.down`, `game.loop.wake()`, wait a few frames,
-`mouse.up`; assert the scene's `input._list` is unchanged after state changes. Found in Fallow Valley's wardrobe (`CreatorPanel`: `build()` once, `refresh()` in place).
+`mouse.up`; assert the scene's `input._list` is unchanged after state changes. The working shape is a panel with `build()` once and `refresh()` in place.
 
 ## 20. Per-plant motion on tilemaps: split the layer by phase, move the parent container
 
@@ -256,8 +256,8 @@ painted (remember the slot per tile so a tile that changes class leaves the old 
 offset this frame. Facts measured on 4.2.1:
 
 - Move the **container**, not the layer: a `TilemapGPULayer` applies its own x/y twice (gotcha 1); a nested container composes correctly with the chunk container above it.
-- A GPU layer holding no tiles must be `setVisible(false)`, or Phaser still submits a quad for it; keep a live-tile count per layer. Eight extra GPU layers per chunk cost
-  31 more draw calls on screen and no measurable CPU time (2.2 ms vs 2.15 ms a frame).
+- A GPU layer holding no tiles must be `setVisible(false)`, or Phaser still submits a quad for it; keep a live-tile count per layer. Eight extra GPU layers per chunk added
+  draw calls (one per visible layer) and no measurable CPU time in the project that tried it (reported from one project, not reproduced here).
 - A mutation behind the sim's back (writing chunk arrays) does not repaint; only change events and a rebind do. In a test, release and rebind the streamer.
 - With the sim **paused** the view interpolates `prev` to `player` with alpha 0, so a teleported player is drawn where it was and the camera never arrives: take one tick, run ~30 frames, then pause.
 - Gate the effect from the view side only (weather, the view clock, tile coordinates, Reduce motion); never read the sim for time, so frame-stepped tests are exact.
@@ -268,11 +268,10 @@ offset this frame. Facts measured on 4.2.1:
 Draw a level meter, status pip row or similar as extra atlas-frame images owned by the prop's view: create them lazily, `setFrame` only when the frame name changes, destroy
 them in the same pass as the prop image. Author the meter as small pips with the build's outline flag so gaps fill with outline colour (a dark strip, no extra pixels). Detect
 lit pips in browser tests by hue, not exact colour (the lighting pass tints the world). `screenOf(tileX, tileY)` already returns the middle of the tile; adding 0.5 puts it half a tile off.
-Found in Fallow Valley's troughs (`docs/PHASER-NOTES.md`).
 
 ## 22. A Scene object is reused, so state keyed to it survives with destroyed display objects
 
-Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows in Fallow Valley). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.
+Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.
 
 ## 23. Filter-mask framebuffers delete invalid handles during WebGL context restore
 
@@ -307,7 +306,7 @@ canvas use and destroy keep their native behavior. This corrects resource owners
 **Evidence and limits.** Node tests execute the complete pinned native wrapper and its actual `Class` dependency,
 with exact npm source hashes recorded in the fixture. They cover stale and live restore-phase handles, texture versus
 renderbuffer ownership, repeat restore/recreate, resize, canvas use, destroy and installer refusal/composition.
-A standalone native mask and plain control were also checked on NVIDIA through ANGLE/D3D11, with two actual context
+A standalone native mask and plain control were also checked on a discrete GPU through ANGLE/D3D11, with two actual context
 loss/restore cycles, identical nonempty restored pixels, live recreate/resize and teardown. This is bounded evidence
 for Phaser 4.2.1 and that GPU/backend, not a claim about every browser or renderer. Remove this band-aid only after an
 equivalent reviewed, pinned upstream fix passes both stale-handle restore and live-handle disposal checks.
@@ -347,8 +346,8 @@ only after an equivalent reviewed, pinned upstream fix passes both allocation/di
 checks.
 
 **Evidence and limits.** The Node fixture stores exact npm 4.2.1 DynamicTexture and Class source hashes and executes
-the native constructor and destroy method with minimal external dependency doubles. In an isolated native NVIDIA
-RTX 5070 Ti ANGLE/D3D11 probe, eight DynamicTexture removals and eight RenderTexture destructions grew registered
+the native constructor and destroy method with minimal external dependency doubles. In an isolated native discrete-GPU
+ANGLE/D3D11 probe, eight DynamicTexture removals and eight RenderTexture destructions grew registered
 wrappers from 4 to 20 before correction; GL texture counts were 32 creates and 16 deletes, with all sixteen orphans
 live. The corrected separate package copy kept wrappers at 4 and balanced 32 creates with 32 deletes. Texture keys,
 framebuffers and scene display counts returned to their original state after each cycle. Eight native RenderTexture
@@ -399,7 +398,7 @@ and renderer destroy/restore methods with their native Class and minimal externa
 npm tarball verified against SHA-512 integrity, SHA-1 and SHA-256. Tests cover live sampler completeness, ordinary bindings,
 repeat destruction, live reinit, restore and destroy-while-lost, plus API/CLI refusal, LF/CRLF, unchanged bytes and composition.
 
-A separate integrity-bound package with all six helpers passed a focused Chromium 153 / NVIDIA RTX 5070 Ti ANGLE/D3D11
+A separate integrity-bound package with all six helpers passed a focused Chromium 153 / discrete-GPU ANGLE/D3D11
 WebGL 1 proof. Six live-context reinitializations retired their previous valid placeholder. Two actual context loss/restore
 epochs kept the restored placeholder valid; native RenderTexture target/on-screen and Image pixels all returned RGBA
 `(98, 201, 168, 255)` before and after restoration. The final non-invalidated epoch balanced 6 texture creates/deletes and

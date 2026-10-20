@@ -26,17 +26,16 @@ cam.roundPixels = scene.game.renderer.type !== Phaser.CANVAS;
 // re-run on Scale.Events.RESIZE and on your own "scale changed" event; remove both on SHUTDOWN
 ```
 
-example: fallow-valley-next `src/game/ui/UiScale.ts` (pure, tested), `UiCamera.ts`, `scenes/WorldScene.ts#fit`.
+Keep the scale calculation a pure, unit-tested function and the camera setup a thin wrapper around it.
 
 For pinned Phaser 4.2.1 native Canvas, keep `roundPixels=false`; the common whole-zoom/single-density path with physically aligned
 origins uses explicit integer local object geometry. Contextual geometry instead follows the physical paint quantization below.
 WebGL uses `true` in that common path. Canvas `batchSprite` adds 0.5 to destination frame width and height when camera rounding
-is enabled; `BitmapTextCanvasRenderer` separately rounds glyph x/y. Those branches are separate from snapping object placements. Cyberpunkt's
-native bitmap, tiled panel and trimmed Image crop controls qualify both backends at integer UI camera zooms,
-including fractional DPR. Recheck actual source pixels when changing Phaser versions; do not patch the renderer
+is enabled; `BitmapTextCanvasRenderer` separately rounds glyph x/y. Those branches are separate from snapping object placements. Native
+bitmap, tiled panel and trimmed Image crop controls qualified both backends at integer UI camera zooms,
+including fractional DPR, in one project. Recheck actual source pixels when changing Phaser versions; do not patch the renderer
 or add a second text compositor. Source: Phaser 4.2.1 `src/renderer/canvas/CanvasRenderer.js` (`batchSprite`),
-`src/gameobjects/bitmaptext/static/BitmapTextCanvasRenderer.js`; project controls:
-Cyberpunkt `tests/phaser-ui-browser.test.mjs` and `src/phaser/pixel-camera.js` (accepted Task 13).
+`src/gameobjects/bitmaptext/static/BitmapTextCanvasRenderer.js`.
 
 Phaser 4.2.1 sets `camera.renderRoundPixels` only when both camera zoom axes are integers (`src/cameras/2d/Camera.js`). That flag
 does not inspect art scale: at `A = 2`, camera zoom 3.5 gives 7-device-pixel source blocks even while the flag is false. Use native
@@ -81,7 +80,7 @@ including scroll and density transitions. On resize, coherently publish the back
 contexts through that same cancellation barrier. Preserve input cancellation on close, blur, pointer cancellation and shutdown,
 and dispose owned listeners, objects and cameras, including partial mount failure.
 
-Cyberpunkt's existing low-density informational cards have `actions: []`; they do not prove interactive routing at another density.
+Informational regions with no actions do not prove interactive routing at another density.
 Before claiming native adoption, exercise both an informational region and an actual interactive control whose painted face is
 smaller than its full target. Prove visible focus, pointer/keyboard activation, clipping, cancellation, scroll/density/resize
 transitions with stale-plan rejection and repeated disposal on native WebGL and Canvas. Reuse existing display, viewport, camera, HUD-density and input owners.
@@ -102,7 +101,7 @@ if (scale.width !== w || scale.height !== h) scale.resize(w, h);
 ```
 
 This is the one `1 / dpr` in the codebase; allow-list it in the "no fractional scale" test. A browser spec at DPR 1.25, 1.5 and 3 proves
-it. example: `ui/DevicePixels.ts`, `BootScene.ts`.
+it.
 
 ## 3. All text is `BitmapText` from the tool's own font export
 
@@ -121,8 +120,6 @@ it. example: `ui/DevicePixels.ts`, `BootScene.ts`.
   ellipsis and glyph-coverage decisions in the game. Missing legacy cell/baseline or ink stays unknown; texture dimensions do not
   establish it. Trim offsets apply once and cannot substitute for reported source-cell ink bounds.
 - Floating world labels are the same face at the *world* layer's zoom: rise in whole-pixel steps, blink out instead of fading.
-
-example: `ui/PixelFont.ts`, `ui/FontMetrics.ts`, `view/FxDirector.ts#float`.
 
 ## 4. Panels are tiled, not stretched
 
@@ -147,8 +144,6 @@ not require regenerating font images or relabeling historical PNGs with a new pr
   Leave by sliding. Nothing fades: a half-transparent pixel is a colour the art does not contain.
 - Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
 
-example: `ui/Skin.ts#panel`, `ui/widgets.ts#tweenInt`, `ui/Window.ts` (ModalStack, scrim).
-
 ## 5. Text must fit, in three layers
 
 A string that runs off its box is a bug the type system cannot see. What worked:
@@ -171,7 +166,7 @@ already visible elsewhere a quiet flag.
 A `Container` measures its hit area from its centre: `setInteractive(new Rectangle(0, 0, w, h))` on a container is offset by half its size, so a
 click on a slot's centre selects the neighbour. Offset the rectangle (or put the zone on a child) and test by clicking centres.
 
-example: fallow-valley-next `ui/TextGuard.ts`, `ui/FontMetrics.ts#layout`, `tests/text-fit.test.ts`, `tests/browser/text-fit.spec.ts`.
+Cover text fitting twice: a pure unit test of the measuring and layout function, and a browser spec that checks the rendered text stays inside its box.
 
 ## 6. Input capture and the keyboard queue
 
@@ -203,9 +198,9 @@ replace navigable buttons, named controls, selection state or editable text. Pre
   text composition and repeated scene teardown. Inspect visible pixels separately. Test the actual mobile keyboard and VoiceOver on iPhone;
   desktop DOM tests and simulated events do not establish those device behaviors.
 
-Fallow Valley's `ui/AriaLive.ts` is an announcement example, not evidence of complete interactive accessibility. Its historical one-node
-architecture assertion is too restrictive for games with semantic controls or native text entry. The bridge above is architectural guidance;
-it has not been validated as a shipped Fallow Valley or Space to Grow implementation.
+An `aria-live` announcement helper is not evidence of complete interactive accessibility. A one-node architecture assertion is
+too restrictive for games with semantic controls or native text entry. The bridge above is architectural guidance, not a
+validated shipped implementation.
 
 ## 8. Clipped scrolling in Phaser 4 WebGL
 
@@ -222,8 +217,8 @@ exclusions before assigning their current owner. Remove owned pane cameras on sc
 
 Use the same clipped rectangle and scroll offset for pointer zones and visual controls. Verify actual
 button/focus pixels with the pane visible, then without it; a working click zone does not prove a visible
-control. Repeat after scrolling, resizing and scene restart on both native backends. Cyberpunkt's UI
-usability correction supplies this diagnostic, not performance or physical-device acceptance.
+control. Repeat after scrolling, resizing and scene restart on both native backends. This
+diagnostic is not performance or physical-device acceptance.
 Pinned source: [CameraManager.render](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/CameraManager.js)
 and [BaseCamera.ignore](https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js).
 
@@ -283,8 +278,8 @@ row lists. Do not cache a unique text/whole-document texture for every scroll of
 filtered panes; a camera viewport can avoid mask render targets for a simple rectangle. Do not allocate surfaces at the GPU maximum
 texture size as a substitute for a viewport budget.
 
-**Evidence:** `examples/web/phaser-probes/scroll-mask.mjs` is a runnable paired failure/correction probe using the host project's
-Phaser 4.2.1 and Playwright. On 2026-10-06, Chrome with Intel/D3D11 hardware rendering reproduced legacy overflow, then verified
+**Evidence:** [`examples/web/phaser-probes/scroll-mask.mjs`](../../../examples/web/phaser-probes/scroll-mask.mjs) is a runnable paired failure/correction probe using the host project's
+Phaser 4.2.1 and Playwright. On 2026-10-06, Chrome with integrated-GPU D3D11 hardware rendering reproduced legacy overflow, then verified
 outside/inside pixels, fixed clipping while scrolling, zoom 2 with matching camera origin, viewport-only pointer activation, and ten
 scene restarts with stable texture/display-object/shutdown-listener counts. The long document retained a 400x300 filter camera.
 It does not certify touch cancellation, semantic focus, GPU heap usage, context restoration, or iPhone behavior; add those tests in

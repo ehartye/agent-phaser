@@ -1,13 +1,12 @@
 # Performance of a Phaser 4 tile game: measure first, then these
 
-Numbers are Fallow Valley on Phaser 4.2.1, a real GPU (D3D11), 1920x1080 at devicePixelRatio 2 with 4x CPU throttle unless stated.
+Numbers below were reported from one pixel-art tile game, not reproduced here: Phaser 4.2.1, a discrete GPU (ANGLE/D3D11 on Windows), 1920x1080 at devicePixelRatio 2 with 4x CPU throttle unless stated. Read them as the shape of each result, not as a benchmark.
 
 ## 1. How to measure (do this before changing anything)
 
 For a stated frame budget or a planned content increase, diagnose first with [profiling method](profiling-method.md): frame decomposition, ablation, per-item cost table, and a proportionate bar for shipping a fix. The tools below are its measuring half.
 
-- **Real GPU, vsync off.** Launch Chromium with `--use-angle=d3d11 --ignore-gpu-blocklist --disable-gpu-vsync --disable-frame-rate-limit` (platform
-  equivalent elsewhere) and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
+- **Real GPU, vsync off.** Launch Chromium with the GPU flags from [verifying](verifying-on-a-gpu.md) (`--use-angle=<d3d11|metal|gl>`, `--ignore-gpu-blocklist`) plus `--disable-gpu-vsync --disable-frame-rate-limit` and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
 - **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report average,
   p95 and max. The GPU runs asynchronously, so a long CPU frame is the signal that matters.
 - **Draw calls have no counter in the renderer.** Wrap `drawElements`, `drawArrays` and their instanced forms on the `WebGLRenderingContext` and reset the
@@ -24,14 +23,11 @@ for (const fn of ['drawElements', 'drawArrays', 'drawElementsInstanced', 'drawAr
 - **Toggle layers off one at a time** (shadows, atmosphere, ambient, clouds, weather, roofs, ui) and re-measure; the delta is the cost.
 - Put budgets in tests, loosely (they should catch doubling, not drift), and attach the numbers to the report.
 
-example: fallow-valley-next `src/game/debug/perf.ts` (counter and window), `debug/layers.ts`, `tools/profile-title.mjs`, `tools/cpu-profile.mjs`,
-`tools/profile-layers.mjs`, `tests/perf/budget.spec.ts`, `docs/PERF.md`.
-
 ## 2. Findings that generalise
 
 | Finding | Evidence | Do |
 | --- | --- | --- |
-| **Submit only what touches the screen.** A pooled chunk ring bound one chunk beyond the camera was drawn too. CPU tilemap layers with `skipCull` walk all their tiles each frame, so the margin ring was about 60% of render time | world render 29 ms to 9 ms, draw calls 88 to 40, title idle 29 to 58 fps | bind a margin, but `setVisible(false)` every view that does not intersect `camera.worldView` (plus a small slack) |
+| **Submit only what touches the screen.** A pooled chunk ring bound one chunk beyond the camera was drawn too. CPU tilemap layers with `skipCull` walk all their tiles each frame, so the margin ring was about 60% of render time | world render 29 ms to 9 ms, draw calls 88 to 40, idle scene 29 to 58 fps | bind a margin, but `setVisible(false)` every view that does not intersect `camera.worldView` (plus a small slack) |
 | **Hide empty layers.** A hidden tilemap layer is not walked or submitted | most of 10 layers per chunk are empty most of the time | keep a live-tile count per layer; toggle visibility when it crosses 0 |
 | **One `Tileset` per atlas and layer kind.** `addTilesetImage` walks the whole atlas frame list; ten per chunk view made creating a view about 17 ms (70 ms at 4x throttle) | 16 views on the first frame | build one per `(texture, gpu or cpu)` in a `WeakMap`; a layer accepts a Tileset object directly; reuse `map.tiles` |
 | **GPU layer for the dense ground** | one quad and one data texture per layer, flat cost | GPU for dense or animated, CPU for sparse; see [tilemaps](tilemaps-and-terrain.md) and gotcha 2 |
@@ -45,7 +41,7 @@ example: fallow-valley-next `src/game/debug/perf.ts` (counter and window), `debu
 | **More GPU layers are cheap if hidden when empty** | eight extra layers per chunk added about 30 quads and 31 draw calls, CPU flat at 2.2 ms (2.15 before) | moving sparse content off a 1024-tile CPU layer paid for them; set the draw-call test limit about 1.5 ms over calm, not at the measured number |
 
 
-Things measured and cleared (do not chase): audio unlock (decodes run off the main thread), title UI rebuild (about 2 ms), devicePixelRatio (CPU
+Things measured and cleared (do not chase): audio unlock (decodes run off the main thread), a menu UI rebuild (about 2 ms), devicePixelRatio (CPU
 bound, not fill bound).
 
 ## 3. Camera and chunk maths worth knowing
@@ -56,9 +52,9 @@ you need a hard ceiling. The simulation's own chunk store is separate and, if it
 
 ## Runtime texture caches: pin by count, never by set
 
-A game that composites textures at runtime (a character wardrobe, tinted variants) usually keeps the newest N and evicts the rest
-(`textures.remove`, `anims.remove`). Anything displaying a texture must pin it, and the pin must be a **reference count**. Fallow Valley kept
-pins in a `Set`: the wardrobe preview and the live backdrop world's player shared the default look, the preview released "its" pin on the first
+A game that composites textures at runtime (a character customiser, tinted variants) usually keeps the newest N and evicts the rest
+(`textures.remove`, `anims.remove`). Anything displaying a texture must pin it, and the pin must be a **reference count**. One project kept
+pins in a `Set`: the customiser preview and the live backdrop world's player shared the default look, the preview released "its" pin on the first
 option change, the cache evicted the player's texture, and `Sprite.setFrame` threw on every frame of the world scene (`Texture "x" has no frame
 "front"`, then `Cannot read properties of undefined (reading 'cutWidth')`): the screen locked up after a handful of changes. Rules: pin and release in
 pairs (`Map<key, count>`), release in the owner's scene `SHUTDOWN`, and test it with a spec that changes the look more than N times while a second

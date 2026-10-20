@@ -1,7 +1,7 @@
 # Controllers and input devices in a Phaser 4 game
 
-The Fallow Valley examples live under `src/game/input` and `docs/INPUT.md`. Their custom polling is a project-specific
-implementation, not a requirement for other games. Start with the installed Phaser API and verify the game's requirements.
+Custom controller polling is a project-specific choice, not a requirement for most games. Start with the installed Phaser API
+and verify the game's requirements.
 
 ## Start with Phaser's Gamepad plugin
 
@@ -83,7 +83,7 @@ configuration, not this correction.
 [tested] The correction produced `disconnected → connected → down` with a matching raw/native connection identity and capture
 before the held edge; neutral release and a fresh analog press activated once. Native source tests cover initial held acquisition,
 older unchanged timestamps with the independent held-input correction, same/different id and index, and ten listener shutdown/restart
-cycles. The isolated Chromium 153 / Playwright 1.63.0 run passed on an NVIDIA RTX 5070 Ti Laptop GPU through D3D11, including initial
+cycles. The isolated Chromium 153 / Playwright 1.63.0 run passed on a hybrid-GPU laptop's discrete GPU through ANGLE/D3D11, including initial
 held analog acquisition, different-id replacement, ten actual Scene restarts and native destruction/listener cleanup. A separately
 reproduced pending-event stop/start retained two events and replayed both callbacks; clearing the native queue on shutdown prevented
 that replay while a later native connection event still fired once. Served optimized

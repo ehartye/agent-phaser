@@ -26,7 +26,7 @@ All GPU layers stay at (0, 0) and are positioned by a parent `Container` (see go
 - On a tile edit, repaint that tile **and its eight neighbours** (blend overlays depend on neighbours) and flush the
   GPU layer once per frame.
 - Things that change without an event (moisture, growth) are reconciled on a timer over the sim's *active* tile set for
-  visible chunks, so cost scales with farmland, not map size.
+  visible chunks, so cost scales with the active set, not map size.
 - A level change releases every bound view, because the same chunk coordinates mean different chunks.
 
 ## Frame names to indices
@@ -70,11 +70,11 @@ placing it, so any generator that paints asphalt gets markings.
 
 ## Procedural terrain generation notes
 
-- Regions must come from coherent noise fields, not per-tile randomness: single random gravel tiles in dust render as
+- Regions must come from coherent noise fields, not per-tile randomness: single random tiles of one material inside another render as
   speckle. Use a broad field and a detail field, threshold them into patches, and reserve per-tile randomness for rare
   scatter.
 - Measure, do not guess: write a small script that prints the share of each ground type and biome over a ring of the
-  world for several seeds, and tune thresholds against targets. A first pass had hotzone at 59% of the far world.
+  world for several seeds, and tune thresholds against targets. A first pass had one hazard biome at 59% of the far world.
 - Give the start a safe, legible neighbourhood (a radius with forced plain terrain) and a guaranteed water source.
-- Make cities structured: a street grid with broken asphalt and concrete foundations reads as ruins; noise alone does
+- Make cities structured: a street grid with broken paving and foundations reads as a settlement; noise alone does
   not.

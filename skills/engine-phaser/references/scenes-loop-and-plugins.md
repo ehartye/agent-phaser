@@ -2,7 +2,7 @@
 
 How to boot a game, split it into scenes, keep state out of them, and run rules at a fixed rate under Phaser's variable frame
 delta. Each rule has the practice, the reason, a minimal generic example, what Phaser 4.2.1 really does (read from
-`node_modules/phaser/src`), and where Fallow Valley demonstrates it (`example:` lines; repo `fallow-valley-next`, private).
+`node_modules/phaser/src`), and where this repo ships runnable code for it.
 
 ## 1. Constants in one file, scenes with one job each
 
@@ -17,8 +17,6 @@ export const SceneKey = { Boot: 'boot', Preload: 'preload', World: 'world', Ui: 
 export const Depth = { Ground: 0, Objects: 3, Entities: 5, Roof: 10, Weather: 20 } as const;
 ```
 
-example: fallow-valley-next `src/game/config.ts`, `src/main.ts`, `src/game/scenes/*`.
-
 ## 2. Ask for WebGL, fail loudly, with the smallest dependency
 
 `type: Phaser.WEBGL` (not `AUTO`, which silently falls back to Canvas) when you use GPU tilemap layers or camera filters, and check
@@ -29,7 +27,7 @@ error path must not need the thing that failed.
 `pixelArt: true` makes textures nearest-filtered, sets `antialias` false **and sets `roundPixels` true**
 (`src/core/Config.js#L395`); stating `roundPixels: true` as well is redundant but documents intent.
 
-example: `BootScene.ts`, `main.ts`.
+Runnable: [harness `game.mjs`](../../../examples/web/harness/game.mjs) sets `type: Phaser.WEBGL`.
 
 ## 3. State lives in a global plugin, not in scenes
 
@@ -55,7 +53,7 @@ Verified: `PluginManager.addToScene` installs "references to Global Plugins that
 (`src/plugins/PluginManager.js#L227`). A global plugin is created once at boot; a scene plugin is created per scene.
 
 Use `registry` (the game-wide `DataManager`) only for read models scenes publish (UI kit, atlases, integer zoom, a small
-`{ capture, paused }` UI state), never for game state. example: `src/game/plugins/SimHostPlugin.ts`, `ui/UiState.ts`.
+`{ capture, paused }` UI state), never for game state.
 
 ## 4. `start` hands off, `launch` runs beside; load shared assets once
 
@@ -67,8 +65,6 @@ Use `registry` (the game-wide `DataManager`) only for read models scenes publish
   never from the scene that decided to start (gotcha 11).
 - Every `game.events.on`, `scale.on`, `document.addEventListener` and sim subscription in a scene needs a matching removal in one
   `SHUTDOWN` handler (gotcha 14).
-
-example: `scenes/PreloadScene.ts`, `scenes/worldAssets.ts`, `scenes/TitleScene.ts` (attract mode), `scenes/WorldScene.ts#create`.
 
 ## 5. The fixed-step loop and interpolation
 
@@ -106,7 +102,7 @@ class FixedStepper {
   debug controller installs pause, step-N or time-scale. The whole test and demo harness then drives the real loop.
 - Hold the loop when the page loses attention: Phaser pauses a hidden tab but not a blurred window (gotcha 15).
 
-example: `src/game/loop/FixedStepper.ts`, `scenes/WorldScene.ts#update`, `debug/hooks.ts`, `tests/view-pure.test.ts`.
+Runnable: [harness `debug.mjs`](../../../examples/web/harness/debug.mjs) drives the real loop by hand (`manual`, `frames`).
 
 ## 6. The headless boundary is a test
 
@@ -117,8 +113,6 @@ files you want Node-testable (input maths, save store, remap rules, read models)
 diagram: [architecture](architecture.md). Where the view still reads sim internals or writes to it (an attract-mode clock), say so
 in a Limits section of your own docs.
 
-example: `tests/architecture.test.ts`, `src/sim/events.ts`, `src/game/view/*-math.ts` (pure files beside each Phaser class).
-
 ## 7. Fan-out, not a web
 
 One subscription, many small `handle(event)` methods, each a `switch` on `e.type`:
@@ -127,4 +121,4 @@ One subscription, many small `handle(event)` methods, each a `switch` on `e.type
 this.simHost.bind(this, (e) => { streamer.handle(e); fx.handle(e); entityViews.handle(e); audio.handle(e); input.handle(e); });
 ```
 
-Views never call each other. Adding a reaction is a file plus one name in the list. example: `WorldScene.create`.
+Views never call each other. Adding a reaction is a file plus one name in the list.

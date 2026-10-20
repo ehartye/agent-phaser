@@ -5,8 +5,8 @@ description: Build, structure, debug and verify a Phaser (3 or 4) game, especial
 
 # Phaser
 
-Start here for any Phaser game. It collects what building Fallow Valley
-taught, including bugs in Phaser itself that cost hours because nothing in the docs mentions them.
+Start here for any Phaser game. It collects lessons from building Phaser 4 games,
+including bugs in Phaser itself that cost hours because nothing in the docs mentions them.
 
 Read the reference that matches the work. Do not load all of them.
 
