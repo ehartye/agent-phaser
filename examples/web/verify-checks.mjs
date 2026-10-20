@@ -1,12 +1,17 @@
 // Pure parts of verify.mjs: arguments, Chromium flags, the renderer check and the audio gate checks.
 // No browser and no dependencies, so `node --test examples/web/verify-checks.test.mjs` covers them.
 
+/** The ANGLE backend that reaches a real GPU on each platform. */
+export const angleBackend = (platform = process.platform) =>
+  platform === 'win32' ? 'd3d11' : platform === 'darwin' ? 'metal' : 'gl';
+
 /**
- * Windows flags that put headless Chromium on the high-performance GPU. Measured in Sector Run on a hybrid laptop
- * (Intel integrated plus NVIDIA RTX 5070 Ti Laptop): no flags gave SwiftShader, `--use-angle=d3d11` alone the Intel
- * GPU, and `--force_high_performance_gpu` added the NVIDIA one. Use the platform's ANGLE backend elsewhere.
+ * Flags that put headless Chromium on the high-performance GPU. On a hybrid-GPU Windows laptop (integrated plus
+ * discrete) no flags gave a software renderer, the platform ANGLE backend alone gave the integrated GPU, and
+ * `--force_high_performance_gpu` added the discrete one. The last flag is harmless on single-GPU machines.
  */
-export const GPU_ARGS = ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--force_high_performance_gpu'];
+export const gpuArgs = (platform = process.platform) =>
+  [`--use-angle=${angleBackend(platform)}`, '--ignore-gpu-blocklist', '--force_high_performance_gpu'];
 
 /** Lets audio start without a gesture. It hides the gesture gate, so it is opt-in (`--autoplay`). */
 export const AUTOPLAY_ARG = '--autoplay-policy=no-user-gesture-required';
@@ -30,9 +35,9 @@ export function parseArgs(argv) {
   return out;
 }
 
-/** @param {{ autoplay: boolean }} opts */
-export function chromiumArgs({ autoplay }) {
-  return autoplay ? [...GPU_ARGS, AUTOPLAY_ARG] : [...GPU_ARGS];
+/** @param {{ autoplay: boolean, platform?: string }} opts */
+export function chromiumArgs({ autoplay, platform }) {
+  return autoplay ? [...gpuArgs(platform), AUTOPLAY_ARG] : gpuArgs(platform);
 }
 
 /**

@@ -1,5 +1,5 @@
 // Verify a web scene in headless Chromium: node web/verify.mjs phaser|three [--allow-software] [--autoplay]
-// Playwright comes from the agent-beeps checkout (PLAYWRIGHT_DIR overrides) so no second browser download is needed.
+// Playwright is resolved from this folder upwards (`npm i -D playwright`), or from PLAYWRIGHT_DIR (an existing install, so no second browser download).
 // It loads the page, records console errors and failed requests, prints the WebGL renderer string and fails on a
 // software renderer (unless --allow-software), samples animation state twice, takes two screenshots, checks that audio
 // is locked and silent before one real click and running after it, then triggers the pickup 12 times and checks the
@@ -15,8 +15,10 @@ let opts;
 try { opts = parseArgs(process.argv.slice(2)); } catch (e) { console.error(e.message); process.exit(2); }
 const which = opts.page;
 const here = resolve(fileURLToPath(new URL('.', import.meta.url)));
-const playwrightDir = process.env.PLAYWRIGHT_DIR ?? resolve(here, '../../agent-beeps/node_modules/playwright');
-const { chromium } = createRequire(import.meta.url)(playwrightDir);
+const { chromium } = (() => {
+  try { return createRequire(import.meta.url)(process.env.PLAYWRIGHT_DIR ?? 'playwright'); }
+  catch { console.error('playwright not found: run `npm i -D playwright` or set PLAYWRIGHT_DIR to an installed playwright folder'); process.exit(2); }
+})();
 
 const out = resolve(here, 'results');
 mkdirSync(out, { recursive: true });

@@ -4,7 +4,7 @@
     "tarball": "https://registry.npmjs.org/phaser/-/phaser-4.2.1.tgz",
     "tarballSha1": "5512f23d348e6fb5c48ce71a9fbddd200ef919ea",
     "tarballSha256": "10c483ef182f0e2aafdc2a11b3bcf86cedb02a4b62a14cfce673b2f9b714318b",
-    "origin": "Exact npm tarball source, byte-compared to the installed pinned Space2grow package; existing dist corrections are not represented as pristine npm.",
+    "origin": "Exact npm tarball source, byte-compared to an installed pinned phaser 4.2.1 package; existing dist corrections are not represented as pristine npm.",
     "sha256": {
       "src/utils/Class.js": "ec859381c9ffee033cb22d0e91610d693d57c27ed527fb682a3707d76c2dfb8c",
       "src/textures/DynamicTexture.js": "5d4b3f535cd07a0fc433ba5a693725f499a541d16461ecb99f5da3d18d9610bf"

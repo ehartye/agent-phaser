@@ -7,9 +7,10 @@ import { resolve } from 'node:path';
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(resolve(project, 'package.json'));
 const { chromium } = require('@playwright/test');
+const ANGLE = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
 const browser = await chromium.launch({
   channel: process.env.CHROME_CHANNEL || undefined,
-  args: ['--use-angle=d3d11', '--ignore-gpu-blocklist'],
+  args: [`--use-angle=${ANGLE}`, '--ignore-gpu-blocklist'],
 });
 try {
   const page = await browser.newPage({ viewport: { width: 400, height: 300 } });

@@ -1,6 +1,6 @@
 # Phaser 4 test harness (runnable template)
 
-A small, working version of the harness Fallow Valley grew (`docs/HARNESS.md` there), cut down to the parts every Phaser game wants. The method is
+A small, working harness cut down to the parts every Phaser game wants. The method is
 in [verifying on a real GPU](../../../skills/engine-phaser/references/verifying-on-a-gpu.md); this folder is the code. Replace `game.mjs` with your
 game and keep the three `HARNESS` hooks.
 

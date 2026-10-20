@@ -21,9 +21,9 @@ node web/serve.mjs                        # then open /web/phaser/index.html or 
 node web/verify.mjs phaser                # or three: writes web/results/*-report.json and screenshots
 ```
 
-`verify.mjs` takes Playwright from `PLAYWRIGHT_DIR` (default: a sibling agent-beeps checkout) and launches Chromium with
-`--use-angle=d3d11 --ignore-gpu-blocklist --force_high_performance_gpu` (Windows; the third flag picks the discrete GPU
-on a laptop with two). It prints the WebGL renderer string and fails when it is a software renderer (SwiftShader,
+`verify.mjs` takes Playwright from `npm i -D playwright` (or `PLAYWRIGHT_DIR`, an installed playwright folder) and launches Chromium with
+`--use-angle=<d3d11|metal|gl by platform> --ignore-gpu-blocklist --force_high_performance_gpu` (the third flag picks the discrete GPU
+on a laptop with two and is harmless elsewhere). It prints the WebGL renderer string and fails when it is a software renderer (SwiftShader,
 llvmpipe) unless you pass `--allow-software`. It loads the page, records console errors and failed requests, samples
 animation state twice, screenshots, checks that audio is locked and nothing played, makes one real click (the gesture
 that unlocks audio), checks that audio runs, then triggers the pickup 12 times and checks the variants. It launches

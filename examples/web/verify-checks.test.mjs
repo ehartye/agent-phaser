@@ -1,7 +1,7 @@
 // node --test examples/web/verify-checks.test.mjs  (no browser, no dependencies)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseArgs, chromiumArgs, classifyRenderer, rendererCheck, audioGateChecks, GPU_ARGS } from './verify-checks.mjs';
+import { parseArgs, chromiumArgs, classifyRenderer, rendererCheck, audioGateChecks, gpuArgs, angleBackend } from './verify-checks.mjs';
 
 test('parseArgs takes the page and the two options', () => {
   assert.deepEqual(parseArgs(['phaser']), { page: 'phaser', allowSoftware: false, autoplay: false });
@@ -15,20 +15,27 @@ test('parseArgs refuses an unknown page or option', () => {
   assert.throws(() => parseArgs(['phaser', '--fast']), /usage/);
 });
 
+test('angleBackend picks the platform backend that reaches a real GPU', () => {
+  assert.equal(angleBackend('win32'), 'd3d11');
+  assert.equal(angleBackend('darwin'), 'metal');
+  assert.equal(angleBackend('linux'), 'gl');
+});
+
 test('chromiumArgs selects the high-performance GPU and leaves autoplay to the gesture by default', () => {
-  assert.deepEqual(GPU_ARGS, ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--force_high_performance_gpu']);
+  assert.deepEqual(gpuArgs('win32'), ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--force_high_performance_gpu']);
+  assert.deepEqual(gpuArgs('darwin')[0], '--use-angle=metal');
   const args = chromiumArgs({ autoplay: false });
-  assert.deepEqual(args, GPU_ARGS);
+  assert.deepEqual(args, gpuArgs());
   assert.ok(!args.some((a) => a.startsWith('--autoplay-policy')));
   assert.ok(!args.includes('--enable-gpu-rasterization'));
 });
 
 test('chromiumArgs adds the autoplay flag only when asked', () => {
-  assert.deepEqual(chromiumArgs({ autoplay: true }), [...GPU_ARGS, '--autoplay-policy=no-user-gesture-required']);
+  assert.deepEqual(chromiumArgs({ autoplay: true }), [...gpuArgs(), '--autoplay-policy=no-user-gesture-required']);
 });
 
 test('classifyRenderer: a hardware GPU', () => {
-  const r = 'ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Ti Laptop GPU (0x00002F58) Direct3D11 vs_5_0 ps_5_0, D3D11)';
+  const r = 'ANGLE (NVIDIA, NVIDIA GeForce RTX 4070 Laptop GPU (0x00002860) Direct3D11 vs_5_0 ps_5_0, D3D11)';
   assert.equal(classifyRenderer({ webgl2: true, renderer: r }), 'gpu');
 });
 
