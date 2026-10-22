@@ -48,5 +48,5 @@ about 40%. Prove it with three specs: calm is pixel-identical to no sway, a gale
 - Ratio: read 16x16 block luma with the layer on and off; assert the deep band's ratio and that open sky is untouched.
 - Palette and grid: read back `image.tintTopLeft`, `x`, `y`, `scaleX`, `rotation`, `alpha` for every visible particle.
 - Fps with everything running, uncapped (`--disable-gpu-vsync --disable-frame-rate-limit`) and capped.
-- A contact sheet of cropped frames (a small script that steps the manual loop and saves crops; see the [harness](../../../examples/web/harness/)) is how you judge "does it feel alive"; look at
+- A contact sheet of cropped frames (a small script that steps the manual loop and saves crops; see the [harness](../../../examples/web/harness)) is how you judge "does it feel alive"; look at
   whole-screen frames too, because a particle can be correct and invisible against the ground.

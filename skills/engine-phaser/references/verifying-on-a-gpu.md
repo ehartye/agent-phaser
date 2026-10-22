@@ -221,7 +221,7 @@ The harness covers the Playwright config, waits and no-sleeps guard; mutation sc
 ## A debug API, a manual frame loop and a page object (what replaces the sleeps)
 
 The probes above each repeated "start, wait 600 ms, press Enter, wait 1200 ms". Under parallel workers the title was not up yet, Enter went nowhere, and the next
-line failed with "no game in progress". Build the harness once instead (a minimal runnable one: [`examples/web/harness`](../../../examples/web/harness/)):
+line failed with "no game in progress". Build the harness once instead (a minimal runnable one: [`examples/web/harness`](../../../examples/web/harness)):
 
 - **One typed debug object on the page** (`__game.debug`), loaded only in dev or when the URL asks (`?debug=1`, `?demo=name`) through a dynamic `import()` so a production
   build carries it as a separate chunk. It starts a world (`start({ seed, hour, weather, at, give, god })` once the title scene is active, never by key press), teleports to

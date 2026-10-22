@@ -1,6 +1,6 @@
 # Profiling a game against a frame budget (method, applied to Phaser)
 
-Use this when a game must hit a frame budget (for example 120 fps) or grow its content by a stated percentage without missing one. It adds diagnosis design and the proportionate shipping bar (section 5); [performance](performance.md) has the measuring tools and findings. The method comes from a native Unreal game investigation. The Unreal half is [Unreal profiling](../../engine-asset-import/references/unreal-native-profiling.md). Labels: **[tested]** is a claim a reader can reproduce from this repo, **[documented]** was read in source or docs, **[general]** is method or guidance, including figures from one project that this repo does not reproduce.
+Use this when a game must hit a frame budget (for example 120 fps) or grow its content by a stated percentage without missing one. It adds diagnosis design and the proportionate shipping bar (section 5); [performance](performance.md) has the measuring tools and findings. The method comes from a native Unreal game investigation. The Unreal half is [Unreal profiling](../../engine-unreal-native/references/unreal-native-profiling.md). Labels: **[tested]** is a claim a reader can reproduce from this repo, **[documented]** was read in source or docs, **[general]** is method or guidance, including figures from one project that this repo does not reproduce.
 
 ## 1. Fix the budget, then decompose the frame
 

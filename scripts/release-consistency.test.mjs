@@ -32,7 +32,7 @@ test('the README skills table lists every skill folder, and nothing else', () =>
 });
 
 test('the README status line states the number of skills', () => {
-  const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+  const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen'];
   assert.match(readme(), new RegExp(`^Early \\([^)]*\\)\\. ${words[skills().length]} skills\\.`, 'm'));
 });
 
