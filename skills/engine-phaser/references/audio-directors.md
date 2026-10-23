@@ -15,10 +15,10 @@ AudioContext, the unlock and the beds survive scene restarts.
 
 ## 2. Exhaustive decision tables, enforced by the compiler and by tests
 
-- Keep the table as pure data in the content layer: `EVENT_SOUNDS` maps every sim event type to a rule (a cue, or a `by` rule that picks
+- [general] Keep the table as pure data in the content layer: `EVENT_SOUNDS` maps every sim event type to a rule (a cue, or a `by` rule that picks
   a cue from an event field with `cases` and a `fallback`), plus tables for deny reasons, ground to footstep surface, creature class to
   voice, weather and biome and daylight to ambience layers, priorities and mix levels.
-- Make completeness a **type error**:
+- [general] Make completeness a **type error**:
 
 ```ts
 type _EveryEventHasADecision = Exclude<SimEvent['type'], keyof typeof EVENT_SOUNDS> extends never ? true : never;
@@ -28,15 +28,15 @@ const _checks: [_EveryEventHasADecision, _NoStaleDecision] = [true, true];
 
   Adding a sim event or a deny reason then fails `tsc` until it has words and a sound; a test file builds
   `{...} satisfies Record<SimEvent['type'], 1>` for the same effect with a readable error.
-- Runtime tests: every cue in the table exists in the build's catalogue (`recipes.json` and, when built, `index.json`), every
+- [general] Runtime tests: every cue in the table exists in the build's catalogue (`recipes.json` and, when built, `index.json`), every
   catalogue file exists, is Ogg, is non-empty; every fauna id has a voice; every content id that should be audible is. A silent decision
   (`null`) must carry a reason and appear in a coverage list.
-- Build cue tables that depend on content (gain, eat, place, equip, tool-break) from the content items, so a new item is covered the day
+- [general] Build cue tables that depend on content (gain, eat, place, equip, tool-break) from the content items, so a new item is covered the day
   it is added, and fail a test when a new crop, weapon or wearable has no cue and when a built cue is played by no table. Mute a pickup cue
   that a larger event (harvest, craft, trade) already caused.
-- An event another branch added but the table does not know yet goes in a `PENDING_EVENT_SOUNDS` table or is silent; never crashes.
+- [general] An event another branch added but the table does not know yet goes in a `PENDING_EVENT_SOUNDS` table or is silent; never crashes.
   Remove the entry when the table lands.
-- A generated "listening room" page that lists every event with its sound is how the owner reviews the decisions by ear.
+- [general] A generated "listening room" page that lists every event with its sound is how the owner reviews the decisions by ear.
 
 ## 3. Music is a state machine with hysteresis
 
@@ -44,36 +44,36 @@ const _checks: [_EveryEventHasADecision, _NoStaleDecision] = [true, true];
 scene (`setScene('title' | 'world' | 'paused' ...)`), and tells the player which loop and which of its layers to play, how far to duck
 the buses and which sting to ask for.
 
-- **Fixed priority**, highest first: a rest after death, the title scenes, a boss, a vault, a fight, the biome by time of day and weather.
-- **Every transition has a minimum hold or hysteresis**, so a roach, a biome border or a dusk that flickers cannot make the score thrash.
+- [general] **Fixed priority**, highest first: a rest after death, the title scenes, a boss, a vault, a fight, the biome by time of day and weather.
+- [general] **Every transition has a minimum hold or hysteresis**, so a roach, a biome border or a dusk that flickers cannot make the score thrash.
   A `Ladder` goes *up* as soon as asked (after a minimum interval since the last change) and *down* only after the lower level has been
   asked for continuously for N seconds: danger music climbs fast and relaxes slowly.
-- **One family, one grid**: build songs on one tempo and bar length so any two can crossfade on a bar. Use layer states (`setState`) for
+- [general] **One family, one grid**: build songs on one tempo and bar length so any two can crossfade on a bar. Use layer states (`setState`) for
   time of day and weather instead of new songs, and trim every state to equal loudness (a per-state trim in the sidecar) so fewer layers
   is not quieter. Hold a chosen song or state about 45 s; gate stings on the current theme (in a fight only boss, victory, death and fanfare stings play).
-- **Quantise changes**: `at: 'bar'` and `sync: true` crossfade on the next bar with the new loop starting in the old one's phase (needs
+- [general] **Quantise changes**: `at: 'bar'` and `sync: true` crossfade on the next bar with the new loop starting in the old one's phase (needs
   songs of the same tempo and length). Stings use `at: 'beat'`.
-- **Duck, do not mute**: dialogue, trade, inventory, map and journal each add a reason to a set; while any is on the music steps back.
+- [general] **Duck, do not mute**: dialogue, trade, inventory, map and journal each add a reason to a set; while any is on the music steps back.
   The deepest active reason wins; ease down in about 0.35 s and up over about 1.6 s. A duck sits on top of the user's volume slider
   (`duck(bus, dB)`) so the slider is never fought. The sfx bus is never ducked, and the voice budget steals by priority so hurt and
   telegraph cues cut through. Deliver sfx near -18 LUFS and beds and songs near -20 LUFS so mix-table numbers are plain dB offsets; no cue above 0 dB.
-- Pass `now` into the director (wall seconds in the game, a fake in tests) and a `later(sec, fn)` for delayed cues; tests drive time by hand.
+- [general] Pass `now` into the director (wall seconds in the game, a fake in tests) and a `later(sec, fn)` for delayed cues; tests drive time by hand.
 
 ## 4. Browser audio rules
 
-- Call the released player's `unlock()` from the first and later real user gestures; re-enabling needs an unlock-driven gesture. Preserve the sound-toggle recovery path: `retry()` clears failed loads before a later call needs them. Do not turn unlock into a one-shot listener that prevents recovery. Download nothing from
+- [general] Call the released player's `unlock()` from the first and later real user gestures; re-enabling needs an unlock-driven gesture. Preserve the sound-toggle recovery path: `retry()` clears failed loads before a later call needs them. Do not turn unlock into a one-shot listener that prevents recovery. Download nothing from
   `audio/` before the gesture; after it, fetch the catalogue, the cues and beds that play and the playing music, never the folder. One project's sample fetched
   no audio bytes before the gesture and only a handful of files after the first cue, a small fraction of the build (reported from one project, not reproduced here).
-- That sample checked Ogg Opus loops frame-exact in Chromium and Firefox. Safari and iOS decode it from 18.4 (checked by ear on a
+- [general] That sample checked Ogg Opus loops frame-exact in Chromium and Firefox. Safari and iOS decode it from 18.4 (checked by ear on a
   device, not by frame count); older Safari and WebKit on Linux and Windows do not, so the game shows a one-time notice and runs silent
   (measured table and probe design: [audio integration](../../engine-asset-import/references/audio-integration.md)). Unlock on `pointerdown`, `keydown`, `touchend` and `click`.
   With a hand-driven frame loop (`game.loop.sleep()` plus `game.step`), keep running frames while waiting for audio: decoding finishes on the event loop. In the released player, fetch or decode failure reports `E_LOAD`; report it through the existing status UI and preserve its retry path.
-- `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
-- Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
+- [general] `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
+- [general] Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
   template [`examples/web/ci/pages-audio.yml`](../../../examples/web/ci/pages-audio.yml)). The decoded set is the memory budget; since player 4 (agent-beeps 0.9.0) it evicts least-recently-used
   assets past `memoryBudgetBytes` ([audio integration](../../engine-asset-import/references/audio-integration.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
   inside a size budget.
-- **Memory budget** (reported from one project, not reproduced here): a crossfade holds the old and the new song at once, so the budget must cover that peak, not the steady state
+- [general] **Memory budget** (reported from one project, not reproduced here): a crossfade holds the old and the new song at once, so the budget must cover that peak, not the steady state
   (in that project the crossfade peak was about three times a song at rest, and a phone budget sized for the steady state failed). Find the floor by starving the budget in a test that plays the real
   score and waits on the player's own state, never on time. Prefetch only what is near in time (the next time of day, the biome ahead, a fight about to start): early asks only evict what is needed sooner.
   Unload whole assets you have left; do not call per-asset `unload` for layers inside a song that is still playing, because it also drops the layer you just prefetched.

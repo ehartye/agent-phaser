@@ -34,45 +34,45 @@ Read the reference that matches the work. Do not load all of them.
 
 ## First five minutes
 
-1. **Pin the version and say which.** `npm view phaser version` and `npm view phaser dist-tags`. As of 2026-07 the
-   `latest` tag is 4.2.1; the `beta` tag is a stale 4.0.0-rc.7 and must not be mistaken for something newer. Pin the exact
+1. [general] **Pin the version and say which.** `npm view phaser version` and `npm view phaser dist-tags`. As of 2026-07 the
+   `latest` tag is 4.2.1; the `beta` tag is a stale 4.0.0-rc.7. Pin the exact
    version in `package.json`. Phaser 4 is a different renderer from 3 (render nodes, filters, GPU tilemap layers); sample
    code written for 3 often does not apply.
-2. **Read Phaser's own skills.** Phaser 4 ships about 600 KB of skill documents in `node_modules/phaser/skills`
+2. [documented] **Read Phaser's own skills.** Phaser 4 ships about 600 KB of skill documents in `node_modules/phaser/skills`
    (scenes, tilemaps, filters and post effects, v4 features, v3 to v4 migration, data manager, particles). They are
    accurate to the installed version. Prefer them to memory and to web posts.
-3. **Check what the renderer really is.** Print the WebGL renderer string (`WEBGL_debug_renderer_info`). Headless
+3. [general] **Check what the renderer really is.** Print the WebGL renderer string (`WEBGL_debug_renderer_info`). Headless
    browsers silently fall back to software rendering, which hides performance and some correctness problems. Phaser 4
    officially supports WebGL 2; 4.2.1 creates WebGL 1 by default and accepts a supplied WebGL 2 context. `Phaser.WEBGL`
    is not an API-version selector. Read [WebGL backends](references/webgl-backends.md) for ES3 shaders and the separate Phaser AE API.
-4. **Put rules in a headless layer.** Keep game state and rules in plain TypeScript that never imports Phaser, and let
+4. [general] **Put rules in a headless layer.** Keep game state and rules in plain TypeScript that never imports Phaser, and let
    Phaser draw it. See [architecture](references/architecture.md). This single choice makes the game unit-testable,
    saves small, and scene restarts safe.
-5. **Decide the verification up front.** A unit-test suite plus a Playwright suite that runs on the GPU and asserts
+5. [general] **Decide the verification up front.** A unit-test suite plus a Playwright suite that runs on the GPU and asserts
    on *pixels*, not on "no console errors". See [verifying](references/verifying-on-a-gpu.md).
 
 ## Rules that earned their place
 
-- **Use Phaser's native capability first.** Configure and test it before adding a parallel implementation. For controller input,
+- [general] **Use Phaser's native capability first.** Configure and test it before adding a parallel implementation. For controller input,
   see [gamepad and input](references/gamepad-and-input.md): configurable thresholds are not defects; lifecycle workarounds require
   a version-specific reproduction, one input owner and a removal condition.
-- **Measure pixels, not impressions.** Read a pixel at a place whose expected colour you know, toggle layers and read it again;
+- [general] **Measure pixels, not impressions.** Read a pixel at a place whose expected colour you know, toggle layers and read it again;
   a plausible-looking screenshot can hide a layer covering the terrain.
-- **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and
+- [general] **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and
   compare it with the real pipeline; several Phaser bugs were found this way in minutes.
-- **Prove a regression test by mutation.** Re-introduce the bug, watch the test fail, restore the fix.
-- **Import Phaser wherever a value is used.** A missing import compiles, then throws `Phaser is not defined` (gotcha 4); add a scanning test.
-- **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the generator's
+- [general] **Prove a regression test by mutation.** Re-introduce the bug, watch the test fail, restore the fix.
+- [general] **Import Phaser wherever a value is used.** A missing import compiles, then throws `Phaser is not defined` (gotcha 4); add a scanning test.
+- [general] **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the generator's
   state in the snapshot: otherwise a loaded game restarts the random stream and drifts from the original (test it by stepping a
   saved and a restored sim side by side).
-- **Every scene restart must be leak-tested.** Restart the scene ten times in a browser spec and require listener counts,
+- [general] **Every scene restart must be leak-tested.** Restart the scene ten times in a browser spec and require listener counts,
   textures and display objects not to grow (gotchas 14 and 15); a WebGL context loss/restore spec belongs beside it (gotcha 13).
-- **A strict pixel-only UI** draws every UI and message pixel from agent-sprites bitmap fonts, skins and icons (no browser text,
+- [general] **A strict pixel-only UI** draws every UI and message pixel from agent-sprites bitmap fonts, skins and icons (no browser text,
   no Phaser `Text`; ban `Text` creation with a test). The UI layer may have a higher resolution than the gameplay layer; require
   whole physical pixels per authored source pixel in each context. Fractional logical units and camera scales are valid when final
   footprints and paint origins align. Keep accessible controls and native text entry through the shared-model semantic bridge (see
   [pixel-perfect and UI](references/pixel-perfect-and-ui.md)); a live region alone is not an interactive interface.
-- **When a tool is missing something, fix the tool.** Capabilities the game needs from agent-sprites or agent-beeps
+- [general] **When a tool is missing something, fix the tool.** Capabilities the game needs from agent-sprites or agent-beeps
   belong in those tools (with a tracked backlog item), not in game-side workarounds.
 
 ## Not covered here

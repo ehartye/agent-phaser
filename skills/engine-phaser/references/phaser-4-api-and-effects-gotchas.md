@@ -28,29 +28,29 @@ Use tint modes: `sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)` fo
 
 ## 7. Smaller observations
 
-- `Tilemap.createBlankLayer` has no GPU argument. Build GPU layers with `make.tilemap({ data })` and
+- [general] `Tilemap.createBlankLayer` has no GPU argument. Build GPU layers with `make.tilemap({ data })` and
   `createLayer(0, tileset, 0, 0, true)`. A 2D array of tile indices is enough; no Tiled file is needed.
-- GPU layers do not repaint on `putTileAt`. Call `generateLayerDataTexture()` once after a batch of edits. Calling it
+- [general] GPU layers do not repaint on `putTileAt`. Call `generateLayerDataTexture()` once after a batch of edits. Calling it
   many times in a frame across many layers works.
-- A tileset image can be a texture that also has atlas frames: `addTilesetImage(name, textureKey, w, h, 0, 0)` uses the
+- [general] A tileset image can be a texture that also has atlas frames: `addTilesetImage(name, textureKey, w, h, 0, 0)` uses the
   source image, so a gapless sprite sheet doubles as a tileset.
-- `Phaser.Types` and the camera `worldView` are in world pixels; with zoom 3 a 1280 px canvas shows about 427 world
+- [general] `Phaser.Types` and the camera `worldView` are in world pixels; with zoom 3 a 1280 px canvas shows about 427 world
   pixels. Compute visible chunks from `worldView`, not from the canvas size.
-- The Phaser `skills` folder inside the package is the fastest accurate reference for v4 APIs.
+- [general] The Phaser `skills` folder inside the package is the fastest accurate reference for v4 APIs.
 
 ## 9. Lighting, camera filters and render textures (measured on 4.2.1)
 
-- `setLighting(true)` works on CPU tilemap layers, sprites and images. Falloff is smooth and additive (easy to overexpose),
+- [general] `setLighting(true)` works on CPU tilemap layers, sprites and images. Falloff is smooth and additive (easy to overexpose),
   there is no occlusion, and it is per-object opt-in, which is awkward with pooled chunk layers. About 0.9 ms for 8 lights at
   1280x720. For pixel-art bands, wall shadows or a grade, a world-locked light map is more controllable: a texture with one
   texel per world pixel (`RenderTexture` filled with ambient, ADD `stamp` pools; or a CPU canvas for occlusion), drawn over
   the world with MULTIPLY and NEAREST filtering.
-- Camera filters (`camera.filters.internal.addColorMatrix()`, `addDisplacement(key, x, y)`) keep pixel art crisp when the game
+- [general] Camera filters (`camera.filters.internal.addColorMatrix()`, `addDisplacement(key, x, y)`) keep pixel art crisp when the game
   is `pixelArt: true` (compare distinct colour counts with the filter on and off), cost nothing while `setActive(false)`, and
   only affect that camera, so a UI scene is untouched. `ColorMatrix.saturate(-1)` is full grayscale, `0` is identity.
-- `RenderTexture`/`DynamicTexture` commands (`fill`, `stamp`) are queued and run (and are cleared) only on `render()`. Never
+- [general] `RenderTexture`/`DynamicTexture` commands (`fill`, `stamp`) are queued and run (and are cleared) only on `render()`. Never
   queue without rendering.
-- To measure cost instead of vsync, launch Chromium with `--disable-gpu-vsync --disable-frame-rate-limit` and read
+- [general] To measure cost instead of vsync, launch Chromium with `--disable-gpu-vsync --disable-frame-rate-limit` and read
   `game.loop.actualFps`.
 
 ## 12. Whole-pixel screen shake

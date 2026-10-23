@@ -5,13 +5,13 @@ Phaser 4.2.1, a real GPU, 1280x720 at zoom 3 (timings below come from one projec
 
 ## 1. Three problems, three owners
 
-1. **The grade**: a pure function `computeGrade({ hour, weather, biome, underground })` returning an ambient RGB multiplier, fog
+1. [general] **The grade**: a pure function `computeGrade({ hour, weather, biome, underground })` returning an ambient RGB multiplier, fog
    colour and amount, saturation, shimmer, flicker. It reads the sim's one `daylight(hour)`; nothing else keeps its own idea of
    night. Ease the live grade toward the target (`1 - exp(-dt / tau)`, about 0.7 s) so weather and the clock never pop. Unit-test it
    in Node.
-2. **The lights**: a list of `{ x, y, radius, colour, intensity, flicker, daylit }` gathered from tiles (re-scanned only when the view
+2. [general] **The lights**: a list of `{ x, y, radius, colour, intensity, flicker, daylit }` gathered from tiles (re-scanned only when the view
    crosses a tile or a tile/prop changes), entities and glowing particles; cull against the view and keep the nearest N (48).
-3. **The effects**: fog, saturation, shimmer, pulse, wetness. Whole-screen treatments chosen by the grade.
+3. [general] **The effects**: fog, saturation, shimmer, pulse, wetness. Whole-screen treatments chosen by the grade.
 
 ## 2. A light map: one texel per world pixel, multiplied over the world
 
@@ -25,15 +25,15 @@ for (const l of lights) rt.stamp('pool', undefined, Math.round(l.x - ox), Math.r
 rt.render();                                                                          // commands only run here
 ```
 
-- `pool` is a 128 px disc made once on a canvas with **twelve stepped alpha bands** and no dithering, nearest-filtered. Edges are
+- [general] `pool` is a 128 px disc made once on a canvas with **twelve stepped alpha bands** and no dithering, nearest-filtered. Edges are
   crisp pixel bands at any integer zoom; nothing blurs.
-- **RenderTexture and DynamicTexture commands are queued and run, and are cleared, only in `render()`** (`DynamicTexture.render`
+- [general] **RenderTexture and DynamicTexture commands are queued and run, and are cleared, only in `render()`** (`DynamicTexture.render`
   empties the buffer at its end, `src/textures/DynamicTexture.js#L299`). Never queue without rendering.
-- **Skip the whole pass in full daylight** (every ambient channel above 0.97 and no flicker): a measurable saving in one project (under a millisecond a frame).
-- **Occlusion** (walls blocking light underground) cannot be done with stamps. Compute the same bands on the CPU with tile line of
+- [general] **Skip the whole pass in full daylight** (every ambient channel above 0.97 and no flicker): a measurable saving in one project (under a millisecond a frame).
+- [general] **Occlusion** (walls blocking light underground) cannot be done with stamps. Compute the same bands on the CPU with tile line of
   sight into a `CanvasTexture` (`putImageData`, `refresh`), drawn MULTIPLY and nearest. A few milliseconds in the heaviest room at 1280x720 (one project);
   rebuild the solid grid only when the view crosses a tile or a tile changes.
-- Fog is the one linear-filtered thing (haze is not pixel art): a vignette image that keeps the player's surroundings clear, tinted
+- [general] Fog is the one linear-filtered thing (haze is not pixel art): a vignette image that keeps the player's surroundings clear, tinted
   by the grade.
 
 ## 3. Camera filters on the world camera only
@@ -44,13 +44,13 @@ const heat  = cam.filters.internal.addDisplacement('heatMap', 0, 0); heat.setAct
 // each frame: color.setActive(needSaturation); if (needSaturation) color.colorMatrix.reset().saturate(sat - 1);
 ```
 
-- Filters belong to one camera (`FilterList`, `src/gameobjects/components/FilterList.js#L364`). Put the interface in its **own scene
+- [general] Filters belong to one camera (`FilterList`, `src/gameobjects/components/FilterList.js#L364`). Put the interface in its **own scene
   with its own camera** and no world filter can touch it (assert `uiScene.cameras.main.filters.internal.list.length === 0`).
-- `setActive(false)` costs nothing. Turn a filter on only while it has work.
-- `ColorMatrix.saturate(-1)` is full greyscale, `0` identity (`src/display/ColorMatrix.js#L204`).
-- Crispness: with `pixelArt: true`, shimmer left the distinct colour count unchanged in the project that tested it (449 on, 546 off, reported not reproduced). A blur would add hundreds;
+- [general] `setActive(false)` costs nothing. Turn a filter on only while it has work.
+- [general] `ColorMatrix.saturate(-1)` is full greyscale, `0` identity (`src/display/ColorMatrix.js#L204`).
+- [general] Crispness: with `pixelArt: true`, shimmer left the distinct colour count unchanged in the project that tested it (449 on, 546 off, reported not reproduced). A blur would add hundreds;
   a displacement only moves existing pixels. Test it that way.
-- Heat shimmer: a 64x64 displacement canvas of rising bands repainted at about 12 Hz; strength a few thousandths.
+- [general] Heat shimmer: a 64x64 displacement canvas of rising bands repainted at about 12 Hz; strength a few thousandths.
 
 ## 4. Why not `setLighting`
 

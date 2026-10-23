@@ -36,11 +36,11 @@ Use native sound volume and native tweens for ordinary fades. Compose each sound
 
 ## Loading, activation and recovery
 
-- Preserve the project's download policy. If it loads audio after a gesture, queue only its needed recordings through the native Loader then. For an initial runtime batch or retry outside `preload`, register completion/error listeners before calling `scene.load.start()` after queueing; queueing alone does not start the load. A suspended, game-owned Phaser context before activation is distinct from downloaded audio bytes.
-- Use Phaser's native unlock mechanism and `locked`/`UNLOCKED` state. Verify keyboard, pointer, semantic and controller activation paths on the target devices before adding a bridge. Reproduce an actual native failure before proposing a scoped repair; do not assume every browser interruption is handled by a network retry.
-- Loader `COMPLETE` is not proof that every recording decoded. Check requested keys in the audio cache, report failure through the existing status UI, and retry missing keys on the authorized retry action. Keep successful cached audio and discard failed initialization state. Reconcile the latest request after asynchronous loading.
-- Check the pinned backend's blur/focus behavior and the game's hidden/visible events separately. Preserve intentional preview/menu holds; a blanket resume can restart sounds meant to remain paused. Pair every owned listener with teardown.
-- Select supported formats from the delivered assets. Codec conversion, loop repair and export validation belong to beeps. WebAudio and HTML5Audio have different loop/overlap behavior; source inspection is not mobile or audible certification.
+- [general] Preserve the project's download policy. If it loads audio after a gesture, queue only its needed recordings through the native Loader then. For an initial runtime batch or retry outside `preload`, register completion/error listeners before calling `scene.load.start()` after queueing; queueing alone does not start the load. A suspended, game-owned Phaser context before activation is distinct from downloaded audio bytes.
+- [general] Use Phaser's native unlock mechanism and `locked`/`UNLOCKED` state. Verify keyboard, pointer, semantic and controller activation paths on the target devices before adding a bridge. Reproduce an actual native failure before proposing a scoped repair; do not assume every browser interruption is handled by a network retry.
+- [general] Loader `COMPLETE` is not proof that every recording decoded. Check requested keys in the audio cache, report failure through the existing status UI, and retry missing keys on the authorized retry action. Keep successful cached audio and discard failed initialization state. Reconcile the latest request after asynchronous loading.
+- [general] Check the pinned backend's blur/focus behavior and the game's hidden/visible events separately. Preserve intentional preview/menu holds; a blanket resume can restart sounds meant to remain paused. Pair every owned listener with teardown.
+- [general] Select supported formats from the delivered assets. Codec conversion, loop repair and export validation belong to beeps. WebAudio and HTML5Audio have different loop/overlap behavior; source inspection is not mobile or audible certification.
 
 ## When the beeps player is the right owner
 

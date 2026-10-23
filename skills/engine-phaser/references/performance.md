@@ -6,10 +6,10 @@ Numbers below were reported from one pixel-art tile game, not reproduced here: P
 
 For a stated frame budget or a planned content increase, diagnose first with [profiling method](profiling-method.md): frame decomposition, ablation, per-item cost table, and a proportionate bar for shipping a fix. The tools below are its measuring half.
 
-- **Real GPU, vsync off.** Launch Chromium with the GPU flags from [verifying](verifying-on-a-gpu.md) (`--use-angle=<d3d11|metal|gl>`, `--ignore-gpu-blocklist`) plus `--disable-gpu-vsync --disable-frame-rate-limit` and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
-- **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report average,
+- [general] **Real GPU, vsync off.** Launch Chromium with the GPU flags from [verifying](verifying-on-a-gpu.md) (`--use-angle=<d3d11|metal|gl>`, `--ignore-gpu-blocklist`) plus `--disable-gpu-vsync --disable-frame-rate-limit` and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
+- [general] **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report average,
   p95 and max. The GPU runs asynchronously, so a long CPU frame is the signal that matters.
-- **Draw calls have no counter in the renderer.** Wrap `drawElements`, `drawArrays` and their instanced forms on the `WebGLRenderingContext` and reset the
+- [general] **Draw calls have no counter in the renderer.** Wrap `drawElements`, `drawArrays` and their instanced forms on the `WebGLRenderingContext` and reset the
   count at `POST_RENDER`:
 
 ```ts
@@ -18,10 +18,10 @@ for (const fn of ['drawElements', 'drawArrays', 'drawElementsInstanced', 'drawAr
 }
 ```
 
-- **CPU throttling** through CDP (`Emulation.setCPUThrottlingRate`, 4x) finds problems a fast desktop hides; use Event Timing (key to next paint),
+- [general] **CPU throttling** through CDP (`Emulation.setCPUThrottlingRate`, 4x) finds problems a fast desktop hides; use Event Timing (key to next paint),
   long tasks, and a sampling CPU profile (self and inclusive time) for the real story.
-- **Toggle layers off one at a time** (shadows, atmosphere, ambient, clouds, weather, roofs, ui) and re-measure; the delta is the cost.
-- Put budgets in tests, loosely (they should catch doubling, not drift), and attach the numbers to the report.
+- [general] **Toggle layers off one at a time** (shadows, atmosphere, ambient, clouds, weather, roofs, ui) and re-measure; the delta is the cost.
+- [general] Put budgets in tests, loosely (they should catch doubling, not drift), and attach the numbers to the report.
 
 ## 2. Findings that generalise
 

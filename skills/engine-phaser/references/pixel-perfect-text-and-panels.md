@@ -21,21 +21,21 @@ it.
 
 ## 3. All text is `BitmapText` from the tool's own font export
 
-- Never `add.text`/`make.text`, CSS fonts, or browser tooltips for visible game UI. Ban them with a test that scans the presentation code
+- [general] Never `add.text`/`make.text`, CSS fonts, or browser tooltips for visible game UI. Ban them with a test that scans the presentation code
   and checks for unintended browser-rendered game chrome. Semantic controls and native input bridges follow section 7; do not ban them by counting DOM nodes.
-- Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
+- [general] Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
   register each tone as a `BitmapFont` with `cache.bitmapFont.add(key, { data, texture, frame: '__BASE', fromAtlas: false })`. **A tone
   is a different set of glyph frames, never a tint.**
-- Prefer released agent-sprites 0.88.0's pinned `ui-runtime.mjs`, which exports `normalizeBitmapFont`, `bitmapLineWidth`, `wrapBitmapText`,
+- [general] Prefer released agent-sprites 0.88.0's pinned `ui-runtime.mjs`, which exports `normalizeBitmapFont`, `bitmapLineWidth`, `wrapBitmapText`,
   `measureBitmapText` and `placeBitmapText`. Normalize once per loaded font; the immutable snapshot preserves advances, authored
   tones, atlas rectangles and trim offsets. Use the same calculations for Node layout and native binding instead of maintaining
   another metrics implementation. Keep existing native adapters until their required export and downstream parity are verified.
-- A single-density native path can draw one `BitmapText` per wrapped line at font scale 1 and integer offsets. A contextual adapter
+- [general] A single-density native path can draw one `BitmapText` per wrapped line at font scale 1 and integer offsets. A contextual adapter
   consumes the plan in its declared space, including fractional local destinations. Retain game-authored newline/tab/empty,
   trailing-advance, line-height/spacing and terminal-space policies explicitly; defaults do not prove legacy parity. Keep fitting,
   ellipsis and glyph-coverage decisions in the game. Missing legacy cell/baseline or ink stays unknown; texture dimensions do not
   establish it. Trim offsets apply once and cannot substitute for reported source-cell ink bounds.
-- Floating world labels are the same face at the *world* layer's zoom: rise in whole-pixel steps, blink out instead of fading.
+- [general] Floating world labels are the same face at the *world* layer's zoom: rise in whole-pixel steps, blink out instead of fading.
 
 ## 4. Panels are tiled, not stretched
 
@@ -51,25 +51,25 @@ the pure planner does not infer a minimum. Existing Canvas wrappers keep their p
 Attribute a copied runtime's software source/version separately from the font/skin art manifest. Updating pure helper code does
 not require regenerating font images or relabeling historical PNGs with a new producer version.
 
-- Dim behind a modal with the skin's **dithered scrim** (a hard-alpha checkerboard) in a `TileSprite`, not a translucent rectangle.
-- In the common whole-zoom/single-density path with physically aligned origins, slide with a tween that rounds local positions
+- [general] Dim behind a modal with the skin's **dithered scrim** (a hard-alpha checkerboard) in a `TileSprite`, not a translucent rectangle.
+- [general] In the common whole-zoom/single-density path with physically aligned origins, slide with a tween that rounds local positions
   every frame (`setPosition(Math.round(fx + (tx - fx) * t), ...)`). For contextual motion, project the intended position to physical
   space, apply the declared physical paint quantization, then project back for native placement. Do not round local coordinates:
   at `S = 1.5`, local x = 1 becomes physical x = 1.5 even when `P = 2`. Preserve continuous semantic geometry independently; when
   motion changes a context mapping, advance its revision and cancel held input before publishing it as described in section 1.
   Leave by sliding. Nothing fades: a half-transparent pixel is a colour the art does not contain.
-- Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
+- [general] Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
 
 ## 5. Text must fit, in three layers
 
 A string that runs off its box is a bug the type system cannot see. What worked:
 
-1. **Static**: a table of every container (id, face, width as a function of the logical screen width, maximum lines) and every string
+1. [general] **Static**: a table of every container (id, face, width as a function of the logical screen width, maximum lines) and every string
    that can go in it, measured with the real glyph advances at every supported width. A mutation block proves the check can fail.
    A source scan for unbounded `.print(` of dynamic text with a list of allowed exceptions that may only shrink.
-2. **Runtime guard**: every text object registers itself; a debug call measures what is on screen from the real transforms and lists
+2. [general] **Runtime guard**: every text object registers itself; a debug call measures what is on screen from the real transforms and lists
    lines that leave the screen, leave a declared clip box, or overlap another line. The browser fixture fails any test with a finding.
-3. **GPU walk-through**: open every screen with worst-case content at several viewport sizes and scales; compare pixels outside the
+3. [general] **GPU walk-through**: open every screen with worst-case content at several viewport sizes and scales; compare pixels outside the
    window rectangle with the window hidden and shown.
 
 Details that mattered: wrap to `maxLines` and end in an ellipsis; take width and height from the container, never from the text; let a clip

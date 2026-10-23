@@ -4,18 +4,18 @@ One integer footprint per context and the device-pixel mapping. Index: [pixel-pe
 
 ## 1. One integer source-pixel footprint per context, chosen from device pixels
 
-- **World layer**: choose a whole source-pixel multiplier `N`. For a layer using a uniform `A` world units per source pixel,
+- [general] **World layer**: choose a whole source-pixel multiplier `N`. For a layer using a uniform `A` world units per source pixel,
   camera zoom is `N / A`, not necessarily a whole number. With the device-pixel canvas policy below, a requested CSS/world zoom
   can use `N = max(1, round(A * requestedCssZoom / scene.scale.zoom))`; the actual CSS/world footprint is `N * scene.scale.zoom / A`.
   Report that quantized footprint at fractional DPR. A source-scale-1 tile world may still choose its integer camera zoom from
   `clamp(floor(canvasWidth / (tilesAcross * TILE)), min, max)`; that fit policy is an example, not a requirement for every game.
-- **UI layer**: a separate scene with its own camera. A common single-density path uses whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
+- [general] **UI layer**: a separate scene with its own camera. A common single-density path uses whole zoom `S`. `S = clamp(min(floor(h / 270), floor(w / 320)), 1, 6)`
   gives 2x at 1280x720, 3x at 1600x900, 4x at 1080p and 1x on a 390 px phone. Lay out in **logical pixels** (canvas / S, rounded
   down); at most `S - 1` device pixels are left over at the right and bottom and nothing draws there.
-- **Resolution contexts may differ** (world 3x, menu 4x, HUD 3x, cards 2x). Define each density and transform with a named native owner;
+- [general] **Resolution contexts may differ** (world 3x, menu 4x, HUD 3x, cards 2x). Define each density and transform with a named native owner;
   reuse compatible pane cameras instead of allocating a camera per widget. Within a context, preserve its authored source-pixel
   footprint. A bigger title uses a separately authored bigger face. Do not infer density from the theme or silently enlarge a face.
-- For the common single-density path, apply the UI scale with the camera:
+- [general] For the common single-density path, apply the UI scale with the camera:
 
 ```ts
 cam.setViewport(0, 0, w, h).setOrigin(0, 0).setZoom(S).setScroll(0, 0);

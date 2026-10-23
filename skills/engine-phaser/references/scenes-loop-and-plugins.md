@@ -57,13 +57,13 @@ Use `registry` (the game-wide `DataManager`) only for read models scenes publish
 
 ## 4. `start` hands off, `launch` runs beside; load shared assets once
 
-- `scene.start(key, data)` stops the caller and starts the target; `scene.launch(key, data)` runs it in parallel
+- [general] `scene.start(key, data)` stops the caller and starts the target; `scene.launch(key, data)` runs it in parallel
   (`src/scene/ScenePlugin.js#L212`, `#L481`). HUDs, debug panels and a title's live backdrop are launches.
-- A scene that is still loading cannot be restarted (gotcha 11). So queue every asset the world draws in one function called by
+- [general] A scene that is still loading cannot be restarted (gotcha 11). So queue every asset the world draws in one function called by
   the preload scene; the loader skips keys already in the cache, so the world scene's own `preload` calling it again is free.
-- To replace a running scene's state, pass a callback in the start data and run it first thing in the restarted scene's `init`,
+- [general] To replace a running scene's state, pass a callback in the start data and run it first thing in the restarted scene's `init`,
   never from the scene that decided to start (gotcha 11).
-- Every `game.events.on`, `scale.on`, `document.addEventListener` and sim subscription in a scene needs a matching removal in one
+- [general] Every `game.events.on`, `scale.on`, `document.addEventListener` and sim subscription in a scene needs a matching removal in one
   `SHUTDOWN` handler (gotcha 14).
 
 ## 5. The fixed-step loop and interpolation
@@ -85,22 +85,22 @@ class FixedStepper {
 // view position = Phaser.Math.Linear(prev.x, sim.x, alpha) * TILE, then Math.round for pixel art
 ```
 
-- **Capture the previous state inside the step callback, before the step.** A frame can run several steps.
-- A pure class with no Phaser import: unit-test it (120 ms at a 50 ms step is two steps and alpha 0.4; a 60 s stall runs at most
+- [general] **Capture the previous state inside the step callback, before the step.** A frame can run several steps.
+- [general] A pure class with no Phaser import: unit-test it (120 ms at a 50 ms step is two steps and alpha 0.4; a 60 s stall runs at most
   `maxSteps`).
-- **Phaser's `delta` is smoothed.** `TimeStep.step` passes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of
+- [general] **Phaser's `delta` is smoothed.** `TimeStep.step` passes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of
   the last ten deltas, with any delta above `1000 / minFps` (200 ms) replaced by the last sane one (`src/core/TimeStep.js#L570`,
   `#L442`). That preserves the mean, so an accumulator is fine, but the `delta` you accumulate is not the real time of any one
   frame. `game.step(time, delta)` (`src/core/Game.js#L454`) does no smoothing: it runs pre-step, scene updates and render with the
   clock you give it, which is what makes deterministic tests possible (see [verifying](verifying-on-a-gpu.md)).
-- **Camera follow lerps per frame, not per millisecond** (`startFollow(t, round, 0.2, 0.2)`), so frame counts change what the camera
+- [general] **Camera follow lerps per frame, not per millisecond** (`startFollow(t, round, 0.2, 0.2)`), so frame counts change what the camera
   sees. If the view asks the sim for world chunks as the camera moves, the set of generated chunks depends on frame count: record
   generation events next to inputs when you need replay to match.
-- **Hit stop** is skipping the step for 60 to 110 ms and reusing the last alpha; never touch the sim's clock. **Pause** is alpha 1
+- [general] **Hit stop** is skipping the step for 60 to 110 ms and reusing the last alpha; never touch the sim's clock. **Pause** is alpha 1
   and no steps. Teleports interpolate a streak for up to one tick unless you snap `prev`.
-- Route the stepper call through **one tooling hook** (`advanceSim(stepper, delta, step)`) that is exactly `stepper.advance` unless a
+- [general] Route the stepper call through **one tooling hook** (`advanceSim(stepper, delta, step)`) that is exactly `stepper.advance` unless a
   debug controller installs pause, step-N or time-scale. The whole test and demo harness then drives the real loop.
-- Hold the loop when the page loses attention: Phaser pauses a hidden tab but not a blurred window (gotcha 15).
+- [general] Hold the loop when the page loses attention: Phaser pauses a hidden tab but not a blurred window (gotcha 15).
 
 Runnable: [harness `debug.mjs`](../../../examples/web/harness/debug.mjs) drives the real loop by hand (`manual`, `frames`).
 

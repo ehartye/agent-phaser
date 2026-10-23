@@ -6,16 +6,16 @@ Restarting scenes, what survives stop and start, the smoothed delta, interactive
 
 Found building a title screen that plays the real world scene behind its menu, then starts a game over it (Phaser 4.2.1).
 
-* `scene.start('world')` on a scene that is **running, paused or sleeping** shuts it down and restarts it (`init`, `preload`, `create`
+* [general] `scene.start('world')` on a scene that is **running, paused or sleeping** shuts it down and restarts it (`init`, `preload`, `create`
   again). On a scene that is **starting, loading or creating** (statuses START to CREATING) `SceneManager.start` returns without doing
   anything, so the data you passed never arrives. Gate a start on `scene.isActive(key)` and queue it for the first frame it is true.
-* Do not "fix" that with `stop` then `start`: stopping a scene mid-load leaves its queued files in the loader, and the second load
+* [general] Do not "fix" that with `stop` then `start`: stopping a scene mid-load leaves its queued files in the loader, and the second load
   logs `Texture key already in use` for every atlas. Load the scene's assets in an earlier scene instead (one function that queues
   them, called from the preload scene; the loader skips keys already cached, so the scene's own `preload` calling it again is free).
-* If a global object holds the game state (a global plugin), do **not** swap it in the scene that decides to start. The running
+* [general] If a global object holds the game state (a global plugin), do **not** swap it in the scene that decides to start. The running
   scene keeps drawing for the rest of that frame and the next, one world's views with the other world's entities. Pass a `boot`
   callback in the start data and call it first thing in the restarted scene's `init`.
-* A modal or panel that rebuilds its own window (a changed row, a new page) must re-centre it: only the stack that opened it knew
+* [general] A modal or panel that rebuilds its own window (a changed row, a new page) must re-centre it: only the stack that opened it knew
   where it belonged, so the rebuilt window appeared at (0, 0). Put placement in the base class `layout`.
 
 ## 14. Scene lifecycle: what survives stop/start
@@ -31,12 +31,12 @@ test that a file subscribing to a long-lived emitter also unsubscribes. Prove it
 
 ## How these were found (do it this way)
 
-1. Build the smallest standalone version in the live scene (`scene.make.tilemap({ data })` plus a layer inside a
+1. [general] Build the smallest standalone version in the live scene (`scene.make.tilemap({ data })` plus a layer inside a
    container) and compare with the real pipeline.
-2. Read a screenshot pixel at a tile whose data you know, then toggle the other layers one at a time and read again.
-3. Print the layer data and compare with the pixel: that separates a data bug from a render bug.
-4. Read Phaser's source for the render node (`src/renderer/webgl/renderNodes/submitter/`) once you have a suspect.
-5. Re-introduce the bug and confirm the regression test fails.
+2. [general] Read a screenshot pixel at a tile whose data you know, then toggle the other layers one at a time and read again.
+3. [general] Print the layer data and compare with the pixel: that separates a data bug from a render bug.
+4. [general] Read Phaser's source for the render node (`src/renderer/webgl/renderNodes/submitter/`) once you have a suspect.
+5. [general] Re-introduce the bug and confirm the regression test fails.
 
 ## 17. The `delta` your scene receives is smoothed
 

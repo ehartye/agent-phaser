@@ -8,14 +8,14 @@ Verified against installed Phaser **4.2.1** source (`src/input/gamepad/{Button,A
 fresh snapshots in Chrome on Windows, 2026-10-06. These are conditions to reproduce in the target game, not claims about all
 browsers or later Phaser versions:
 
-- `Gamepad.update(pad)` updates controls but retains its original `this.pad`. With fresh snapshots, `.connected` and `.timestamp`
+- [general] `Gamepad.update(pad)` updates controls but retains its original `this.pad`. With fresh snapshots, `.connected` and `.timestamp`
   can be stale. Prefer lifecycle events to those cached properties for device loss.
-- `refreshPads()` skips null slots without pruning cached pads; `total` is the sparse array length, and `pad1` to `pad4` can
+- [general] `refreshPads()` skips null slots without pruning cached pads; `total` is the sparse array length, and `pad1` to `pad4` can
   retain stale aliases. Track event-based membership by device index; do not infer active membership from aliases or `total`.
-- `update` ignores snapshots whose timestamp is earlier than `_created`. The trial reproduced ignored controls at timestamp 0.
+- [general] `update` ignores snapshots whose timestamp is earlier than `_created`. The trial reproduced ignored controls at timestamp 0.
   Test held input on initial acquisition and resume, including a valid older unchanged timestamp; do not merely make a mock's
   timestamp advance every frame and declare lifecycle parity.
-- Scene plugins have independent control state. One action owner prevents duplicate dispatch; test its shutdown/restart and
+- [general] Scene plugins have independent control state. One action owner prevents duplicate dispatch; test its shutdown/restart and
   controller reconnection, including reuse of an index by the same or a different device.
 
 Before replacing an engine capability, record the requirement, installed version, native API/configuration attempted, failing

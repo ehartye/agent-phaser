@@ -4,15 +4,15 @@ What to assert, mutation proof, the debugging harness and reading pixels in the 
 
 ## What to assert
 
-1. **A clean console** (errors and warnings) and **no page errors**.
-2. **Pixel colours, not "not black".** Teleport the player to a place whose terrain you know (a dark
+1. [general] **A clean console** (errors and warnings) and **no page errors**.
+2. [general] **Pixel colours, not "not black".** Teleport the player to a place whose terrain you know (a dark
    paved area, a lake) and assert the share of pixels in a colour range. A "not black" test passed while a particle overlay covered the
    whole terrain.
-3. **Every visible chunk renders**, with a camera parked on a chunk corner so four chunks are visible.
-4. **Pooling and streaming**: walk for several seconds and assert the number of containers or views stays bounded.
-5. **Entity views appear and are released** when a creature leaves the camera.
-6. **Frame rate and renderer** are recorded, not asserted tightly.
-7. **Native GPU resource lifecycle**: for repeated DynamicTexture removal and RenderTexture destruction, require
+3. [general] **Every visible chunk renders**, with a camera parked on a chunk corner so four chunks are visible.
+4. [general] **Pooling and streaming**: walk for several seconds and assert the number of containers or views stays bounded.
+5. [general] **Entity views appear and are released** when a creature leaves the camera.
+6. [general] **Frame rate and renderer** are recorded, not asserted tightly.
+7. [general] **Native GPU resource lifecycle**: for repeated DynamicTexture removal and RenderTexture destruction, require
    `renderer.glTextureWrappers` and framebuffer counts to return to baseline, no additional live `gl.isTexture`
    handles, and balanced native texture creates/deletes. Also compare texture keys and display objects, but keys
    alone miss replaced source wrappers ([gotcha 24](phaser-4-webgl-context-gotchas.md#24-dynamictexture-and-rendertexture-creation-leaves-a-live-gpu-texture-wrapper-behind)).
@@ -38,22 +38,22 @@ confirm it fails with a clear number (the dark-pixel ratio went from over 0.08 t
 
 ## Debugging harness (small scripts worth keeping)
 
-- A script that starts the game, optionally runs an expression, screenshots, and prints the renderer string, fps and
+- [general] A script that starts the game, optionally runs an expression, screenshots, and prints the renderer string, fps and
   console errors.
-- A script that teleports the player to a named place (a biome interior, a distant landmark) and screenshots it. Chunks are generated on
+- [general] A script that teleports the player to a named place (a biome interior, a distant landmark) and screenshots it. Chunks are generated on
   demand, so this reaches far terrain in seconds.
-- A **pixel check** that finds a tile whose data is known, reads the screenshot pixel there, then toggles layers one at a
+- [general] A **pixel check** that finds a tile whose data is known, reads the screenshot pixel there, then toggles layers one at a
   time and reads it again. That is what found an overlay bug: the baseline colour, ground plus overlay, ground plus
   a second overlay.
-- Pass JavaScript through `page.evaluate` as one line without `//` comments (joining lines turns the rest into a comment).
+- [general] Pass JavaScript through `page.evaluate` as one line without `//` comments (joining lines turns the rest into a comment).
 
 See `examples/web/phaser-probes` for generic versions. For a whole runnable harness (debug API, manual loop, condition waits, no-sleeps guard, GPU smoke spec, CI workflow) copy `examples/web/harness`.
 
 ## Gotchas in the harness itself
 
-- Teleporting a long way and screenshotting after a fixed wait can be flaky on the first frame; wait for chunks to bind.
-- At zoom 3, tile (8, 8) is 384 px from the origin; an edit you cannot see may simply be off screen.
-- Day and night multiply tints change pixel colours; set the clock to noon before sampling colours.
+- [general] Teleporting a long way and screenshotting after a fixed wait can be flaky on the first frame; wait for chunks to bind.
+- [general] At zoom 3, tile (8, 8) is 384 px from the origin; an edit you cannot see may simply be off screen.
+- [general] Day and night multiply tints change pixel colours; set the clock to noon before sampling colours.
 
 ## Read pixels inside the page: `renderer.snapshotPixel`
 
@@ -70,9 +70,9 @@ const px = (wx: number, wy: number) => new Promise<{ red: number; green: number;
 Each Phaser behaviour claim in these references can be reduced to such a probe. Two examples that decide real designs (both pass on 4.2.1;
 if one starts failing after an upgrade, the workaround it justifies can be deleted):
 
-- GPU layer at `x = 60` draws at `120`: build a 4x4 GPU layer of a known tile at `(60, 0)`, read a pixel at world x 70 (unchanged) and x 170 (now
+- [general] GPU layer at `x = 60` draws at `120`: build a 4x4 GPU layer of a known tile at `(60, 0)`, read a pixel at world x 70 (unchanged) and x 170 (now
   the tile colour); put the same layer at `(0, 0)` inside a container at `(60, 0)` and the colours swap to the correct ones.
-- An "empty" (`-1`) tile in a GPU layer is the tileset's top-left pixel: an all-empty layer over a sheet whose first pixel is opaque paints that
+- [general] An "empty" (`-1`) tile in a GPU layer is the tileset's top-left pixel: an all-empty layer over a sheet whose first pixel is opaque paints that
   colour; over a sheet whose first cell is transparent it paints nothing.
 
 Runnable: the [harness smoke spec](../../../examples/web/harness/tests/smoke.spec.mjs) reads known colours at known places and asserts the renderer.

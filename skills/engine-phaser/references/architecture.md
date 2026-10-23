@@ -7,9 +7,9 @@ indexed in [phaser reference](phaser-reference.md); boot, scenes, plugins and th
 
 > **The world is `f(seed) + delta`. Phaser is a view of it.**
 
-- A headless **sim** (plain TypeScript, no Phaser, no DOM, no `Math.random`, no `Date`) owns every rule and all state.
-- The Phaser **game layer** renders the sim and turns input into commands. It never mutates the sim.
-- A save is the seed plus a *delta*: only what the player changed. Generated terrain is recomputed on load.
+- [general] A headless **sim** (plain TypeScript, no Phaser, no DOM, no `Math.random`, no `Date`) owns every rule and all state.
+- [general] The Phaser **game layer** renders the sim and turns input into commands. It never mutates the sim.
+- [general] A save is the seed plus a *delta*: only what the player changed. Generated terrain is recomputed on load.
 
 Enforce the boundary with a test (scan `src/sim` and `src/content` for imports of `phaser`, `document`, `window`,
 `Math.random`, `Date.now`). Conventions erode; a failing test does not.
@@ -38,10 +38,10 @@ compile-time check that every event has a decision: adding an event then fails t
 
 ## Determinism primitives
 
-- A seeded generator (sfc32) with `fork(label, x, y)` for independent sub-streams, so generation order never matters.
-- Hash-based value noise for terrain fields. Weather and daylight are *pure functions* of (seed, time, biome): nothing to
+- [general] A seeded generator (sfc32) with `fork(label, x, y)` for independent sub-streams, so generation order never matters.
+- [general] Hash-based value noise for terrain fields. Weather and daylight are *pure functions* of (seed, time, biome): nothing to
   save and nothing to desync.
-- Fixed timestep: a `FixedStepper` accumulator turns Phaser's variable frame delta into 20 Hz sim steps and returns an
+- [general] Fixed timestep: a `FixedStepper` accumulator turns Phaser's variable frame delta into 20 Hz sim steps and returns an
   interpolation fraction (alpha) so views glide between the previous and current state at any refresh rate. Cap the
   catch-up steps so a background tab cannot spiral.
 
@@ -60,25 +60,25 @@ compile-time check that every event has a decision: adding an event then fails t
 
 ## Sim design choices that paid off
 
-- **Tiles are struct-of-arrays in typed arrays per chunk** (`Uint8Array` layers). A chunk records which tiles the player
+- [general] **Tiles are struct-of-arrays in typed arrays per chunk** (`Uint8Array` layers). A chunk records which tiles the player
   edited; that set is the save delta.
-- **Simulate only active things.** Slow processes such as growth iterate a per-chunk set of active tiles; out-of-range chunks are
+- [general] **Simulate only active things.** Slow processes such as growth iterate a per-chunk set of active tiles; out-of-range chunks are
   caught up in hour-sized steps when revisited, with a cap so a long absence cannot stall a frame.
-- **Collision belongs to the sim.** Movement and creature AI use the sim's tile grid, not Arcade physics. Say so in the
+- [general] **Collision belongs to the sim.** Movement and creature AI use the sim's tile grid, not Arcade physics. Say so in the
   docs; the physics engine is simply not part of a deterministic rules layer.
-- **Levels are worlds.** An underground level is another `World` with its own generator; entities carry a `level`; the
+- [general] **Levels are worlds.** An underground level is another `World` with its own generator; entities carry a `level`; the
   view releases every bound chunk on a level change.
-- **Containment falls out of collision.** Creatures respect solid tiles, so player-built fences contain them with no special enclosure system.
+- [general] **Containment falls out of collision.** Creatures respect solid tiles, so player-built fences contain them with no special enclosure system.
 
 ## Saves: versioned, migrated, quarantined
 
 A save is `{version, seed, rng, delta}`: the seed regenerates the world, the delta holds only what the player changed, the RNG words keep the
 random stream from restarting. Keep the format and `migrate(snapshot)` in a pure module (no Phaser, no storage) with one fixture per old version.
-- Reject a save from a newer version untouched; never downgrade it.
-- A `checkSnapshot` validator names the first malformed field. A damaged slot is moved aside (quarantined), never thrown at the player or erased.
-- Keep a slot index so listing never parses saves; read back after each write to verify it; apply side effects (difficulty, settings) only after the restore succeeded.
-- Autosave on a timer, day change, level change, sleep and tab hidden; never while dead.
-- Export and import a slot as a file (hidden anchor download, detached file input, `migrate` on the way in, confirm before replacing) and watch storage:
+- [general] Reject a save from a newer version untouched; never downgrade it.
+- [general] A `checkSnapshot` validator names the first malformed field. A damaged slot is moved aside (quarantined), never thrown at the player or erased.
+- [general] Keep a slot index so listing never parses saves; read back after each write to verify it; apply side effects (difficulty, settings) only after the restore succeeded.
+- [general] Autosave on a timer, day change, level change, sleep and tab hidden; never while dead.
+- [general] Export and import a slot as a file (hidden anchor download, detached file input, `migrate` on the way in, confirm before replacing) and watch storage:
   count what the game keeps in `localStorage`, warn above about 85% of the 5,000,000-character quota and say why a write was refused. A 6 to 16 KB slot makes
   compression or IndexedDB not worth building; say that you chose not to.
 

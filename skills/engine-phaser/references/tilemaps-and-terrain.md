@@ -20,14 +20,14 @@ All GPU layers stay at (0, 0) and are positioned by a parent `Container` (see go
 
 ## Pooling and streaming
 
-- Visible chunk range from `camera.worldView` plus a margin of one chunk.
-- Bind a pooled view to each wanted chunk; release views that leave. Scrolling then allocates nothing. Bind through a distance-sorted queue
+- [general] Visible chunk range from `camera.worldView` plus a margin of one chunk.
+- [general] Bind a pooled view to each wanted chunk; release views that leave. Scrolling then allocates nothing. Bind through a distance-sorted queue
   with a per-frame time budget, not the whole ring in one frame ([performance](performance.md)).
-- On a tile edit, repaint that tile **and its eight neighbours** (blend overlays depend on neighbours) and flush the
+- [general] On a tile edit, repaint that tile **and its eight neighbours** (blend overlays depend on neighbours) and flush the
   GPU layer once per frame.
-- Things that change without an event (moisture, growth) are reconciled on a timer over the sim's *active* tile set for
+- [general] Things that change without an event (moisture, growth) are reconciled on a timer over the sim's *active* tile set for
   visible chunks, so cost scales with the active set, not map size.
-- A level change releases every bound view, because the same chunk coordinates mean different chunks.
+- [general] A level change releases every bound view, because the same chunk coordinates mean different chunks.
 
 ## Frame names to indices
 
@@ -42,14 +42,14 @@ Never let the composer hand a GPU ground layer `-1`: fall back to a safe tile.
 
 Draw every tile as its own material, then overlay each higher-priority neighbour material onto it.
 
-- The mask has one bit per neighbour that *is* the overlay material (N=1, NE=2, E=4, SE=8, S=16, SW=32, W=64, NW=128).
-- A diagonal bit counts only when both adjacent edge bits are clear; that leaves exactly 47 masks (16+16+8+2+4+1).
+- [general] The mask has one bit per neighbour that *is* the overlay material (N=1, NE=2, E=4, SE=8, S=16, SW=32, W=64, NW=128).
+- [general] A diagonal bit counts only when both adjacent edge bits are clear; that leaves exactly 47 masks (16+16+8+2+4+1).
   Unit-test this: enumerate 0..255, normalise, count distinct values.
-- Overlay tiles of the same material must seam across every neighbourhood; agent-sprites' `terrain-overlay` recipe
+- [general] Overlay tiles of the same material must seam across every neighbourhood; agent-sprites' `terrain-overlay` recipe
   guarantees that and names frames `<material>_<mask>_<variant>`.
-- Keep a priority table (water lowest so shores read as land over water; hard surfaces highest). At most two overlay
+- [general] Keep a priority table (water lowest so shores read as land over water; hard surfaces highest). At most two overlay
   layers per tile; keep the highest-priority two.
-- Choose the per-tile variant with a hash of the tile coordinates so repainting never reshuffles the ground.
+- [general] Choose the per-tile variant with a hash of the tile coordinates so repainting never reshuffles the ground.
 
 ## Animated tiles (water)
 
@@ -70,11 +70,11 @@ placing it, so any generator that paints asphalt gets markings.
 
 ## Procedural terrain generation notes
 
-- Regions must come from coherent noise fields, not per-tile randomness: single random tiles of one material inside another render as
+- [general] Regions must come from coherent noise fields, not per-tile randomness: single random tiles of one material inside another render as
   speckle. Use a broad field and a detail field, threshold them into patches, and reserve per-tile randomness for rare
   scatter.
-- Measure, do not guess: write a small script that prints the share of each ground type and biome over a ring of the
+- [general] Measure, do not guess: write a small script that prints the share of each ground type and biome over a ring of the
   world for several seeds, and tune thresholds against targets. A first pass had one hazard biome at 59% of the far world.
-- Give the start a safe, legible neighbourhood (a radius with forced plain terrain) and a guaranteed water source.
-- Make cities structured: a street grid with broken paving and foundations reads as a settlement; noise alone does
+- [general] Give the start a safe, legible neighbourhood (a radius with forced plain terrain) and a guaranteed water source.
+- [general] Make cities structured: a street grid with broken paving and foundations reads as a settlement; noise alone does
   not.
