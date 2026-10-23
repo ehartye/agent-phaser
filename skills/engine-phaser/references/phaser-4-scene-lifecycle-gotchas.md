@@ -20,14 +20,14 @@ Found building a title screen that plays the real world scene behind its menu, t
 
 ## 14. Scene lifecycle: what survives stop/start
 
-`Systems.shutdown()` removes only the TRANSITION_* listeners and emits SHUTDOWN. A scene's own `events` emitter keeps every other
-listener (a `scene.events.on(WAKE)` in `create()` stacks one per visit); game-wide emitters (`game.events`, `scale`, `registry.events`),
-the global texture manager and the DOM obviously outlive the scene. The scene's input/keyboard plugins and display list do clean
-up. Also: the Scene *object* is reused, so a `WeakMap<Scene, Pool>` hands out images that were destroyed with the display list,
-field initialisers run once per Scene object (reset accumulators in `init()`), and canvas textures you made are yours to remove.
-Remove everything in one SHUTDOWN handler. Guard it with a browser spec that restarts the scene ten times and requires listener
-counts per event name (`emitter.eventNames()` / `listenerCount`), texture count and display-object count not to grow, plus a static
-test that a file subscribing to a long-lived emitter also unsubscribes. Prove it red by mutation.
+- [general] `Systems.shutdown()` removes only the TRANSITION_* listeners and emits SHUTDOWN. A scene's own `events` emitter keeps every other
+  listener (a `scene.events.on(WAKE)` in `create()` stacks one per visit); game-wide emitters (`game.events`, `scale`, `registry.events`),
+  the global texture manager and the DOM obviously outlive the scene. The scene's input/keyboard plugins and display list do clean
+  up. Also: the Scene *object* is reused, so a `WeakMap<Scene, Pool>` hands out images that were destroyed with the display list,
+  field initialisers run once per Scene object (reset accumulators in `init()`), and canvas textures you made are yours to remove.
+  Remove everything in one SHUTDOWN handler. Guard it with a browser spec that restarts the scene ten times and requires listener
+  counts per event name (`emitter.eventNames()` / `listenerCount`), texture count and display-object count not to grow, plus a static
+  test that a file subscribing to a long-lived emitter also unsubscribes. Prove it red by mutation.
 
 ## How these were found (do it this way)
 
@@ -40,21 +40,21 @@ test that a file subscribing to a long-lived emitter also unsubscribes. Prove it
 
 ## 17. The `delta` your scene receives is smoothed
 
-`TimeStep.step` hands scenes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of the last ten deltas, and any delta above
-`1000 / minFps` replaced by the last sane value (`src/core/TimeStep.js#L570`). Accumulators are fine with that; code that wants the real frame time
-should read `game.loop.rawDelta`. `game.step(time, delta)` bypasses smoothing, so a hand-driven test loop and the live loop differ slightly: test the
-pure stepper with raw numbers and trust the game loop for the rest.
+- [general] `TimeStep.step` hands scenes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of the last ten deltas, and any delta above
+  `1000 / minFps` replaced by the last sane value (`src/core/TimeStep.js#L570`). Accumulators are fine with that; code that wants the real frame time
+  should read `game.loop.rawDelta`. `game.step(time, delta)` bypasses smoothing, so a hand-driven test loop and the live loop differ slightly: test the
+  pure stepper with raw numbers and trust the game loop for the rest.
 
 ## 19. Never destroy and recreate interactive objects in response to input
 
-A "dirty flag, rebuild everything once per tick" UI is lossy for the mouse in two ways. (1) Phaser's click is down plus up on the same object, so a
-rebuild between them hands the release to a new object that never saw the press. (2) Phaser adds a new interactive object to the input list in the
-scene's PRE_UPDATE, after that frame's queued pointer events are processed, so the frame after a rebuild is deaf: `pointerdown` fires on the scene but
-no `gameobjectdown`. Hover is the usual trigger (it sets the dirty flag just before the click), and it costs about 1 click in 20 with Playwright's
-instant move, down, up under load. Build zones and buttons once per layout and update them in place (`setLabel`, `setFocused`, `setVisible`); rebuild only
-the passive art on state changes. Test it deterministically: `game.loop.sleep()`, `mouse.move`, `mouse.down`, `game.loop.wake()`, wait a few frames,
-`mouse.up`; assert the scene's `input._list` is unchanged after state changes. The working shape is a panel with `build()` once and `refresh()` in place.
+- [general] A "dirty flag, rebuild everything once per tick" UI is lossy for the mouse in two ways. (1) Phaser's click is down plus up on the same object, so a
+  rebuild between them hands the release to a new object that never saw the press. (2) Phaser adds a new interactive object to the input list in the
+  scene's PRE_UPDATE, after that frame's queued pointer events are processed, so the frame after a rebuild is deaf: `pointerdown` fires on the scene but
+  no `gameobjectdown`. Hover is the usual trigger (it sets the dirty flag just before the click), and it costs about 1 click in 20 with Playwright's
+  instant move, down, up under load. Build zones and buttons once per layout and update them in place (`setLabel`, `setFocused`, `setVisible`); rebuild only
+  the passive art on state changes. Test it deterministically: `game.loop.sleep()`, `mouse.move`, `mouse.down`, `game.loop.wake()`, wait a few frames,
+  `mouse.up`; assert the scene's `input._list` is unchanged after state changes. The working shape is a panel with `build()` once and `refresh()` in place.
 
 ## 22. A Scene object is reused, so state keyed to it survives with destroyed display objects
 
-Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.
+- [general] Besides listeners (gotcha 14): a field initialiser or a `WeakMap<Scene, Pool>` runs once per Scene object, so after a restart the pool still holds images that were destroyed with the display list (invisible shadows). Reset such state in `init`/`create` or on `SHUTDOWN`, and write a spec that restarts and then uses it.

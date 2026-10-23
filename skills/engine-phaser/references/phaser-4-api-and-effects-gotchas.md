@@ -4,14 +4,14 @@ Imports, animation registration, removed methods, lighting and filters, shake, e
 
 ## 4. A missing `import Phaser` compiles, then fails at runtime
 
-Phaser's typings declare a global namespace. `new Phaser.Geom.Rectangle(...)` type-checks in a file that never imports
-Phaser, and the page throws `Phaser is not defined` when that code runs. Add a test that scans game files for runtime
-uses (`new Phaser.`, `Phaser.Math`, `Phaser.Scale`, `Phaser.BlendModes`, `Phaser.WEBGL`, key-code constants and so on)
-and requires the import.
+- [general] Phaser's typings declare a global namespace. `new Phaser.Geom.Rectangle(...)` type-checks in a file that never imports
+  Phaser, and the page throws `Phaser is not defined` when that code runs. Add a test that scans game files for runtime
+  uses (`new Phaser.`, `Phaser.Math`, `Phaser.Scale`, `Phaser.BlendModes`, `Phaser.WEBGL`, key-code constants and so on)
+  and requires the import.
 
 ## 5. `anims.createFromAseprite` registers animations under the bare tag name, globally
 
-**Symptom.** The second creature or character looks frozen or plays another creature's animation.
+- [general] **Symptom.** The second creature or character looks frozen or plays another creature's animation.
 
 **Cause.** Every agent-sprites sheet has tags like `walk_right`. `createFromAseprite(key)` creates each animation with
 `key: <tag name>` in the single global animation table; a second atlas with the same tag names creates nothing new
@@ -23,8 +23,8 @@ because the key already exists.
 
 ## 6. Phaser 4 removed `setTintFill`
 
-Use tint modes: `sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)` for a hit flash, then
-`setTintMode(Phaser.TintModes.MULTIPLY)`. Modes are MULTIPLY, FILL, ADD, SCREEN, OVERLAY and HARD_LIGHT.
+- [general] Use tint modes: `sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)` for a hit flash, then
+  `setTintMode(Phaser.TintModes.MULTIPLY)`. Modes are MULTIPLY, FILL, ADD, SCREEN, OVERLAY and HARD_LIGHT.
 
 ## 7. Smaller observations
 
@@ -55,19 +55,19 @@ Use tint modes: `sprite.setTint(0xffffff).setTintMode(Phaser.TintModes.FILL)` fo
 
 ## 12. Whole-pixel screen shake
 
-`camera.shake` offsets by fractions of a pixel, which smears pixel art. Use the camera's follow offset instead: every ~33 ms
-pick an integer offset (a hash of the step index, so it is repeatable), let the amplitude fall in whole steps to exactly 0, and set
-`camera.setLerp(1, 1)` while it rings so the offset lands on the frame it is set (restore the lerp after). Assert in a test that
-every sampled offset is an integer and that the last sample is `(0, 0)`. A hit stop is the same idea in time: skip the fixed-step
-advance for 60 to 110 ms and keep the last interpolation alpha, never touching the sim's clock.
+- [general] `camera.shake` offsets by fractions of a pixel, which smears pixel art. Use the camera's follow offset instead: every ~33 ms
+  pick an integer offset (a hash of the step index, so it is repeatable), let the amplitude fall in whole steps to exactly 0, and set
+  `camera.setLerp(1, 1)` while it rings so the offset lands on the frame it is set (restore the lerp after). Assert in a test that
+  every sampled offset is an integer and that the last sample is `(0, 0)`. A hit stop is the same idea in time: skip the fixed-step
+  advance for 60 to 110 ms and keep the last interpolation alpha, never touching the sim's clock.
 ## 16. `emitter.setFrequency()` resets the flow counter, so calling it every frame starves the emitter
 
-`ParticleEmitter.setFrequency(f)` sets `frequency` **and** `flowCounter = f` (`src/gameobjects/particles/ParticleEmitter.js#L1727`); each
-update does `flowCounter -= delta` and emits while it is `<= 0` (`#L2897`). If the wanted rate depends on something that changes (a camera
-size) and you call `setFrequency` every frame, a frame (16.7 ms) is shorter than the interval (21.7 ms), the counter never reaches 0 and
-nothing is ever emitted, while the emitter reports `emitting: true` and the right frequency. Change it only when the wanted rate has moved by
-a threshold. Reproduce: call `setFrequency(emitter.frequency)` in a loop of frames and watch `getAliveParticleCount()` drain to 0, then recover
-once you stop.
+- [general] `ParticleEmitter.setFrequency(f)` sets `frequency` **and** `flowCounter = f` (`src/gameobjects/particles/ParticleEmitter.js#L1727`); each
+  update does `flowCounter -= delta` and emits while it is `<= 0` (`#L2897`). If the wanted rate depends on something that changes (a camera
+  size) and you call `setFrequency` every frame, a frame (16.7 ms) is shorter than the interval (21.7 ms), the counter never reaches 0 and
+  nothing is ever emitted, while the emitter reports `emitting: true` and the right frequency. Change it only when the wanted rate has moved by
+  a threshold. Reproduce: call `setFrequency(emitter.frequency)` in a loop of frames and watch `getAliveParticleCount()` drain to 0, then recover
+  once you stop.
 
 A death zone is anything with `contains(x, y)`: `emitter.addDeathZone({ type: 'onEnter', source: { contains: (x, y) => underRoof(x, y) } })`.
 `DeathZone.willKill` tests `particle.worldPosition` every update (`src/gameobjects/particles/zones/DeathZone.js#L63`), so a function over your
@@ -75,6 +75,6 @@ own world data makes weather stop at roofs with no per-particle allocation.
 
 ## 21. Reactive companion art on a prop (a level meter): atlas frames owned by the prop's view
 
-Draw a level meter, status pip row or similar as extra atlas-frame images owned by the prop's view: create them lazily, `setFrame` only when the frame name changes, destroy
-them in the same pass as the prop image. Author the meter as small pips with the build's outline flag so gaps fill with outline colour (a dark strip, no extra pixels). Detect
-lit pips in browser tests by hue, not exact colour (the lighting pass tints the world). `screenOf(tileX, tileY)` already returns the middle of the tile; adding 0.5 puts it half a tile off.
+- [general] Draw a level meter, status pip row or similar as extra atlas-frame images owned by the prop's view: create them lazily, `setFrame` only when the frame name changes, destroy
+  them in the same pass as the prop image. Author the meter as small pips with the build's outline flag so gaps fill with outline colour (a dark strip, no extra pixels). Detect
+  lit pips in browser tests by hue, not exact colour (the lighting pass tints the world). `screenOf(tileX, tileY)` already returns the middle of the tile; adding 0.5 puts it half a tile off.

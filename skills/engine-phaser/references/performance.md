@@ -41,21 +41,21 @@ for (const fn of ['drawElements', 'drawArrays', 'drawElementsInstanced', 'drawAr
 | **More GPU layers are cheap if hidden when empty** | eight extra layers per chunk added about 30 quads and 31 draw calls, CPU flat at 2.2 ms (2.15 before) | moving sparse content off a 1024-tile CPU layer paid for them; set the draw-call test limit about 1.5 ms over calm, not at the measured number |
 
 
-Things measured and cleared (do not chase): audio unlock (decodes run off the main thread), a menu UI rebuild (about 2 ms), devicePixelRatio (CPU
-bound, not fill bound).
+- [general] Things measured and cleared (do not chase): audio unlock (decodes run off the main thread), a menu UI rebuild (about 2 ms), devicePixelRatio (CPU
+  bound, not fill bound).
 
 ## 3. Camera and chunk maths worth knowing
 
-At zoom 3 on 1280x720 the world view is 427x240 world pixels: 4 chunk windows (32x32 tiles at 16 px = 512 px) touch the screen and 16 are bound with a
-one-chunk margin. A long teleport that binds new views before releasing old ones transiently doubles the pool (32 views, 64 containers); release first if
-you need a hard ceiling. The simulation's own chunk store is separate and, if it never evicts, grows with exploration; say so.
+- [general] At zoom 3 on 1280x720 the world view is 427x240 world pixels: 4 chunk windows (32x32 tiles at 16 px = 512 px) touch the screen and 16 are bound with a
+  one-chunk margin. A long teleport that binds new views before releasing old ones transiently doubles the pool (32 views, 64 containers); release first if
+  you need a hard ceiling. The simulation's own chunk store is separate and, if it never evicts, grows with exploration; say so.
 
 ## Runtime texture caches: pin by count, never by set
 
-A game that composites textures at runtime (a character customiser, tinted variants) usually keeps the newest N and evicts the rest
-(`textures.remove`, `anims.remove`). Anything displaying a texture must pin it, and the pin must be a **reference count**. One project kept
-pins in a `Set`: the customiser preview and the live backdrop world's player shared the default look, the preview released "its" pin on the first
-option change, the cache evicted the player's texture, and `Sprite.setFrame` threw on every frame of the world scene (`Texture "x" has no frame
-"front"`, then `Cannot read properties of undefined (reading 'cutWidth')`): the screen locked up after a handful of changes. Rules: pin and release in
-pairs (`Map<key, count>`), release in the owner's scene `SHUTDOWN`, and test it with a spec that changes the look more than N times while a second
-scene still shows the first look, failing on any console error or warning.
+- [general] A game that composites textures at runtime (a character customiser, tinted variants) usually keeps the newest N and evicts the rest
+  (`textures.remove`, `anims.remove`). Anything displaying a texture must pin it, and the pin must be a **reference count**. One project kept
+  pins in a `Set`: the customiser preview and the live backdrop world's player shared the default look, the preview released "its" pin on the first
+  option change, the cache evicted the player's texture, and `Sprite.setFrame` threw on every frame of the world scene (`Texture "x" has no frame
+  "front"`, then `Cannot read properties of undefined (reading 'cutWidth')`): the screen locked up after a handful of changes. Rules: pin and release in
+  pairs (`Map<key, count>`), release in the owner's scene `SHUTDOWN`, and test it with a spec that changes the look more than N times while a second
+  scene still shows the first look, failing on any console error or warning.

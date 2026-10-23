@@ -4,9 +4,9 @@ Device pixels, `BitmapText`, tiled panels and text fit. Index: [pixel-perfect-an
 
 ## 2. Device pixels, not CSS pixels
 
-`Scale.RESIZE` sizes the canvas in CSS pixels. On a display with `devicePixelRatio` 1.25 or 1.5 the browser stretches that canvas by a
-fraction and every art pixel becomes a different width. Size the canvas to the page times the ratio and set Phaser's CSS zoom to the
-inverse, so each layer picks its integer source-pixel footprint from device pixels:
+- [general] `Scale.RESIZE` sizes the canvas in CSS pixels. On a display with `devicePixelRatio` 1.25 or 1.5 the browser stretches that canvas by a
+  fraction and every art pixel becomes a different width. Size the canvas to the page times the ratio and set Phaser's CSS zoom to the
+  inverse, so each layer picks its integer source-pixel footprint from device pixels:
 
 ```ts
 scale.scaleMode = Phaser.Scale.NONE;

@@ -19,12 +19,12 @@ export default defineConfig({
 });
 ```
 
-The same three flags are exported as `gpuArgs()` (with `angleBackend()`) from [`examples/web/verify-checks.mjs`](../../../examples/web/verify-checks.mjs).
-On a hybrid-GPU laptop the first two are not enough. [tested] On one Windows 11 laptop with an integrated and a discrete GPU (Playwright 1.63.0,
-Chromium 153): no flags rendered on SwiftShader (software), `--use-angle=d3d11 --ignore-gpu-blocklist` selected the integrated GPU, and adding
-`--force_high_performance_gpu` selected the discrete GPU (reproduced with `examples/web/verify.mjs`). Which GPU Chromium picks varies by machine,
-driver and power state, and the last flag is harmless on single-GPU machines. Print the renderer string on every run and fail on software (below),
-since software WebGL raises no error; assert the string you expect when a test needs the discrete GPU.
+- [general] The same three flags are exported as `gpuArgs()` (with `angleBackend()`) from [`examples/web/verify-checks.mjs`](../../../examples/web/verify-checks.mjs).
+  On a hybrid-GPU laptop the first two are not enough. [tested] On one Windows 11 laptop with an integrated and a discrete GPU (Playwright 1.63.0,
+  Chromium 153): no flags rendered on SwiftShader (software), `--use-angle=d3d11 --ignore-gpu-blocklist` selected the integrated GPU, and adding
+  `--force_high_performance_gpu` selected the discrete GPU (reproduced with `examples/web/verify.mjs`). Which GPU Chromium picks varies by machine,
+  driver and power state, and the last flag is harmless on single-GPU machines. Print the renderer string on every run and fail on software (below),
+  since software WebGL raises no error; assert the string you expect when a test needs the discrete GPU.
 
 For frozen acceptance, own the server, source root, configuration and cache identity. Choose a free strict port and a fresh cache directory;
 do not attach to an unidentified existing server. Keep full raw server stdout/stderr from before process spawn, not only a tail sample.

@@ -4,13 +4,13 @@ The texture-unit sampler placeholder at renderer destruction. Numbers match the 
 
 ## 25. Renderer destruction leaves the texture-unit sampler placeholder live
 
-**Symptom and cause.** npm Phaser 4.2.1's native `WebGLTextureUnitsWrapper.init()` creates one bare `tempTexture`,
-binds it to every texture unit and uploads a blue 1x1 pixel. The source states that the placeholder prevents MacOS
-WebGL errors. It is not registered in `glTextureWrappers`, retained by its owner or deleted by `WebGLRenderer.destroy()`.
-Restore calls `init()` again; live-context reinitialization also accumulates placeholders. Registered-wrapper counts alone miss it.
-After ten native World restarts and two real context epochs, the consuming game's final valid epoch had 147 texture creates,
-146 deletes and one valid survivor whose creation stack was `WebGLTextureUnitsWrapper.init -> WebGLRenderer.dispatchContextRestored`.
-Framebuffers balanced 5/5 with zero live handles. Retained dead framebuffer-array entries were a separate harness-counting error.
+- [general] **Symptom and cause.** npm Phaser 4.2.1's native `WebGLTextureUnitsWrapper.init()` creates one bare `tempTexture`,
+  binds it to every texture unit and uploads a blue 1x1 pixel. The source states that the placeholder prevents MacOS
+  WebGL errors. It is not registered in `glTextureWrappers`, retained by its owner or deleted by `WebGLRenderer.destroy()`.
+  Restore calls `init()` again; live-context reinitialization also accumulates placeholders. Registered-wrapper counts alone miss it.
+  After ten native World restarts and two real context epochs, the consuming game's final valid epoch had 147 texture creates,
+  146 deletes and one valid survivor whose creation stack was `WebGLTextureUnitsWrapper.init -> WebGLRenderer.dispatchContextRestored`.
+  Framebuffers balanced 5/5 with zero live handles. Retained dead framebuffer-array entries were a separate harness-counting error.
 
 **Temporary dependency band-aid.** Copy the exact released
 [phaser-texture-units-patch.mjs](../scripts/assets/phaser-texture-units-patch.mjs) into the consuming project's scripts

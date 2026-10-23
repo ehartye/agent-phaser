@@ -6,8 +6,8 @@ delta. Each rule has the practice, the reason, a minimal generic example, what P
 
 ## 1. Constants in one file, scenes with one job each
 
-**Practice.** One `as const` object per kind of string key (scenes, textures, registry keys), one depth table, the tile and chunk
-sizes. Give every scene one job: boot (UI assets only), preload (the big load, a progress bar), title, world, UI.
+- [general] **Practice.** One `as const` object per kind of string key (scenes, textures, registry keys), one depth table, the tile and chunk
+  sizes. Give every scene one job: boot (UI assets only), preload (the big load, a progress bar), title, world, UI.
 
 **Why.** A typo in a string key is a blank screen at runtime; the same typo in a constant is a compile error. A scene that owns one
 thing can be restarted without losing anything.
@@ -19,10 +19,10 @@ export const Depth = { Ground: 0, Objects: 3, Entities: 5, Roof: 10, Weather: 20
 
 ## 2. Ask for WebGL, fail loudly, with the smallest dependency
 
-`type: Phaser.WEBGL` (not `AUTO`, which silently falls back to Canvas) when you use GPU tilemap layers or camera filters, and check
-`this.renderer.type` in the first scene. Make the first scene load only what it needs to draw an error (two bitmap fonts and a
-skin: kilobytes), so a failure can be shown in the game's own pixels; also mirror it to a visually hidden `aria-live` node. The
-error path must not need the thing that failed.
+- [general] `type: Phaser.WEBGL` (not `AUTO`, which silently falls back to Canvas) when you use GPU tilemap layers or camera filters, and check
+  `this.renderer.type` in the first scene. Make the first scene load only what it needs to draw an error (two bitmap fonts and a
+  skin: kilobytes), so a failure can be shown in the game's own pixels; also mirror it to a visually hidden `aria-live` node. The
+  error path must not need the thing that failed.
 
 `pixelArt: true` makes textures nearest-filtered, sets `antialias` false **and sets `roundPixels` true**
 (`src/core/Config.js#L395`); stating `roundPixels: true` as well is redundant but documents intent.
@@ -31,8 +31,8 @@ Runnable: [harness `game.mjs`](../../../examples/web/harness/game.mjs) sets `typ
 
 ## 3. State lives in a global plugin, not in scenes
 
-**Practice.** Put the game (the headless sim) and storage in a global `BasePlugin`, register it with `mapping`, and let scenes read
-it as `this.simHost`. Scenes subscribe through one method that removes the subscription on `SHUTDOWN`.
+- [general] **Practice.** Put the game (the headless sim) and storage in a global `BasePlugin`, register it with `mapping`, and let scenes read
+  it as `this.simHost`. Scenes subscribe through one method that removes the subscription on `SHUTDOWN`.
 
 **Why.** Scenes restart, sleep and get replaced (the title's backdrop becomes the game). A plugin outlives all of them.
 
@@ -106,16 +106,16 @@ Runnable: [harness `debug.mjs`](../../../examples/web/harness/debug.mjs) drives 
 
 ## 6. The headless boundary is a test
 
-Commands in (`sim.dispatch`), typed events out (`sim.events`), view reads sim. Enforce with a test that scans `src/sim` and
-`src/content` for `phaser`, `document`, `window`, `localStorage`, `Math.random(`, `Date.now(`, `new Date(`, `performance.now(`
-(strip comments first). Add: content imports nothing from sim; every game file that uses a Phaser value at runtime imports it; the
-files you want Node-testable (input maths, save store, remap rules, read models) contain no `phaser`. Details and the data-flow
-diagram: [architecture](architecture.md). Where the view still reads sim internals or writes to it (an attract-mode clock), say so
-in a Limits section of your own docs.
+- [general] Commands in (`sim.dispatch`), typed events out (`sim.events`), view reads sim. Enforce with a test that scans `src/sim` and
+  `src/content` for `phaser`, `document`, `window`, `localStorage`, `Math.random(`, `Date.now(`, `new Date(`, `performance.now(`
+  (strip comments first). Add: content imports nothing from sim; every game file that uses a Phaser value at runtime imports it; the
+  files you want Node-testable (input maths, save store, remap rules, read models) contain no `phaser`. Details and the data-flow
+  diagram: [architecture](architecture.md). Where the view still reads sim internals or writes to it (an attract-mode clock), say so
+  in a Limits section of your own docs.
 
 ## 7. Fan-out, not a web
 
-One subscription, many small `handle(event)` methods, each a `switch` on `e.type`:
+- [general] One subscription, many small `handle(event)` methods, each a `switch` on `e.type`:
 
 ```ts
 this.simHost.bind(this, (e) => { streamer.handle(e); fx.handle(e); entityViews.handle(e); audio.handle(e); input.handle(e); });

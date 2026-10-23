@@ -23,30 +23,30 @@ Index: [touch-and-mobile.md](touch-and-mobile.md).
 
 ## The page: stop the browser's own gestures
 
-`touch-action: none`, `overscroll-behavior: none`, `user-select: none`, `-webkit-touch-callout: none` and
-`-webkit-tap-highlight-color: transparent` on `html`, `body` and the canvas; cancel `contextmenu` (a long-press opens it) and, for iOS
-Safari, which ignores `user-scalable=no`, `gesturestart`, `gesturechange` and `gestureend`; `maximum-scale=1`;
-`viewport-fit=cover`; `100dvh` after a `100%` fallback (iOS's `100vh` includes the collapsed address bar). A pixel game has its own integer
-scale option: that, not pinch, is the zoom.
+- [general] `touch-action: none`, `overscroll-behavior: none`, `user-select: none`, `-webkit-touch-callout: none` and
+  `-webkit-tap-highlight-color: transparent` on `html`, `body` and the canvas; cancel `contextmenu` (a long-press opens it) and, for iOS
+  Safari, which ignores `user-scalable=no`, `gesturestart`, `gesturechange` and `gestureend`; `maximum-scale=1`;
+  `viewport-fit=cover`; `100dvh` after a `100%` fallback (iOS's `100vh` includes the collapsed address bar). A pixel game has its own integer
+  scale option: that, not pinch, is the zoom.
 
 ## Safe areas without a DOM node
 
-`env(safe-area-inset-*)` is only readable through CSS. Register four `<length>` custom properties (`@property --safe-top { syntax:
-'<length>'; inherits: true; initial-value: 0px }`) set to `env(...)` on `:root`; `getComputedStyle(document.documentElement)
-.getPropertyValue('--safe-top')` then returns a plain pixel length. A strict pixel-only game that bans extra DOM can still avoid the
-notch. Needs `@property` (Chrome 85, Safari 16.4); older engines read zero. Cache the read for a fraction of a second.
+- [general] `env(safe-area-inset-*)` is only readable through CSS. Register four `<length>` custom properties (`@property --safe-top { syntax:
+  '<length>'; inherits: true; initial-value: 0px }`) set to `env(...)` on `:root`; `getComputedStyle(document.documentElement)
+  .getPropertyValue('--safe-top')` then returns a plain pixel length. A strict pixel-only game that bans extra DOM can still avoid the
+  notch. Needs `@property` (Chrome 85, Safari 16.4); older engines read zero. Cache the read for a fraction of a second.
 
 ## Render quality on phones: keep the ratio a whole number
 
-Capping the canvas pixel ratio is the usual phone-performance lever, and with pixel art it is a trap. A first version capped a 3x phone at
-2x; the pixel-grid test (every `scale x scale` block of one colour) failed at once because a canvas pixel was then 1.5 device pixels. Divide
-the device ratio by a **whole number** instead (3x: 1.0 with 3x3 device blocks; 4x: 2.0), and know that the UI scale (an integer chosen from
-the canvas width) then changes too: dividing a 3x phone's ratio by 2 would shrink the interface to two thirds. Keep the tier that divides by
-the ratio's whole part (the interface keeps its CSS size, the pixels get chunkier), and skip steps that change nothing. Drive it from a
-setting plus a frame-time governor (windows of N frames, strikes, ignore hitches over 250 ms) and halve the weather particles in the lowest
-tier. Pure functions, unit-tested. Numbers that worked in one project (reported, not reproduced here): the governor steps down after two consecutive windows of 90 frames averaging over 26 ms
-(once more on screens 3.5x or denser), at most twice; expose Full, Light and Auto as a setting; Light divides the ratio by its whole part and
-halves weather particles.
+- [general] Capping the canvas pixel ratio is the usual phone-performance lever, and with pixel art it is a trap. A first version capped a 3x phone at
+  2x; the pixel-grid test (every `scale x scale` block of one colour) failed at once because a canvas pixel was then 1.5 device pixels. Divide
+  the device ratio by a **whole number** instead (3x: 1.0 with 3x3 device blocks; 4x: 2.0), and know that the UI scale (an integer chosen from
+  the canvas width) then changes too: dividing a 3x phone's ratio by 2 would shrink the interface to two thirds. Keep the tier that divides by
+  the ratio's whole part (the interface keeps its CSS size, the pixels get chunkier), and skip steps that change nothing. Drive it from a
+  setting plus a frame-time governor (windows of N frames, strikes, ignore hitches over 250 ms) and halve the weather particles in the lowest
+  tier. Pure functions, unit-tested. Numbers that worked in one project (reported, not reproduced here): the governor steps down after two consecutive windows of 90 frames averaging over 26 ms
+  (once more on screens 3.5x or denser), at most twice; expose Full, Light and Auto as a setting; Light divides the ratio by its whole part and
+  halves weather particles.
 
 ## Accidental input, haptics and install
 

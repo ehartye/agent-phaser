@@ -54,24 +54,24 @@ const heat  = cam.filters.internal.addDisplacement('heatMap', 0, 0); heat.setAct
 
 ## 4. Why not `setLighting`
 
-Measured, not assumed: in one project `setLighting` with 8 lights on a couple of hundred objects and the light map's heaviest scene both
-cost a few milliseconds a frame. Speed was not the reason. Smooth falloff fights hard-banded art, there is no occlusion, it is per-object opt-in (pooled chunk layers would need
-re-enabling on every rebind), and it cannot express a grade (saturation, haze, flicker). It does work on tilemap layers, sprites and
-images. If you want smooth lamps and have no pixel constraint, use it.
+- [general] Measured, not assumed: in one project `setLighting` with 8 lights on a couple of hundred objects and the light map's heaviest scene both
+  cost a few milliseconds a frame. Speed was not the reason. Smooth falloff fights hard-banded art, there is no occlusion, it is per-object opt-in (pooled chunk layers would need
+  re-enabling on every rebind), and it cannot express a grade (saturation, haze, flicker). It does work on tilemap layers, sprites and
+  images. If you want smooth lamps and have no pixel constraint, use it.
 
 ## Stacked dimming and lightning
 
-Grade, fog, vignette and cloud bands each looked fine alone and made the starter view dull when stacked (the fix was to lighten the vignette and
-the cloud darkness together). Tune treatments together and assert the starter view's mean luma against a floor.
-Lightning flashes through the grade in whole brightness steps, at most two strokes in half a second; drop a strike within 1 s of the last
-(WCAG 2.3.1) and soften it to about 40% under Reduce motion. Weather is a sim fact the view follows, so a harness trigger needs no view code.
+- [general] Grade, fog, vignette and cloud bands each looked fine alone and made the starter view dull when stacked (the fix was to lighten the vignette and
+  the cloud darkness together). Tune treatments together and assert the starter view's mean luma against a floor.
+  Lightning flashes through the grade in whole brightness steps, at most two strokes in half a second; drop a strike within 1 s of the last
+  (WCAG 2.3.1) and soften it to about 40% under Reduce motion. Weather is a sim fact the view follows, so a harness trigger needs no view code.
 
 ## 5. Test it on the GPU
 
-Read real pixels (see [verifying](verifying-on-a-gpu.md) and the [harness `pixel()` debug call](../../../examples/web/harness/debug.mjs)): night over noon luminance ratio (assert a ceiling you choose from your own art, for example 0.6); the
-player's pool against far field; vault dark corner against lit pool; pairwise weather grades differ; shimmer moves pixels without adding
-colours and spares the UI camera; fps at least 55 with everything on. Mutation proofs: revert a fix and watch the number cross the
-threshold.
+- [general] Read real pixels (see [verifying](verifying-on-a-gpu.md) and the [harness `pixel()` debug call](../../../examples/web/harness/debug.mjs)): night over noon luminance ratio (assert a ceiling you choose from your own art, for example 0.6); the
+  player's pool against far field; vault dark corner against lit pool; pairwise weather grades differ; shimmer moves pixels without adding
+  colours and spares the UI camera; fps at least 55 with everything on. Mutation proofs: revert a fix and watch the number cross the
+  threshold.
 
 Known limits to write down: no surface occlusion; entity lights that read the sim position can run up to one tick ahead of the sprite; colours
 unjudged on other GPUs or calibrated displays.

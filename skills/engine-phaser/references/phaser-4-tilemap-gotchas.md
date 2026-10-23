@@ -4,7 +4,7 @@ Tilemap layers, tile animation, containers and per-tile motion. Numbers match th
 
 ## 1. `TilemapGPULayer` draws at twice its position
 
-**Symptom.** Only the tilemap at the world origin renders. Others vanish or appear far away.
+- [general] **Symptom.** Only the tilemap at the world origin renders. Others vanish or appear far away.
 
 **Cause.** `SubmitterTilemapGPULayer.run()` builds `spriteMatrix.applyITRS(x, y, ...)` and then computes the quad corners
 from `(x, y)` to `(x + width, y + height)`. The layer position is applied twice.
@@ -45,7 +45,7 @@ transparent (an explicit `empty` cell first in the sheet) and "empty" becomes tr
 
 ## 3. Hand-built tile animations need `animationDuration`
 
-**Symptom.** An animated water tile in a GPU layer draws the wrong tile (sand-coloured) instead of cycling frames.
+- [general] **Symptom.** An animated water tile in a GPU layer draws the wrong tile (sand-coloured) instead of cycling frames.
 
 **Cause.** `Tileset.createAnimationDataTexture` reads `tileData[i].animationDuration` in addition to `animation`. The
 Tiled parser fills both. Procedural `tileData` that only sets `animation` leaves the duration undefined, so the shader
@@ -62,15 +62,15 @@ tileset.tileData[firstFrameIndex] = {
 
 ## 8. A Container's alpha does not reach the CPU tilemap layers inside it
 
-`container.setAlpha(0.25)` changed nothing on screen when the container held a `TilemapLayer`; the scene graph said 0.25
-and the pixel was unchanged (a roof fade was silently broken). Set alpha on the layer itself. Verify fades with a pixel
-read of a tile with the effect on and off.
+- [general] `container.setAlpha(0.25)` changed nothing on screen when the container held a `TilemapLayer`; the scene graph said 0.25
+  and the pixel was unchanged (a roof fade was silently broken). Set alpha on the layer itself. Verify fades with a pixel
+  read of a tile with the effect on and off.
 
 ## 10. Tile animations: GPU layers only, and the second animation plays the wrong tiles
 
-**Symptom.** After registering several tile animations (swaying plants, pulsing crystals), a row of one plant draws tiles of
-other plants (wildflowers showed glowing mushrooms and dry grass). The first animation registered (water) was always right.
-CPU `TilemapLayer`s never animate at all.
+- [general] **Symptom.** After registering several tile animations (swaying plants, pulsing crystals), a row of one plant draws tiles of
+  other plants (wildflowers showed glowing mushrooms and dry grass). The first animation registered (water) was always right.
+  CPU `TilemapLayer`s never animate at all.
 
 **Cause.** Only `TilemapGPULayer` animates tiles (`tileData[i].animation`, read by `Tileset.createAnimationDataTexture`). That
 texture stores each animation as a pair of 32-bit values, so animation `n` sits at texels `2n` and `2n + 1`. The fragment shader
@@ -93,15 +93,15 @@ Put sparse animated content (plants, glow, drips) in its own sparse GPU layer (g
 
 ## 18. CPU tilemap layers inside a positioned container are culled as if the container were at the origin
 
-`CullBounds` subtracts the layer's *own* `x, y` from `camera.worldView` and never looks at a parent container
-(`src/tilemaps/components/CullBounds.js#L27`). A layer at (0, 0) inside a container at (2560, 0) is judged to be far from a camera looking
-at 2560, so only some of its tiles draw: landmarks, covers and wall pieces vanish at random while others show; a GPU ground layer is
-unaffected. `CullTiles` honours `layer.skipCull` by using the whole layer (`src/tilemaps/components/CullTiles.js#L28`), so set
-`layer.skipCull = true` on every CPU layer you put in a positioned container and do your own culling at chunk level (hide views that do not
-touch the camera). Cost: a visible CPU layer then walks all its tiles every frame, which is why hiding off-screen views and empty layers
-matters ([performance](performance.md)). Related: the CPU layer renderer reads `src.alpha` (the layer's own, `src/tilemaps/TilemapLayerWebGLRenderer.js#L50`),
-which is why a container's alpha does not reach it (gotcha 8). Test: read the pixel at a landmark tile in a far chunk (yellow hatch handle in the
-example), with and without `skipCull`.
+- [general] `CullBounds` subtracts the layer's *own* `x, y` from `camera.worldView` and never looks at a parent container
+  (`src/tilemaps/components/CullBounds.js#L27`). A layer at (0, 0) inside a container at (2560, 0) is judged to be far from a camera looking
+  at 2560, so only some of its tiles draw: landmarks, covers and wall pieces vanish at random while others show; a GPU ground layer is
+  unaffected. `CullTiles` honours `layer.skipCull` by using the whole layer (`src/tilemaps/components/CullTiles.js#L28`), so set
+  `layer.skipCull = true` on every CPU layer you put in a positioned container and do your own culling at chunk level (hide views that do not
+  touch the camera). Cost: a visible CPU layer then walks all its tiles every frame, which is why hiding off-screen views and empty layers
+  matters ([performance](performance.md)). Related: the CPU layer renderer reads `src.alpha` (the layer's own, `src/tilemaps/TilemapLayerWebGLRenderer.js#L50`),
+  which is why a container's alpha does not reach it (gotcha 8). Test: read the pixel at a landmark tile in a far chunk (yellow hatch handle in the
+  example), with and without `skipCull`.
 
 ## 20. Per-plant motion on tilemaps: split the layer by phase, move the parent container
 

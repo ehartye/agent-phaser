@@ -5,7 +5,7 @@ layer bugs decide the layer design.
 
 ## Layer plan per chunk
 
-A chunk is 32x32 tiles at 16 px. One pooled view owns these layers:
+- [general] A chunk is 32x32 tiles at 16 px. One pooled view owns these layers:
 
 | Layer | Type | Why |
 | --- | --- | --- |
@@ -31,10 +31,10 @@ All GPU layers stay at (0, 0) and are positioned by a parent `Container` (see go
 
 ## Frame names to indices
 
-A gapless agent-sprites sheet on a regular grid doubles as the tileset image: a frame's tile index is its row-major
-cell position (`row * columns + column`, columns = sheet width / tile size). Build a `name -> index` map from the
-texture's frames and keep **one** function that maps sim tile state to frame names (a `TileComposer`). It is pure, so it
-is unit tested without a renderer, and swapping art means changing names in one file.
+- [general] A gapless agent-sprites sheet on a regular grid doubles as the tileset image: a frame's tile index is its row-major
+  cell position (`row * columns + column`, columns = sheet width / tile size). Build a `name -> index` map from the
+  texture's frames and keep **one** function that maps sim tile state to frame names (a `TileComposer`). It is pure, so it
+  is unit tested without a renderer, and swapping art means changing names in one file.
 
 Never let the composer hand a GPU ground layer `-1`: fall back to a safe tile.
 
@@ -53,8 +53,8 @@ Draw every tile as its own material, then overlay each higher-priority neighbour
 
 ## Animated tiles (water)
 
-Register tile animations on the **tileset** (`tileData`), not per layer; the GPU layer animates them in the shader, so
-a whole lake animates for one data upload. Remember `animationDuration` (gotcha 3). Have every water tile use frame 0.
+- [general] Register tile animations on the **tileset** (`tileData`), not per layer; the GPU layer animates them in the shader, so
+  a whole lake animates for one data upload. Remember `animationDuration` (gotcha 3). Have every water tile use frame 0.
 
 More than one animation per tileset needs the index-map fix (gotcha 10), and only GPU layers animate. A sparse animated layer
 (plants, glow, drips) is a GPU layer over a sheet whose cell 0 is transparent (gotcha 2 refinement). Give a plant field
@@ -62,11 +62,11 @@ phase-shifted copies of one loop so it does not sway in lockstep.
 
 ## Ground variety without a stored layer
 
-Variety that needs no sim data can be a second sparse GPU ground layer between the base ground and the blend overlays, holding
-seamless macro patterns picked by `(x mod P, y mod P)` and a low-frequency noise field. Give a flavoured tile a priority a hair
-below its parent material so the parent's existing 47-mask overlays encroach on the patch border: ragged edges for free, no
-per-flavour transition art. Derive street furniture (lane dashes, crossings, curbs) from the neighbouring ground ids instead of
-placing it, so any generator that paints asphalt gets markings.
+- [general] Variety that needs no sim data can be a second sparse GPU ground layer between the base ground and the blend overlays, holding
+  seamless macro patterns picked by `(x mod P, y mod P)` and a low-frequency noise field. Give a flavoured tile a priority a hair
+  below its parent material so the parent's existing 47-mask overlays encroach on the patch border: ragged edges for free, no
+  per-flavour transition art. Derive street furniture (lane dashes, crossings, curbs) from the neighbouring ground ids instead of
+  placing it, so any generator that paints asphalt gets markings.
 
 ## Procedural terrain generation notes
 

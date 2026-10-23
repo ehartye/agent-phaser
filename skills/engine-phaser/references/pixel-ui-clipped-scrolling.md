@@ -4,10 +4,10 @@ Index: [pixel-perfect-and-ui.md](pixel-perfect-and-ui.md).
 
 ## 8. Clipped scrolling in Phaser 4 WebGL
 
-`Graphics.createGeometryMask()` plus `Container.setMask()` is a Phaser 3 recipe: in **4.2.1 WebGL**, `setMask` warns and does
-nothing (`src/gameobjects/components/Mask.js`). It remains a Canvas API. Use native filter masks for WebGL; never recreate GL
-scissors or upload a DOM/canvas UI image each frame. A dedicated camera viewport is another native option for a rectangular pane
-when the screen already has clean camera ownership; keep its display/input exclusions explicit.
+- [general] `Graphics.createGeometryMask()` plus `Container.setMask()` is a Phaser 3 recipe: in **4.2.1 WebGL**, `setMask` warns and does
+  nothing (`src/gameobjects/components/Mask.js`). It remains a Canvas API. Use native filter masks for WebGL; never recreate GL
+  scissors or upload a DOM/canvas UI image each frame. A dedicated camera viewport is another native option for a rectangular pane
+  when the screen already has clean camera ownership; keep its display/input exclusions explicit.
 
 For the camera-viewport option, render a pane's panel, text, icons, button faces and focus indicators through
 the same pane camera. Cameras render in their array order; object depth cannot put a main-camera button

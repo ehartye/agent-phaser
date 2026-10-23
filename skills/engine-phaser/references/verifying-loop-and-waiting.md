@@ -20,8 +20,8 @@ scene `time` clock, particles and the fixed-step stepper all follow it, so tests
 
 ## Waiting: conditions, frames and page time, never sleeps
 
-`page.waitForTimeout` is a bet about today's machine speed: it broke when a bigger atlas slowed the first boot, hides what is being waited for inside a number, and
-on a software-GL runner (about one frame a second) it is wrong by an order of magnitude. Replace it, in this order:
+- [general] `page.waitForTimeout` is a bet about today's machine speed: it broke when a bigger atlas slowed the first boot, hides what is being waited for inside a number, and
+  on a software-GL runner (about one frame a second) it is wrong by an order of magnitude. Replace it, in this order:
 
 | Waiting for | Use |
 | --- | --- |

@@ -1,11 +1,13 @@
-# Phaser best-practices reference (index)
+# Phaser best-practices reference
 
 One page to scan before writing Phaser 4 code. Each row is a rule, the reference that carries the reason, and the 4.2.1 evidence. Where this repo
-ships runnable code for a rule, the Where column links it.
+ships runnable code, the Where column links it.
 Everything marked *verified* was read from `node_modules/phaser/src` or reproduced in a real-GPU browser; rules marked *convention* are design
 choices that paid off, not engine facts.
 
 ## Architecture and flow
+
+- [general] Index rows; the evidence is in the linked reference.
 
 | Rule | Where |
 | --- | --- |
@@ -24,6 +26,8 @@ choices that paid off, not engine facts.
 
 ## World rendering
 
+- [general] Index rows; the evidence is in the linked reference.
+
 | Rule | Where |
 | --- | --- |
 | Pooled chunk views bound to the camera range plus a margin; draw only views that touch the view; repaint a tile and its 8 neighbours; reconcile continuous state on a timer | [tilemaps](tilemaps-and-terrain.md), [performance](performance.md) |
@@ -38,6 +42,8 @@ choices that paid off, not engine facts.
 
 ## Light, motion and effects
 
+- [general] Index rows; the evidence is in the linked reference.
+
 | Rule | Where |
 | --- | --- |
 | Pure grade, eased; light map one texel per world pixel, MULTIPLY, NEAREST, stepped bands; skip in full daylight | [lighting](lighting-and-atmosphere.md) |
@@ -49,6 +55,8 @@ choices that paid off, not engine facts.
 | Whole-pixel shake and hit stop | gotchas 12 |
 
 ## UI, input and audio
+
+- [general] Index rows; the evidence is in the linked reference.
 
 | Rule | Where |
 | --- | --- |
@@ -65,6 +73,8 @@ choices that paid off, not engine facts.
 
 ## Verification, performance, pipeline
 
+- [general] Index rows; the evidence is in the linked reference.
+
 | Rule | Where |
 | --- | --- |
 | Real GPU, assert pixels (`snapshotPixel` in the page), mutation-prove every regression test | [verifying](verifying-on-a-gpu.md); [harness smoke spec](../../../examples/web/harness/tests/smoke.spec.mjs) |
@@ -76,14 +86,13 @@ choices that paid off, not engine facts.
 
 ## Method
 
-Read Phaser's own skills in `node_modules/phaser/skills` first. When a render looks wrong: build the smallest standalone object beside the
+- [general] When a render looks wrong: build the smallest standalone object beside the
 scene, read a pixel of known value, toggle layers one at a time, print the data to separate a data bug from a render bug, read the
 renderer source on a suspect, and prove the regression test by mutation ([how these were found](phaser-4-scene-lifecycle-gotchas.md)).
-State limits: what the view still reads from the sim, which fixes patch Phaser's data, what only a human playtest can judge.
 
 ## Process rules from the architecture review
 
-Shipping code must not import the debug tooling (load it through a gated dynamic `import()` and reach the loop through one hook); turn on
+- [general] Shipping code must not import the debug tooling (load it through a gated dynamic `import()` and reach the loop through one hook); turn on
 `noUnusedLocals` and `noUnusedParameters`; keep architecture tests for layer imports and host globals; keep an audit record of what was reviewed, fixed and deferred.
 
-Further guards: an unsubscribed long-lived `game.events` or `scale` listener; only the entry file may reach the debug tooling; `Command` and `SimEvent` switches are exhaustive; no `waitForTimeout` in specs (wait on state or frames, see [verifying](verifying-on-a-gpu.md) and the [no-sleeps guard](../../../examples/web/harness/tests/no-sleeps.test.mjs)); every link, anchor and path in the Markdown resolves; a **practices checker** (a table of rule to file and symbol, checked by a test, with a `--fix` that moves drifted line anchors) so docs cannot name a deleted symbol. Put the restart-leak spec in the CI smoke set: a CI that ran 2 of 19 browser specs hid regressions.
+Further guards: an unsubscribed long-lived `game.events` or `scale` listener; only the entry file may reach the debug tooling; `Command` and `SimEvent` switches are exhaustive; no `waitForTimeout` in specs (wait on state or frames, see [verifying](verifying-on-a-gpu.md) and the [no-sleeps guard](../../../examples/web/harness/tests/no-sleeps.test.mjs)); every link, anchor and path in the Markdown resolves; a practices checker (a table of rule to file and symbol, checked by a test) so docs cannot name a deleted symbol.

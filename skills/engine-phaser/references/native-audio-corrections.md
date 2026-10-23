@@ -4,7 +4,7 @@ Index: [native-audio.md](native-audio.md).
 
 ## Phaser 4.2.1 decode rejection correction
 
-Phaser 4.2.1's native `AudioFile.onProcess` supplies success and error callbacks to `decodeAudioData` but ignores its returned Promise. The [Web Audio specification](https://www.w3.org/TR/webaudio-1.1/#dom-baseaudiocontext-decodeaudiodata) requires an undecodable recording to reject that Promise with `EncodingError` and invoke the error callback. An HTTP 200 invalid recording therefore reaches Phaser's ordinary `FILE_ERRORED` processing path and Loader `COMPLETE`, then produces an uncaught rejection. Loader `totalFailed` counts HTTP failures; it remains zero in this case. The missing audio-cache key is still the readiness/retry signal.
+- [general] Phaser 4.2.1's native `AudioFile.onProcess` supplies success and error callbacks to `decodeAudioData` but ignores its returned Promise. The [Web Audio specification](https://www.w3.org/TR/webaudio-1.1/#dom-baseaudiocontext-decodeaudiodata) requires an undecodable recording to reject that Promise with `EncodingError` and invoke the error callback. An HTTP 200 invalid recording therefore reaches Phaser's ordinary `FILE_ERRORED` processing path and Loader `COMPLETE`, then produces an uncaught rejection. Loader `totalFailed` counts HTTP failures; it remains zero in this case. The missing audio-cache key is still the readiness/retry signal.
 
 Use the released [install-time correction](../scripts/assets/phaser-audio-decode-patch.mjs) as a temporary dependency band-aid. Copy that exact artifact into the consuming project's scripts directory and call it from the existing postinstall after Phaser is installed:
 
@@ -28,7 +28,7 @@ The host project supplies only `@playwright/test`; its Phaser installation and g
 
 ## Phaser 4.2.1 delayed visibility lifetime correction
 
-The pinned [WebAudioSoundManager](https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js) captures its context in `onGameVisible`, then unconditionally suspends and resumes it after 100 ms. Native destruction can close that owned context; [BaseSoundManager.destroy](https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js) clears `game`. `setAudioContext` can also replace the captured context. The pending callback can therefore touch a closed, stale or destroyed manager's context.
+- [general] The pinned [WebAudioSoundManager](https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js) captures its context in `onGameVisible`, then unconditionally suspends and resumes it after 100 ms. Native destruction can close that owned context; [BaseSoundManager.destroy](https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js) clears `game`. `setAudioContext` can also replace the captured context. The pending callback can therefore touch a closed, stale or destroyed manager's context.
 
 Copy the released [install-time correction](../scripts/assets/phaser-audio-visibility-patch.mjs) into the consuming project's scripts directory and call it from the existing postinstall:
 

@@ -33,8 +33,8 @@ What to assert, mutation proof, the debugging harness and reading pixels in the 
 
 ## Prove the test by mutation
 
-For each regression test, re-introduce the bug (for example make an overlay layer a GPU layer again), run the test,
-confirm it fails with a clear number (the dark-pixel ratio went from over 0.08 to 0), and restore the fix.
+- [general] For each regression test, re-introduce the bug (for example make an overlay layer a GPU layer again), run the test,
+  confirm it fails with a clear number (the dark-pixel ratio went from over 0.08 to 0), and restore the fix.
 
 ## Debugging harness (small scripts worth keeping)
 

@@ -4,29 +4,29 @@ Focus, visibility and context loss, dead GL wrappers and invalid handles during 
 
 ## 13. `generateLayerDataTexture()` leaves a dead GL wrapper, and that breaks WebGL context restore
 
-`TilemapGPULayer.generateLayerDataTexture()` replaces its data texture with `layerDataTexture.destroy()`, which frees the GL
-texture but leaves the wrapper in `renderer.glTextureWrappers` (its `renderer` is null). Each regeneration leaks one, and when the
-browser restores a lost context Phaser calls `createResource()` on every wrapper and throws
-`Cannot read properties of null (reading 'gl')`: the renderer never comes back. The layer's own `destroy()` also never frees the
-data texture. Workaround: before regenerating, `renderer.deleteTexture(layer.layerDataTexture)` and null the field; do the same
-when you destroy a chunk. Test: count `renderer.glTextureWrappers.filter(w => w.renderer === null)` (expect 0) and run
-`gl.getExtension('WEBGL_lose_context').loseContext()` then `restoreContext()` and assert the world draws again.
+- [general] `TilemapGPULayer.generateLayerDataTexture()` replaces its data texture with `layerDataTexture.destroy()`, which frees the GL
+  texture but leaves the wrapper in `renderer.glTextureWrappers` (its `renderer` is null). Each regeneration leaks one, and when the
+  browser restores a lost context Phaser calls `createResource()` on every wrapper and throws
+  `Cannot read properties of null (reading 'gl')`: the renderer never comes back. The layer's own `destroy()` also never frees the
+  data texture. Workaround: before regenerating, `renderer.deleteTexture(layer.layerDataTexture)` and null the field; do the same
+  when you destroy a chunk. Test: count `renderer.glTextureWrappers.filter(w => w.renderer === null)` (expect 0) and run
+  `gl.getExtension('WEBGL_lose_context').loseContext()` then `restoreContext()` and assert the world draws again.
 
 ## 15. Focus, visibility, context loss, and unused audio
 
-Phaser pauses its loop in a hidden tab (and resets the delta on return) but keeps running when the window only loses focus, so a
-simulation plays on unseen: listen once per game for `Core.Events.BLUR/FOCUS/HIDDEN/VISIBLE` and stop stepping. On
-`renderer.on(Renderer.Events.LOSE_WEBGL)` Phaser disables the renderer but your update loop still runs, and creating a GL
-resource then throws (`Framebuffer Unsupported`): hold the frame until `RESTORE_WEBGL`. Dynamic textures (RenderTexture) must be
-redrawn after a restore. If sound comes from another engine, set `audio: { noAudio: true }` or Phaser builds an unused AudioContext.
+- [general] Phaser pauses its loop in a hidden tab (and resets the delta on return) but keeps running when the window only loses focus, so a
+  simulation plays on unseen: listen once per game for `Core.Events.BLUR/FOCUS/HIDDEN/VISIBLE` and stop stepping. On
+  `renderer.on(Renderer.Events.LOSE_WEBGL)` Phaser disables the renderer but your update loop still runs, and creating a GL
+  resource then throws (`Framebuffer Unsupported`): hold the frame until `RESTORE_WEBGL`. Dynamic textures (RenderTexture) must be
+  redrawn after a restore. If sound comes from another engine, set `audio: { noAudio: true }` or Phaser builds an unused AudioContext.
 
 ## 23. Filter-mask framebuffers delete invalid handles during WebGL context restore
 
-**Symptom and cause.** On pinned npm Phaser 4.2.1, a native `Container`/`Rectangle` with an external `Graphics` filter mask
-draws again after actual `WEBGL_lose_context` restoration, but logs `INVALID_OPERATION` for `deleteFramebuffer` and
-`deleteRenderbuffer`. `WebGLRenderer.dispatchContextRestored()` recreates wrapper resources while `renderer.contextLost`
-is still true. `WebGLFramebufferWrapper.createResource()` first deletes its previous-context framebuffer and owned
-renderbuffers, which the browser has already invalidated. A plain scene without the mask does not reproduce these calls.
+- [general] **Symptom and cause.** On pinned npm Phaser 4.2.1, a native `Container`/`Rectangle` with an external `Graphics` filter mask
+  draws again after actual `WEBGL_lose_context` restoration, but logs `INVALID_OPERATION` for `deleteFramebuffer` and
+  `deleteRenderbuffer`. `WebGLRenderer.dispatchContextRestored()` recreates wrapper resources while `renderer.contextLost`
+  is still true. `WebGLFramebufferWrapper.createResource()` first deletes its previous-context framebuffer and owned
+  renderbuffers, which the browser has already invalidated. A plain scene without the mask does not reproduce these calls.
 
 **Temporary dependency band-aid.** Copy the exact released
 [phaser-framebuffer-restore-patch.mjs](../scripts/assets/phaser-framebuffer-restore-patch.mjs) into the consuming project's
@@ -60,13 +60,13 @@ equivalent reviewed, pinned upstream fix passes both stale-handle restore and li
 
 ## 24. DynamicTexture and RenderTexture creation leaves a live GPU texture wrapper behind
 
-**Symptom and cause.** Pinned npm Phaser 4.2.1 creates a TextureSource GL wrapper in the base Texture constructor,
-then replaces `frame.source.glTexture` with `this.drawingContext.texture` without disposing the first wrapper.
-Removing the DynamicTexture, or destroying its native RenderTexture owner, disposes the replacement while the
-original remains registered and live. Texture-manager keys return to baseline, so counting keys alone misses it.
-Related primary [report #7379](https://github.com/phaserjs/phaser/issues/7379) and proposed
-[upstream fix #7381](https://github.com/phaserjs/phaser/pull/7381) describe this replacement path; their status is not
-a substitute for testing the consumed pin.
+- [general] **Symptom and cause.** Pinned npm Phaser 4.2.1 creates a TextureSource GL wrapper in the base Texture constructor,
+  then replaces `frame.source.glTexture` with `this.drawingContext.texture` without disposing the first wrapper.
+  Removing the DynamicTexture, or destroying its native RenderTexture owner, disposes the replacement while the
+  original remains registered and live. Texture-manager keys return to baseline, so counting keys alone misses it.
+  Related primary [report #7379](https://github.com/phaserjs/phaser/issues/7379) and proposed
+  [upstream fix #7381](https://github.com/phaserjs/phaser/pull/7381) describe this replacement path; their status is not
+  a substitute for testing the consumed pin.
 
 **Temporary dependency band-aid.** Copy the exact released
 [phaser-dynamic-texture-patch.mjs](../scripts/assets/phaser-dynamic-texture-patch.mjs) into the consuming project's

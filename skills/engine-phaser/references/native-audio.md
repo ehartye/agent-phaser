@@ -13,7 +13,7 @@ Moved to their own file:
 
 ## One playback owner
 
-Read the pinned package's `skills/audio-and-sound/SKILL.md`, `src/sound/SoundManagerCreator.js`, `src/sound/BaseSoundManager.js` and the chosen backend. Phaser's SoundManager belongs to the Game, so playing sounds survive an ordinary scene change. A room's shutdown must not destroy shared music. Keep retained loop references with the existing game-wide audio owner; a persistent scene can host native loading and tweens when room scenes restart.
+- [general] Read the pinned package's `skills/audio-and-sound/SKILL.md`, `src/sound/SoundManagerCreator.js`, `src/sound/BaseSoundManager.js` and the chosen backend. Phaser's SoundManager belongs to the Game, so playing sounds survive an ordinary scene change. A room's shutdown must not destroy shared music. Keep retained loop references with the existing game-wide audio owner; a persistent scene can host native loading and tweens when room scenes restart.
 
 The native operations are small:
 
@@ -44,7 +44,7 @@ Use native sound volume and native tweens for ordinary fades. Compose each sound
 
 ## When the beeps player is the right owner
 
-Live synthesis or existing beeps-specific adaptive layers, variant selection, priority handling or processing may require its player or a released integration API. First check the concrete requirement against native Phaser behavior. Preserve required beeps behavior instead of copying it into an engine helper. If a reusable beeps adapter/export capability is missing, fix and release it in agent-beeps; agent-engine documents how the engine consumes it.
+- [general] Live synthesis or existing beeps-specific adaptive layers, variant selection, priority handling or processing may require its player or a released integration API. First check the concrete requirement against native Phaser behavior. Preserve required beeps behavior instead of copying it into an engine helper. If a reusable beeps adapter/export capability is missing, fix and release it in agent-beeps; agent-engine documents how the engine consumes it.
 
 Choose the playback owner explicitly. If the beeps player owns all audio, disable Phaser audio to avoid an unused second context and follow the conditional [beeps integration reference](audio-directors.md). Shared-context injection by itself does not resolve duplicate playback or lifecycle ownership. Do not disable Phaser merely because a recording was authored with beeps.
 

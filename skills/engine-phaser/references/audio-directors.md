@@ -6,7 +6,7 @@ When the beeps player owns all playback, set `audio: { noAudio: true }` so Phase
 
 ## 1. The player contract and game decisions
 
-Use the installed beeps player's exported types and documented API as the contract. Keep a project-specific adapter only where a concrete consumer needs it, and pass a fake to policy tests. Do not maintain a second player interface or copy variant selection, synthesis, mixer or export logic into agent-engine; reusable missing beeps capabilities belong in that plugin.
+- [general] Use the installed beeps player's exported types and documented API as the contract. Keep a project-specific adapter only where a concrete consumer needs it, and pass a fake to policy tests. Do not maintain a second player interface or copy variant selection, synthesis, mixer or export logic into agent-engine; reusable missing beeps capabilities belong in that plugin.
 
 The **director decides, the player plays**. `director.handle(event)` for one-shots with cooldowns and de-duplication;
 `director.update(worldState)` each frame, which talks to the player *only on change*; `director.walk(distance, ground)` per stride;

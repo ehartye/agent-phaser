@@ -22,7 +22,7 @@ sim      ->  content             rules, world generation, growth, needs, AI, sav
 game     ->  sim, content, phaser   scenes, plugins, views, input, audio, UI
 ```
 
-Content is data only, so a designer can add an item without touching a rule.
+- [general] Content is data only, so a designer can add an item without touching a rule.
 
 ## Data flow
 
@@ -33,8 +33,8 @@ input device -> InputController (named actions) -> Command -> Sim.dispatch(cmd)
                        SimEvent (one closed union) -> views, FX, audio, HUD
 ```
 
-Commands go in, events come out. Make `SimEvent` a single closed discriminated union and give the audio director a
-compile-time check that every event has a decision: adding an event then fails the build everywhere it matters.
+- [general] Commands go in, events come out. Make `SimEvent` a single closed discriminated union and give the audio director a
+  compile-time check that every event has a decision: adding an event then fails the build everywhere it matters.
 
 ## Determinism primitives
 
@@ -46,6 +46,8 @@ compile-time check that every event has a decision: adding an event then fails t
   catch-up steps so a background tab cannot spiral.
 
 ## Phaser patterns worth showing
+
+- [general] Each row pairs a Phaser feature with the use this architecture makes of it.
 
 | Feature | Use |
 | --- | --- |
@@ -84,5 +86,5 @@ random stream from restarting. Keep the format and `migrate(snapshot)` in a pure
 
 ## Testing shape
 
-Unit tests (Node, milliseconds) for rules, generation, saves and layer boundaries. Browser tests on a real GPU for
-rendering, streaming and pooling. See [verifying on a real GPU](verifying-on-a-gpu.md).
+- [general] Unit tests (Node, milliseconds) for rules, generation, saves and layer boundaries. Browser tests on a real GPU for
+  rendering, streaming and pooling. See [verifying on a real GPU](verifying-on-a-gpu.md).
