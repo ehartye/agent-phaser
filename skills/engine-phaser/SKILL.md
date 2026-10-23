@@ -1,19 +1,19 @@
 ---
 name: engine-phaser
-description: Build, structure, debug and verify a Phaser (3 or 4) game, especially one with procedural worlds, tilemaps, GPU rendering or agent-sprites and agent-beeps assets. Use before writing Phaser code, when a Phaser render looks wrong, when a game misses a frame budget, or when choosing how to split rules from rendering. Not for choosing an engine (use engine-selection) or importing assets into other engines.
+description: Build, structure, debug and verify a Phaser (3 or 4) game, especially one with procedural worlds, tilemaps, GPU rendering or agent-sprites and agent-beeps assets. Use before writing Phaser code, when a Phaser render looks wrong, when a game misses a frame budget (Chrome DevTools performance, long animation frames, frame time percentile), or when choosing how to split rules from rendering. Not for choosing an engine (use engine-selection) or importing assets into other engines.
 ---
 
 # Phaser
 
 Start here for any Phaser game. It collects lessons from building Phaser 4 games,
-including bugs in Phaser itself that cost hours because nothing in the docs mentions them.
+including undocumented Phaser bugs that cost hours.
 
-Read the reference that matches the work. Do not load all of them.
+Read the reference that matches the work, not all of them.
 
 | You are about to | Read |
 | --- | --- |
 | Coordinate shared contracts or testing/publication costs across Phaser games and tools | [Phaser architecture coordination](../phaser-architecture/SKILL.md) |
-| Scan every rule on one page (index with evidence and examples) | [phaser reference](references/phaser-reference.md) |
+| Scan every rule on one page (evidence, examples) | [phaser reference](references/phaser-reference.md) |
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
 | Boot, scenes, a global plugin, the fixed-step loop and interpolation | [scenes, loop and plugins](references/scenes-loop-and-plugins.md) |
 | Choose WebGL 1/2, integrate ES3 shaders or distinguish Phaser AE | [WebGL backends](references/webgl-backends.md) |
@@ -24,7 +24,7 @@ Read the reference that matches the work. Do not load all of them.
 | Play exported recordings, own audio loading and lifecycle in Phaser | [native recorded audio](references/native-audio.md), [4.2.1 corrections](references/native-audio-corrections.md) |
 | Use the beeps procedural/adaptive player and direct game sound decisions | [audio directors](references/audio-directors.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
-| Hit a frame budget (60 or 120 fps) or cost +25% to +50% more content: decompose the frame, run an ablation matrix, build a per-item cost table, prove a fix exact | [profiling method](references/profiling-method.md) |
+| Hit a frame budget (60 or 120 fps) or cost +25% to +50% more content: decompose, ablate, price items, prove a fix exact | [profiling method](references/profiling-method.md), [Chrome frame budget](references/chrome-frame-budget.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
 | Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md), [lifecycle hazards](references/gamepad-lifecycle-hazards.md) |
 | Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md): [input and design](references/touch-input-and-design.md), [tap to move, page, tests](references/touch-tap-to-move-and-page.md) |
@@ -44,7 +44,7 @@ Read the reference that matches the work. Do not load all of them.
 3. [general] **Check what the renderer really is.** Print the WebGL renderer string (`WEBGL_debug_renderer_info`). Headless
    browsers silently fall back to software rendering, which hides performance and some correctness problems. Phaser 4
    officially supports WebGL 2; 4.2.1 creates WebGL 1 by default and accepts a supplied WebGL 2 context. `Phaser.WEBGL`
-   is not an API-version selector. Read [WebGL backends](references/webgl-backends.md) for ES3 shaders and the separate Phaser AE API.
+   is not an API-version selector. Read [WebGL backends](references/webgl-backends.md) for ES3 shaders and Phaser AE.
 4. [general] **Put rules in a headless layer.** Keep game state and rules in plain TypeScript that never imports Phaser, and let
    Phaser draw it. See [architecture](references/architecture.md). This single choice makes the game unit-testable,
    saves small, and scene restarts safe.
@@ -59,7 +59,7 @@ Read the reference that matches the work. Do not load all of them.
 - [general] **Measure pixels, not impressions.** Read a pixel at a place whose expected colour you know, toggle layers and read it again;
   a plausible-looking screenshot can hide a layer covering the terrain.
 - [general] **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and
-  compare it with the real pipeline; several Phaser bugs were found this way in minutes.
+  compare it with the real pipeline; this found several Phaser bugs in minutes.
 - [general] **Prove a regression test by mutation.** Re-introduce the bug, watch the test fail, restore the fix.
 - [general] **Import Phaser wherever a value is used.** A missing import compiles, then throws `Phaser is not defined` (gotcha 4); add a scanning test.
 - [general] **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the generator's
@@ -73,7 +73,7 @@ Read the reference that matches the work. Do not load all of them.
   footprints and paint origins align. Keep accessible controls and native text entry through the shared-model semantic bridge (see
   [pixel-perfect and UI](references/pixel-perfect-and-ui.md)); a live region alone is not an interactive interface.
 - [general] **When a tool is missing something, fix the tool.** Capabilities the game needs from agent-sprites or agent-beeps
-  belong in those tools (with a tracked backlog item), not in game-side workarounds.
+  belong in those tools (with a tracked backlog item), not in game workarounds.
 
 ## Not covered here
 

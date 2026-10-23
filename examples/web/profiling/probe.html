@@ -1,0 +1,92 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Frame budget probe</title>
+<!-- A synthetic frame loop with a controllable busy-wait per frame. run.mjs calls window.runProbe(config) and reads the result.
+     Each frame spends work*0.7 ms in a "sim" phase and work*0.3 ms in a "render" phase, marks both phases with
+     performance.measure (detail.devtools custom track) and console.timeStamp, and records the requestAnimationFrame timestamp. -->
+<body>
+<script>
+const spin = (ms) => { const end = performance.now() + ms; while (performance.now() < end); };
+
+const observe = (type, sink) => {
+  try {
+    new PerformanceObserver((list) => { for (const e of list.getEntries()) sink.push(e.toJSON()); }).observe({ type });
+    return true;
+  } catch { return false; }
+};
+
+// Fixed-iteration work (median of several runs), to compare with the wall-clock spin under CPU throttling.
+window.cpuWorkMs = (iterations = 1e7, repeats = 5) => {
+  const times = [];
+  for (let k = 0; k < repeats; k++) {
+    const t0 = performance.now();
+    let x = 0;
+    for (let i = 0; i < iterations; i++) x = (x + i * 31) | 0;
+    window.__sink = x;
+    times.push(performance.now() - t0);
+  }
+  return times.sort((p, q) => p - q)[repeats >> 1];
+};
+
+// Do console.timeStamp and performance.measure add entries to the performance timeline?
+window.entryCreationProbe = () => {
+  const count = () => performance.getEntries().length;
+  const before = count();
+  console.timeStamp('ts-a');
+  console.timeStamp('ts-b');
+  console.timeStamp('ts-measure', 'ts-a', 'ts-b', 'Probe timeStamp track');
+  const afterTimeStamp = count();
+  performance.measure('plain-measure', { start: performance.now() - 1, end: performance.now() });
+  const afterPlain = count();
+  const m = performance.measure('devtools-measure', {
+    start: performance.now() - 1, end: performance.now(),
+    detail: { devtools: { dataType: 'track-entry', track: 'Probe', trackGroup: 'Probe group', color: 'primary', tooltipText: 'probe' } },
+  });
+  const afterDevtools = count();
+  return { before, afterTimeStamp, afterPlain, afterDevtools, devtoolsDetail: m.detail };
+};
+
+window.runProbe = ({ schedule, measures = true, timeStamps = true }) => new Promise((resolve) => {
+  const loaf = [], longtask = [];
+  const supported = PerformanceObserver.supportedEntryTypes;
+  const loafOn = observe('long-animation-frame', loaf);
+  const longtaskOn = observe('longtask', longtask);
+  const stamps = [], nows = [], phases = [];
+  let i = 0;
+  const track = (name, t0, t1, track) => {
+    if (measures) {
+      performance.measure(name, {
+        start: t0, end: t1,
+        detail: { devtools: { dataType: 'track-entry', track, trackGroup: 'Probe', color: 'primary' } },
+      });
+    }
+    if (timeStamps) {
+      console.timeStamp(`${name}-start`);
+      console.timeStamp(name, `${name}-start`, undefined, `${track} (timeStamp)`);
+    }
+  };
+  const tick = (ts) => {
+    stamps.push(ts);
+    nows.push(performance.now()); // when the callback really started; the rAF argument is the frame time
+    const work = schedule[i];
+    const t0 = performance.now();
+    spin(work * 0.7);
+    const t1 = performance.now();
+    spin(work * 0.3);
+    const t2 = performance.now();
+    phases.push({ sim: t1 - t0, render: t2 - t1 });
+    track('sim', t0, t1, 'Sim');
+    track('render', t1, t2, 'Render');
+    i++;
+    if (i < schedule.length) { requestAnimationFrame(tick); return; }
+    // Observers deliver asynchronously; give them a few frames to flush before reading.
+    setTimeout(() => resolve({
+      stamps, nows, phases, loaf, longtask,
+      loafSupported: loafOn, longtaskSupported: longtaskOn, supportedEntryTypes: supported,
+      measures: performance.getEntriesByType('measure').map((e) => ({ name: e.name, duration: e.duration, devtools: !!e.detail?.devtools })),
+    }), 500);
+  };
+  requestAnimationFrame(tick);
+});
+</script>
+</body>
