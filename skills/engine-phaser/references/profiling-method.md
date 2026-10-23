@@ -4,7 +4,7 @@ Use this when a game must hit a frame budget (for example 120 fps) or grow its c
 
 ## 1. Fix the budget, then decompose the frame
 
-- [general] Write the target in milliseconds before touching code: 60 Hz is 16.67 ms, 120 Hz is 8.33 ms, 144 Hz is 6.94 ms. Decide which statistic must meet it (mean, p95, max); a mean under budget with a p95 over it still drops frames.
+- [general] Write the target in milliseconds before touching code: 60 Hz is 16.67 ms, 120 Hz is 8.33 ms, 144 Hz is 6.94 ms. Decide which statistic must meet it (mean, p95, p99, max); a mean under budget with a p95 over it still drops frames.
 - [general] Split one frame into main-thread JavaScript (sim step, scene updates, render submission), GPU, and everything else the page does (GC, long tasks, compositing). Optimise the largest part first.
 - [general] In one native-engine investigation the GPU took about 1 ms and the game thread nearly all the rest, so culling and instancing could not reach the budget.
 - [documented] In Phaser 4.2.1 `game.loop.actualFps` is a once-a-second average, `delta` is smoothed when `smoothStep` is on, and `rawDelta` is the unsmoothed value. Time frames yourself from `PRE_STEP` to `POST_RENDER` and from `requestAnimationFrame` timestamps plus callback-start `performance.now()` ([section 2](chrome-frame-budget.md)); do not read a budget from `actualFps`.
@@ -23,7 +23,7 @@ This is diagnosis, used to find where the milliseconds go; it is not an acceptan
 - [general] Rendered runs are noisy: in one investigation a scene's rendered baseline ranged 12.3 to 14.4 ms over three repeats against 10.4 to 10.9 headless, and "effects off" read slower than the baseline. Attribute with the quiet run, confirm in the noisy one, and read a delta inside the visible spread as zero.
 - [general] A row that fails must be logged, not skipped. In one investigation both scale rows wrote no result for any repeat; reading the log found the gap, the switch was redefined to scale only what it could, and the rows were re-run. A scale row that reads faster than a smaller one is noise or a bug.
 - [general] Avoid contamination: DevTools open, a hidden tab (`requestAnimationFrame` is throttled), another benchmark or a build sharing the machine, battery saver. Note the cause beside any run you discard.
-- [general] The baseline build must carry the same sampler as the experiments or only one side reports. Keep baseline builds out of any cleanup script; in one investigation a cleanup script deleted one.
+- [general] The baseline build must carry the same sampler as the experiments or only one side reports. Keep baseline builds out of any cleanup script (one deleted one).
 - [general] Experiment switches (`?exp=noweather,scenery=1.5`) are tooling, not product: keep them on a never-merged branch.
 
 ## 3. Turn deltas into a per-item cost
@@ -48,12 +48,12 @@ This is diagnosis, used to find where the milliseconds go; it is not an acceptan
 
 ## 6. What changes browser numbers
 
-- [documented] Playwright can record a Chromium trace (`browser.startTracing`, [section 7](chrome-frame-budget.md)) and the page can observe `longtask` entries. GC pauses show in a trace or with `--js-flags=--trace-gc`; neither is measured here.
+- [documented] Playwright can record a Chromium trace (`browser.startTracing`, [section 7](chrome-frame-budget.md)) and long tasks and long animation frames start at 50 ms, so they find stalls, not an 8.33 ms miss. GC pauses show in a trace or with `--js-flags=--trace-gc`; neither measured here.
 - [general] Tracing and sampling profilers slow the page (5 to 8% in one native-engine investigation). Take headline numbers untraced.
 - [general] Draw-call and batch counts come from wrapping the GL draw functions ([performance](performance.md)). Compare counts across rows; a row that changes draws without changing frame time was not the bottleneck.
 - [general] Check display-list size, objects drawn outside `camera.worldView`, texture or blend changes that break a batch, and per-frame allocation in `update`.
 
 ## Evidence status
 
-- [general] Browser figures come from one project (performance.md), not reproduced here. The matrix, cost model and exactness checks were measured in a native Unreal game, not in Phaser.
+- [general] Browser figures come from one project (performance.md). The matrix, cost model and exactness checks were measured in a native Unreal game, not Phaser.
 - [general] No Phaser game has yet been through the matrix, a 1.25x and 1.5x cost table, or a GC measurement; record the numbers here when one is.

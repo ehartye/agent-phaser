@@ -6,9 +6,9 @@ Numbers below were reported from one pixel-art tile game, not reproduced here: P
 
 For a stated frame budget or a planned content increase, diagnose first with [profiling method](profiling-method.md): frame decomposition, ablation, per-item cost table, and a proportionate bar for shipping a fix. The tools below are its measuring half.
 
-- [general] **Real GPU, vsync off.** Launch Chromium with the GPU flags from [verifying](verifying-on-a-gpu.md) (`--use-angle=<d3d11|metal|gl>`, `--ignore-gpu-blocklist`) plus `--disable-gpu-vsync --disable-frame-rate-limit` and read `game.loop.actualFps`; otherwise every scene reads 60. Software GL hides GPU problems and invents CPU ones.
-- [general] **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report average,
-  p95 and max. The GPU runs asynchronously, so a long CPU frame is the signal that matters.
+- [general] **Real GPU, vsync off.** Launch Chromium with the GPU flags from [verifying](verifying-on-a-gpu.md) (`--use-angle=<d3d11|metal|gl>`, `--ignore-gpu-blocklist`) plus `--disable-gpu-vsync --disable-frame-rate-limit`, which is untested on a real GPU here: in headless Chromium they did not lift a ~17 ms cadence ([Chrome frame budget](chrome-frame-budget.md), section 1), so judge an 8.33 ms budget on work per frame. Do not read a budget from `game.loop.actualFps`. Software GL hides GPU problems and invents CPU ones.
+- [general] **CPU frame cost**, not fps: record `performance.now()` at `Core.Events.PRE_STEP` and `POST_RENDER`; keep a window of 240 frames; report mean,
+  p95, p99 and max (nearest rank; p99 is the maximum under 100 samples). The GPU runs asynchronously, so a long CPU frame is the signal that matters.
 - [general] **Draw calls have no counter in the renderer.** Wrap `drawElements`, `drawArrays` and their instanced forms on the `WebGLRenderingContext` and reset the
   count at `POST_RENDER`:
 
