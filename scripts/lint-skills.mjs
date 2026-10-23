@@ -192,7 +192,7 @@ export function lintSkill(dir, options = {}) {
   // 5a. No unfilled placeholders anywhere, code fences included
   for (const doc of documents) {
     for (const { n, raw } of doc.lines) {
-      const m = /\{\{[^}]*\}\}|\b(?:TODO|TBD|FIXME)\b/.exec(raw);
+      const m = /(?<!\$)\{\{[^}]*\}\}|\b(?:TODO|TBD|FIXME)\b/.exec(raw);
       if (m) add(doc.rel, n, 'placeholder', `unfilled placeholder "${m[0]}"`);
     }
   }

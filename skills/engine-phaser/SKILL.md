@@ -18,17 +18,17 @@ Read the reference that matches the work. Do not load all of them.
 | Boot, scenes, a global plugin, the fixed-step loop and interpolation | [scenes, loop and plugins](references/scenes-loop-and-plugins.md) |
 | Choose WebGL 1/2, integrate ES3 shaders or distinguish Phaser AE | [WebGL backends](references/webgl-backends.md) |
 | Draw a tilemap, chunk a world, add overlays or animated tiles | [tilemaps and terrain](references/tilemaps-and-terrain.md) |
-| Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md) |
+| Hit a render that is blank, doubled, stale, wrong-coloured or throws | [Phaser 4 gotchas](references/phaser-4-gotchas.md): [tilemaps](references/phaser-4-tilemap-gotchas.md), [API and effects](references/phaser-4-api-and-effects-gotchas.md), [scene lifecycle](references/phaser-4-scene-lifecycle-gotchas.md), [context loss and restore](references/phaser-4-webgl-context-gotchas.md), [renderer destruction](references/phaser-4-renderer-destruction-gotchas.md) |
 | Add day and night, lights, fog, saturation or heat shimmer without blurring pixel art | [lighting and atmosphere](references/lighting-and-atmosphere.md) |
-| Make the canvas pixel-exact, build pixel UI, or clip a scrolling pane in WebGL | [pixel-perfect and UI](references/pixel-perfect-and-ui.md) |
-| Play exported recordings, own audio loading and lifecycle in Phaser | [native recorded audio](references/native-audio.md) |
+| Make the canvas pixel-exact, build pixel UI, or clip a scrolling pane in WebGL | [pixel-perfect and UI](references/pixel-perfect-and-ui.md): [footprint](references/pixel-perfect-footprint.md), [text and panels](references/pixel-perfect-text-and-panels.md), [input and controls](references/pixel-ui-input-and-controls.md), [clipped scrolling](references/pixel-ui-clipped-scrolling.md) |
+| Play exported recordings, own audio loading and lifecycle in Phaser | [native recorded audio](references/native-audio.md), [4.2.1 corrections](references/native-audio-corrections.md) |
 | Use the beeps procedural/adaptive player and direct game sound decisions | [audio directors](references/audio-directors.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
 | Hit a frame budget (60 or 120 fps) or cost +25% to +50% more content: decompose the frame, run an ablation matrix, build a per-item cost table, prove a fix exact | [profiling method](references/profiling-method.md) |
 | Add drifting shadows, wind, particles, weather or footsteps to a strict pixel game | [ambient motion](references/ambient-motion.md) |
-| Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md) |
-| Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md) |
-| Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md) |
+| Add gamepad or controller support, glyph prompts, or on-screen keyboards | [gamepad and input](references/gamepad-and-input.md), [lifecycle hazards](references/gamepad-lifecycle-hazards.md) |
+| Add touch or mobile support: tap to move, gestures, on-screen buttons, safe areas, phone render quality, touch tests | [touch and mobile](references/touch-and-mobile.md): [input and design](references/touch-input-and-design.md), [tap to move, page, tests](references/touch-tap-to-move-and-page.md) |
+| Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md): [setup](references/verifying-playwright-setup.md), [assertions and harness](references/verifying-assertions-and-harness.md), [loop and waiting](references/verifying-loop-and-waiting.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
 | Ship audio: lock, store, Opus-only format, unsupported-browser notice, decoded-memory budget, a CI that fetches instead of rendering | [audio integration](../engine-asset-import/references/audio-integration.md), [CI for generated assets](../engine-asset-import/references/ci-for-generated-assets.md) |
 
@@ -56,25 +56,22 @@ Read the reference that matches the work. Do not load all of them.
 - **Use Phaser's native capability first.** Configure and test it before adding a parallel implementation. For controller input,
   see [gamepad and input](references/gamepad-and-input.md): configurable thresholds are not defects; lifecycle workarounds require
   a version-specific reproduction, one input owner and a removal condition.
-- **Measure pixels, not impressions.** A screenshot that "looks plausible" hid a layer covering the whole terrain for
-  hours. Read a pixel at a place whose expected colour you know, then toggle layers and read it again.
+- **Measure pixels, not impressions.** Read a pixel at a place whose expected colour you know, toggle layers and read it again;
+  a plausible-looking screenshot can hide a layer covering the terrain.
 - **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and
-  compare it with the real pipeline. Three of the Phaser bugs below were found this way in minutes after hours of
-  reasoning.
+  compare it with the real pipeline; several Phaser bugs were found this way in minutes.
 - **Prove a regression test by mutation.** Re-introduce the bug, watch the test fail, restore the fix.
-- **Every runtime use of a Phaser value needs `import Phaser from 'phaser'`.** Phaser's types are a global namespace, so
-  a missing import compiles and then throws `Phaser is not defined`. Add a test that scans for it.
+- **Import Phaser wherever a value is used.** A missing import compiles, then throws `Phaser is not defined` (gotcha 4); add a scanning test.
 - **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the generator's
   state in the snapshot: otherwise a loaded game restarts the random stream and drifts from the original (test it by stepping a
   saved and a restored sim side by side).
 - **Every scene restart must be leak-tested.** Restart the scene ten times in a browser spec and require listener counts,
   textures and display objects not to grow (gotchas 14 and 15); a WebGL context loss/restore spec belongs beside it (gotcha 13).
-- **Games for this owner use a strict pixel-only UI.** Every visible game UI and message pixel comes from agent-sprites bitmap
-  fonts, skins and icons (no browser-rendered game text, no Phaser `Text`); the UI layer may have a higher resolution than the gameplay
-  layer. Require whole physical pixels per authored source pixel in each resolution context. Fractional logical units and camera
-  scales are valid when final physical source-pixel footprints and paint origins are aligned. Ban `Text` creation with a test.
-  Use [pixel-perfect and UI](references/pixel-perfect-and-ui.md) for resolution mapping and native verification. Preserve accessible
-  controls and native text entry through its shared-model semantic bridge; a live region alone is not an interactive interface.
+- **A strict pixel-only UI** draws every UI and message pixel from agent-sprites bitmap fonts, skins and icons (no browser text,
+  no Phaser `Text`; ban `Text` creation with a test). The UI layer may have a higher resolution than the gameplay layer; require
+  whole physical pixels per authored source pixel in each context. Fractional logical units and camera scales are valid when final
+  footprints and paint origins align. Keep accessible controls and native text entry through the shared-model semantic bridge (see
+  [pixel-perfect and UI](references/pixel-perfect-and-ui.md)); a live region alone is not an interactive interface.
 - **When a tool is missing something, fix the tool.** Capabilities the game needs from agent-sprites or agent-beeps
   belong in those tools (with a tracked backlog item), not in game-side workarounds.
 

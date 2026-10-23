@@ -68,7 +68,7 @@ choices that paid off, not engine facts.
 | Rule | Where |
 | --- | --- |
 | Real GPU, assert pixels (`snapshotPixel` in the page), mutation-prove every regression test | [verifying](verifying-on-a-gpu.md); [harness smoke spec](../../../examples/web/harness/tests/smoke.spec.mjs) |
-| Retain the native sampler placeholder during rendering; release it through its owner on live reinit and renderer destruction (*verified*, Phaser 4.2.1) | [gotcha 25](phaser-4-gotchas.md#25-renderer-destruction-leaves-the-texture-unit-sampler-placeholder-live), [GPU lifecycle checks](verifying-on-a-gpu.md); pinned native owner tests and an isolated context-epoch proof in this repo's `tests/phaser-*.test.mjs` |
+| Retain the native sampler placeholder while rendering; release it through its owner on reinit and destruction (*verified*, Phaser 4.2.1) | [gotcha 25](phaser-4-renderer-destruction-gotchas.md#25-renderer-destruction-leaves-the-texture-unit-sampler-placeholder-live), [GPU lifecycle checks](verifying-on-a-gpu.md); pinned native owner tests and an isolated context-epoch proof in this repo's `tests/phaser-*.test.mjs` |
 | Drive the real loop by hand (`loop.sleep`, `game.step`), one gated debug API for panel, tests, tools and demos | verifying; [harness debug API](../../../examples/web/harness/debug.mjs) |
 | Record and replay with state hashes; visual regression; perf budgets; two workers | verifying |
 | Measure first: vsync off, CPU frame ms, wrapped draw-call counter, layer toggles, CPU throttle | [performance](performance.md) |
@@ -76,15 +76,14 @@ choices that paid off, not engine facts.
 
 ## Method
 
-Read Phaser's own skills in `node_modules/phaser/skills` first. When a render looks wrong: build the smallest standalone object in the live
-scene, read a pixel whose value you know, toggle layers one at a time, print the data to separate a data bug from a render bug, read the
-renderer source once you have a suspect, and prove the regression test by mutation ([gotchas](phaser-4-gotchas.md), "How these were found").
-Write down limits honestly: what the view still reads from the sim, which fixes patch Phaser's data, what only a human playtest can judge.
+Read Phaser's own skills in `node_modules/phaser/skills` first. When a render looks wrong: build the smallest standalone object beside the
+scene, read a pixel of known value, toggle layers one at a time, print the data to separate a data bug from a render bug, read the
+renderer source on a suspect, and prove the regression test by mutation ([how these were found](phaser-4-scene-lifecycle-gotchas.md)).
+State limits: what the view still reads from the sim, which fixes patch Phaser's data, what only a human playtest can judge.
 
 ## Process rules from the architecture review
 
 Shipping code must not import the debug tooling (load it through a gated dynamic `import()` and reach the loop through one hook); turn on
-`noUnusedLocals` and `noUnusedParameters`; keep architecture tests for layer imports and host globals; keep an audit record of what was
-reviewed, fixed and deferred with reasons.
+`noUnusedLocals` and `noUnusedParameters`; keep architecture tests for layer imports and host globals; keep an audit record of what was reviewed, fixed and deferred.
 
-Guards worth adding beyond layer imports: an unsubscribed long-lived `game.events` or `scale` listener; only the entry file may reach the debug tooling; `Command` and `SimEvent` switches are exhaustive; no `waitForTimeout` in specs (wait on state or frames, see [verifying](verifying-on-a-gpu.md) and the [no-sleeps guard](../../../examples/web/harness/tests/no-sleeps.test.mjs)); every link, anchor and path in the Markdown resolves; a **practices checker** (a table of rule to file and symbol, checked by a test, with a `--fix` that moves drifted line anchors) so docs cannot name a deleted symbol. Put the restart-leak spec in the CI smoke set: a CI that ran 2 of 19 browser specs hid regressions.
+Further guards: an unsubscribed long-lived `game.events` or `scale` listener; only the entry file may reach the debug tooling; `Command` and `SimEvent` switches are exhaustive; no `waitForTimeout` in specs (wait on state or frames, see [verifying](verifying-on-a-gpu.md) and the [no-sleeps guard](../../../examples/web/harness/tests/no-sleeps.test.mjs)); every link, anchor and path in the Markdown resolves; a **practices checker** (a table of rule to file and symbol, checked by a test, with a `--fix` that moves drifted line anchors) so docs cannot name a deleted symbol. Put the restart-leak spec in the CI smoke set: a CI that ran 2 of 19 browser specs hid regressions.
