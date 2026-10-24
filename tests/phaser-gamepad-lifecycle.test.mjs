@@ -7,7 +7,7 @@ import {join,posix} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
-import {patchAudioDecode} from '../skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs';
+import {patchAudioDecode} from '../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs';
 
 // Execute the complete pinned native module graph, not a second input engine.
 const {modules}=JSON.parse(await readFile(new URL('./fixtures/phaser-gamepad-4.2.1.json',import.meta.url),'utf8'));
@@ -21,7 +21,7 @@ const timestampGate=`        if (pad.timestamp < this._created)
 assert.ok(modules[padKey].includes(timestampGate));
 const heldPad=modules[padKey].replace(timestampGate,'        // Existing held-input correction; native Button owns edges.\n');
 const audio=(await readFile(new URL('./fixtures/phaser-audio-on-process-4.2.1.txt',import.meta.url),'utf8')).replaceAll('\r\n','\n');
-const script=new URL('../skills/engine-phaser/scripts/assets/phaser-gamepad-lifecycle-patch.mjs',import.meta.url);
+const script=new URL('../skills/phaser-input/scripts/assets/phaser-gamepad-lifecycle-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchGamepadLifecycle:undefined;
 const files=[pluginKey,'dist/phaser.esm.js','dist/phaser.js'];
 const prefix=Buffer.from('// Outside bytes: é\n'+heldPad+'\n'+audio+'\n');

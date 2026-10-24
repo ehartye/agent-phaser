@@ -10,7 +10,7 @@ game on `http://localhost:5173` (override with `--url=` or the second argument) 
 - `probe.mjs "<expression>"` evaluates an expression inside the running game (it can use `game`) and prints the result.
 
 They assume the game starts a world when Enter is pressed after the title scene; adapt the first lines for your own
-start flow. The method they support is in `skills/engine-phaser/references/verifying-on-a-gpu.md`: read a pixel at a
+start flow. The method they support is in `skills/phaser-verification/references/verifying-on-a-gpu.md`: read a pixel at a
 tile whose data you know, then toggle layers one at a time and read it again.
 
 `scroll-mask.mjs /absolute/path/to/host-project` is standalone: it starts its own tiny Phaser 4.2.1 scene, with no dev server or
@@ -24,3 +24,27 @@ camera zooms 3, 3.5, 4, 4.5 and 7.5, including fractional follow coordinates, at
 the exact integer device-pixel rectangle. It also compares fractional source-scale-1 UI zoom with its integer correction.
 It prints the actual hardware renderer and all block measurements; it does not test a game's complete artwork, pointer targets,
 mobile browser, or sustained performance. Use the same host dependencies and `CHROME_CHANNEL` option as the scroll probe.
+
+## Domain-skill probes (Phaser 4.2.1)
+
+Each Phaser domain skill cites the probes that reproduce its `[tested]` claims. They are standalone: each starts its own tiny
+Phaser scene in a throwaway page, so the host project only provides `phaser` (4.2.1) and `@playwright/test` (or `playwright-core`).
+Run one with `node <probe>.mjs /absolute/path/to/host-project`. They print their checks and exit non-zero when a behaviour
+changed, so a Phaser upgrade names the reference to update. They are a manual lane, not part of `node scripts/check.mjs`. Unless a
+probe says it needs a hardware GPU, it runs on headless Chromium with a software rasteriser, which is enough for logic, counts and
+flat-colour pixels but not for GPU correctness or speed. The `[tested]` label means "reproduced by one of these".
+
+| Skill | Probes |
+| --- | --- |
+| `engine-phaser` | `engine-phaser-foundations.mjs`: config and boot, scale, loader, events and data, game objects, Phaser 3 leftovers (37 checks) |
+| `phaser-rendering` | `phaser-rendering-render-graph.mjs`, `-filters.mjs`, `-stencil.mjs`, `-mesh-and-gpu-layer.mjs`, `-textures-and-shaders.mjs`, `-webgl2-context.mjs`, sharing `phaser-rendering-harness.mjs` (not run alone); also runs on a hardware GPU with `PROBE_GL=hardware` |
+| `phaser-worlds` | `phaser-worlds-cameras.mjs`, `-lights.mjs`, `-particles.mjs`, `-tilemaps.mjs`, `-layers.mjs`, sharing `phaser-worlds-lib.mjs` (not run alone) |
+| `phaser-physics` | `phaser-physics-arcade.mjs`, `-matter.mjs`, `-tilemap.mjs`, `-paths.mjs` |
+| `phaser-motion` | `phaser-motion-clocks.mjs`: which clock drives tweens, timers and animations (optionally also against an extracted 4.2.0 package) |
+| `phaser-pixel-ui` | `phaser-pixel-ui-text.mjs`, `phaser-pixel-ui-panels.mjs` |
+| `phaser-input` | `phaser-input-keyboard.mjs`, `-pointer.mjs`, `-gamepad.mjs` (a fake `navigator.getGamepads`, no physical controller) |
+| `phaser-audio` | `phaser-audio-manager.mjs`, `phaser-audio-sounds.mjs` |
+| `phaser-verification` | `phaser-verification-driving.mjs`, `-pixels.mjs`, `-leaks.mjs`, `-renderer.mjs` |
+
+The pure-logic helpers have ordinary Node tests in the merge lane: `tests/phaser-physics-grid-sweep.test.mjs`,
+`tests/phaser-pixel-ui-focus.test.mjs` and `tests/engine-phaser-migration-patterns.test.mjs`.

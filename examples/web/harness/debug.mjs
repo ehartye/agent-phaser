@@ -18,7 +18,7 @@ export function installDebug(game) {
       if (on) { clock = game.loop.now; game.loop.sleep(); } else game.loop.wake();
       return manual;
     },
-    /** Run `n` whole frames (input, tweens, scene updates, render) on a virtual clock of `dt` ms. Needs `manual()`. */
+    /** Run `n` whole frames (input, scene updates, render) on a virtual clock of `dt` ms. Needs `manual()`. Tweens read Date.now(), so they do NOT follow this clock. */
     frames(n = 1, { dt = 1000 / 60 } = {}) {
       if (!manual) throw new Error('frames(): call manual() first, or use a condition wait in the page loop');
       for (let i = 0; i < n; i++) { clock += dt; game.step(clock, dt); }

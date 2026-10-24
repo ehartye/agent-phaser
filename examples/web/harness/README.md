@@ -1,7 +1,7 @@
 # Phaser 4 test harness (runnable template)
 
 A small, working harness cut down to the parts every Phaser game wants. The method is
-in [verifying on a real GPU](../../../skills/engine-phaser/references/verifying-on-a-gpu.md); this folder is the code. Replace `game.mjs` with your
+in [verifying on a real GPU](../../../skills/phaser-verification/references/verifying-on-a-gpu.md); this folder is the code. Replace `game.mjs` with your
 game and keep the three `HARNESS` hooks.
 
 | File | What it is |
@@ -26,8 +26,8 @@ npm run test:guard                     # the no-sleeps guard alone
 
 - **Wait on state, frames or page time, never a sleep.** `until` for something you can name, `settle` for a real animation, `elapsed` for a duration that is the
   thing under test, `framesUntil` when the loop is manual. A sleep is a build failure.
-- **A manual frame loop** (`game.loop.sleep()` then `game.step(time, dt)` on a virtual clock) makes tests and captures deterministic. Keys and pointer events are
-  consumed at the next step. Yield to the event loop between batches while waiting for loads; a tight synchronous loop starves the loader.
+- **A manual frame loop** (`game.loop.sleep()` then `game.step(time, dt)` on a virtual clock) makes timers, Arcade physics and captures deterministic. Tweens read
+  `Date.now()`, not the virtual clock ([which clock drives what](../../../skills/phaser-verification/references/deterministic-test-driving.md)). Keys and pointer events reach Phaser's handlers at the DOM event, not at the next step; only code that polls (`isDown`, `JustDown`) sees them at a step. Yield to the event loop between batches while waiting for loads; a tight synchronous loop starves the loader.
 - **Assert the renderer, not just the absence of errors.** Software WebGL raises nothing. `@gpu` tests need hardware; the rest are the CI smoke.
 - **Pixels, not "not black".** Known colour, known place, via `renderer.snapshotPixel` after a rendered frame.
 - **`page.evaluate` serialises a function.** It cannot close over variables, and a helper from the spec does not exist in the page. Pass data as the argument and

@@ -7,13 +7,13 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
-import {patchAudioDecode} from '../skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs';
-import {patchGamepadLifecycle} from '../skills/engine-phaser/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
-import {patchFramebufferRestore} from '../skills/engine-phaser/scripts/assets/phaser-framebuffer-restore-patch.mjs';
+import {patchAudioDecode} from '../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs';
+import {patchGamepadLifecycle} from '../skills/phaser-input/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
+import {patchFramebufferRestore} from '../skills/phaser-rendering/scripts/assets/phaser-framebuffer-restore-patch.mjs';
 
 const fixtureSource=(await readFile(new URL('./fixtures/phaser-audio-visible-4.2.1.txt',import.meta.url),'utf8')).replaceAll('\r\n','\n');
 const original=fixtureSource.slice(fixtureSource.indexOf('     * @method Phaser.Sound.WebAudioSoundManager#onGameVisible'),fixtureSource.indexOf('// End extracted native fragment.'));
-const script=new URL('../skills/engine-phaser/scripts/assets/phaser-audio-visibility-patch.mjs',import.meta.url);
+const script=new URL('../skills/phaser-audio/scripts/assets/phaser-audio-visibility-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchAudioVisibility:undefined;
 const files=['src/sound/webaudio/WebAudioSoundManager.js','dist/phaser.esm.js','dist/phaser.js'];
 const prefix=Buffer.from('// Outside bytes: é\n'),suffix=Buffer.from('\n// Trailing bytes\n');

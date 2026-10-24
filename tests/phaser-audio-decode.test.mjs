@@ -11,7 +11,7 @@ import {spawnSync} from 'node:child_process';
 // Extracted byte-for-byte (newline-normalized) from npm phaser@4.2.1 AudioFile.
 const fixtureSource=(await readFile(new URL('./fixtures/phaser-audio-on-process-4.2.1.txt',import.meta.url),'utf8')).replaceAll('\r\n','\n');
 const original=fixtureSource.slice(fixtureSource.indexOf('     * @method Phaser.Loader.FileTypes.AudioFile#onProcess'));
-const script=new URL('../skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs',import.meta.url);
+const script=new URL('../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchAudioDecode:undefined;
 const files=['src/loader/filetypes/AudioFile.js','dist/phaser.esm.js','dist/phaser.js'];
 const prefix=Buffer.from('// held-input correction elsewhere stays intact\nconst unicode = "é";\n');

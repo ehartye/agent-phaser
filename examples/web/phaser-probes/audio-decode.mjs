@@ -16,9 +16,9 @@ await mkdir(evidence); // Refuse to overwrite an earlier run.
 const {chromium}=createRequire(join(project,'package.json'))('@playwright/test');
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const targets=['src/loader/filetypes/AudioFile.js','dist/phaser.esm.js','dist/phaser.js'];
-const sources=[fileURLToPath(import.meta.url),join(root,'skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs'),
+const sources=[fileURLToPath(import.meta.url),join(root,'skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs'),
   join(root,'tests/phaser-audio-decode.test.mjs'),join(root,'tests/fixtures/phaser-audio-on-process-4.2.1.txt'),
-  join(root,'skills/engine-phaser/references/native-audio.md'),join(root,'.claude-plugin/plugin.json'),join(root,'.claude-plugin/marketplace.json'),
+  join(root,'skills/phaser-audio/references/native-audio.md'),join(root,'.claude-plugin/plugin.json'),join(root,'.claude-plugin/marketplace.json'),
   ...[pristine,patched].flatMap(directory=>[join(directory,'package.json'),...targets.map(file=>join(directory,file))])];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const hashes=async()=>Object.fromEntries(await Promise.all(sources.map(async file=>[file,sha(await readFile(file))])));

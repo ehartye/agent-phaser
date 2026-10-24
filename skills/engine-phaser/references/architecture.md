@@ -56,7 +56,7 @@ input device -> InputController (named actions) -> Command -> Sim.dispatch(cmd)
 | Registry | settings and cross-scene read models; never game state |
 | Aseprite loader | `load.aseprite` then `anims.createFromAseprite` for agent-sprites sheets |
 | Tilemap layers, pooled | one pooled view per visible chunk, rebound as the camera moves, so scrolling allocates nothing |
-| Cameras | integer source-pixel footprint (art scale × camera zoom), visible chunks from `camera.worldView`; see [pixel scaling](pixel-perfect-and-ui.md) |
+| Cameras | integer source-pixel footprint (art scale × camera zoom), visible chunks from `camera.worldView`; see [pixel scaling](../../phaser-pixel-ui/references/pixel-perfect-and-ui.md) |
 | Particle emitters | one reused emitter per effect; `explode` for bursts; weather is one emitter reconfigured per weather |
 | Tweens and `time` events | feedback and timers in the view; `setTimeout` only outside the world (delayed audio cues, debug polling) |
 
@@ -87,4 +87,4 @@ random stream from restarting. Keep the format and `migrate(snapshot)` in a pure
 ## Testing shape
 
 - [general] Unit tests (Node, milliseconds) for rules, generation, saves and layer boundaries. Browser tests on a real GPU for
-  rendering, streaming and pooling. See [verifying on a real GPU](verifying-on-a-gpu.md).
+  rendering, streaming and pooling. See [verifying on a real GPU](../../phaser-verification/references/verifying-on-a-gpu.md).

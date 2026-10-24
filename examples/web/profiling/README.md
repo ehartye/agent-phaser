@@ -1,7 +1,7 @@
 # Frame-budget probe
 
 A synthetic frame loop with a controllable busy-wait per frame, run in headless Chromium, that shows what each way of
-measuring a web game sees. The method it supports is in `skills/engine-phaser/references/chrome-frame-budget.md`.
+measuring a web game sees. The method it supports is in `skills/phaser-verification/references/chrome-frame-budget.md`.
 
 - `probe.html` runs the loop. Each frame busy-waits for its scheduled time, 70% in a "sim" phase and 30% in a "render" phase,
   marks both with `performance.measure` (with the `detail.devtools` custom-track extension) and `console.timeStamp`, and

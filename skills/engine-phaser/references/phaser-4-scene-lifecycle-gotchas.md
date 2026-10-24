@@ -1,6 +1,6 @@
 # Phaser 4.2.1 scene lifecycle and input gotchas
 
-Restarting scenes, what survives stop and start, the smoothed delta, interactive objects and reused Scene objects. Numbers match the index in [phaser-4-gotchas.md](phaser-4-gotchas.md).
+Restarting scenes, what survives stop and start, the smoothed delta, interactive objects and reused Scene objects. Numbers match the index in [phaser-4-gotchas.md](../../phaser-rendering/references/phaser-4-gotchas.md).
 
 ## 11. Restarting scenes: a loading scene ignores `start`, and the sim must change in `init`, not before
 
@@ -9,8 +9,8 @@ Found building a title screen that plays the real world scene behind its menu, t
 * [general] `scene.start('world')` on a scene that is **running, paused or sleeping** shuts it down and restarts it (`init`, `preload`, `create`
   again). On a scene that is **starting, loading or creating** (statuses START to CREATING) `SceneManager.start` returns without doing
   anything, so the data you passed never arrives. Gate a start on `scene.isActive(key)` and queue it for the first frame it is true.
-* [general] Do not "fix" that with `stop` then `start`: stopping a scene mid-load leaves its queued files in the loader, and the second load
-  logs `Texture key already in use` for every atlas. Load the scene's assets in an earlier scene instead (one function that queues
+* [general] Do not "fix" that with `stop` then `start`: stopping a scene mid-load clears the loader's queue but not requests already in flight; they still complete and register their key, so the second load
+  logs `Texture key already in use` for every atlas (reproduced for one image in [loading assets](loading-assets.md)). Load the scene's assets in an earlier scene instead (one function that queues
   them, called from the preload scene; the loader skips keys already cached, so the scene's own `preload` calling it again is free).
 * [general] If a global object holds the game state (a global plugin), do **not** swap it in the scene that decides to start. The running
   scene keeps drawing for the rest of that frame and the next, one world's views with the other world's entities. Pass a `boot`
@@ -25,7 +25,7 @@ Found building a title screen that plays the real world scene behind its menu, t
   the global texture manager and the DOM obviously outlive the scene. The scene's input/keyboard plugins and display list do clean
   up. Also: the Scene *object* is reused, so a `WeakMap<Scene, Pool>` hands out images that were destroyed with the display list,
   field initialisers run once per Scene object (reset accumulators in `init()`), and canvas textures you made are yours to remove.
-  Remove everything in one SHUTDOWN handler. Guard it with a browser spec that restarts the scene ten times and requires listener
+  Remove everything in one SHUTDOWN handler ([who owns which emitter](events-and-data.md)). Guard it with a browser spec that restarts the scene ten times and requires listener
   counts per event name (`emitter.eventNames()` / `listenerCount`), texture count and display-object count not to grow, plus a static
   test that a file subscribing to a long-lived emitter also unsubscribes. Prove it red by mutation.
 
@@ -40,8 +40,9 @@ Found building a title screen that plays the real world scene behind its menu, t
 
 ## 17. The `delta` your scene receives is smoothed
 
-- [general] `TimeStep.step` hands scenes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of the last ten deltas, and any delta above
-  `1000 / minFps` replaced by the last sane value (`src/core/TimeStep.js#L570`). Accumulators are fine with that; code that wants the real frame time
+- [documented] `TimeStep.step` hands scenes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of the last ten deltas, any delta above
+  `1000 / minFps` replaced by the oldest value in that window, and, for 120 frames after start, focus or resume and for every blurred frame, each delta capped at 16.67 ms
+  (`src/core/TimeStep.js#L570`). Accumulators are fine with that, but the lost time never comes back; code that wants the real frame time
   should read `game.loop.rawDelta`. `game.step(time, delta)` bypasses smoothing, so a hand-driven test loop and the live loop differ slightly: test the
   pure stepper with raw numbers and trust the game loop for the rest.
 

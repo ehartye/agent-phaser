@@ -8,8 +8,8 @@ import {fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {patchAudioDecode} from '../skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs';
-import {patchGamepadLifecycle} from '../skills/engine-phaser/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
+import {patchAudioDecode} from '../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs';
+import {patchGamepadLifecycle} from '../skills/phaser-input/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
 
 // Complete npm native wrapper and its only dependency; no duplicate resource algorithm.
 const {provenance,modules}=JSON.parse(await readFile(new URL('./fixtures/phaser-framebuffer-4.2.1.json',import.meta.url),'utf8'));
@@ -18,7 +18,7 @@ const original=modules[wrapperKey].replaceAll('\r\n','\n');
 const files=[wrapperKey,'dist/phaser.esm.js','dist/phaser.js'];
 const marker='* @method Phaser.Renderer.WebGL.Wrappers.WebGLFramebufferWrapper#createResource';
 const correctedCondition='if (this.webGLFramebuffer && (!renderer.contextLost || gl.isFramebuffer(this.webGLFramebuffer)))';
-const script=new URL('../skills/engine-phaser/scripts/assets/phaser-framebuffer-restore-patch.mjs',import.meta.url);
+const script=new URL('../skills/phaser-rendering/scripts/assets/phaser-framebuffer-restore-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchFramebufferRestore:undefined;
 const prefix=Buffer.from([0,255,195,169,10]),suffix=Buffer.from([10,254,0]);
 async function fixture(newline='\n'){

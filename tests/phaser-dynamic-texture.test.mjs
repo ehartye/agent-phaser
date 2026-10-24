@@ -8,10 +8,10 @@ import {fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {patchAudioDecode} from '../skills/engine-phaser/scripts/assets/phaser-audio-decode-patch.mjs';
-import {patchAudioVisibility} from '../skills/engine-phaser/scripts/assets/phaser-audio-visibility-patch.mjs';
-import {patchGamepadLifecycle} from '../skills/engine-phaser/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
-import {patchFramebufferRestore} from '../skills/engine-phaser/scripts/assets/phaser-framebuffer-restore-patch.mjs';
+import {patchAudioDecode} from '../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs';
+import {patchAudioVisibility} from '../skills/phaser-audio/scripts/assets/phaser-audio-visibility-patch.mjs';
+import {patchGamepadLifecycle} from '../skills/phaser-input/scripts/assets/phaser-gamepad-lifecycle-patch.mjs';
+import {patchFramebufferRestore} from '../skills/phaser-rendering/scripts/assets/phaser-framebuffer-restore-patch.mjs';
 
 // Complete pinned native DynamicTexture and Class; doubles only at external dependencies.
 const {provenance,modules}=JSON.parse(await readFile(new URL('./fixtures/phaser-dynamic-texture-4.2.1.json',import.meta.url),'utf8'));
@@ -21,7 +21,7 @@ const marker='function DynamicTexture (manager, key, width, height, forceEven)';
 const assignment='            frame.source.glTexture = this.drawingContext.texture;';
 const disposal='            renderer.deleteTexture(frame.source.glTexture);\n';
 const changed=original.replace(assignment,disposal+assignment);
-const script=new URL('../skills/engine-phaser/scripts/assets/phaser-dynamic-texture-patch.mjs',import.meta.url);
+const script=new URL('../skills/phaser-rendering/scripts/assets/phaser-dynamic-texture-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchDynamicTexture:undefined;
 const prefix=Buffer.from([0,255,195,169,10]),suffix=Buffer.from([10,254,0]);
 async function fixture(newline='\n'){

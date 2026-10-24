@@ -16,7 +16,7 @@ await mkdir(evidence); // Refuse to overwrite a prior attempt.
 const {chromium}=createRequire(join(project,'package.json'))('@playwright/test');
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const targets=['src/sound/webaudio/WebAudioSoundManager.js','dist/phaser.esm.js','dist/phaser.js'];
-const sources=[fileURLToPath(import.meta.url),join(root,'skills/engine-phaser/scripts/assets/phaser-audio-visibility-patch.mjs'),
+const sources=[fileURLToPath(import.meta.url),join(root,'skills/phaser-audio/scripts/assets/phaser-audio-visibility-patch.mjs'),
   join(root,'tests/phaser-audio-visibility.test.mjs'),join(root,'tests/fixtures/phaser-audio-visible-4.2.1.txt'),
   ...[pristine,patched].flatMap(directory=>[join(directory,'package.json'),...targets.map(file=>join(directory,file))])];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');

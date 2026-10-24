@@ -1,6 +1,6 @@
 // A smoke spec that proves the game really boots and draws, on the renderer you think it is on. Layers, cheapest first:
 //   1. boots with a clean console (the fixture fails on any error or warning) and says which renderer it got;
-//   2. the manual loop is deterministic: N frames run exactly N frames, with no sleeps anywhere;
+//   2. the manual loop is deterministic: N frames run exactly N frames, with no sleeps anywhere (scene ticks follow the virtual clock; tweens do not, see below);
 //   3. pixels, not "not black": known colours at known places (`@gpu`: exact colours need a real renderer).
 import { expect, test } from './fixtures.mjs';
 import { settle } from './wait.mjs';
@@ -28,7 +28,9 @@ test('the manual loop is deterministic', async ({ game }) => {
   await game.frames(60);
   const b = await game.state();
   expect(b.ticks - a.ticks, 'exactly 60 more frames ran').toBe(60);
-  expect(b.blockX, 'the tween followed the virtual clock').not.toBe(a.blockX);
+  // Phaser 4.2.1 tweens read Date.now(), not the virtual clock passed to game.step, so this passes because wall time elapsed between the two
+  // reads, not because the frames moved the tween. Assert tween positions only under page.clock or with tweens paused (see deterministic-test-driving.md).
+  expect(b.blockX, 'the tween moved (it follows wall time, not the virtual clock)').not.toBe(a.blockX);
 });
 
 test('@gpu draws the colours the scene asks for, in the right places', async ({ game }) => {

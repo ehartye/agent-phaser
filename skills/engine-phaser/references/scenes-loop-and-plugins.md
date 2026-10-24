@@ -88,11 +88,14 @@ class FixedStepper {
 - [general] **Capture the previous state inside the step callback, before the step.** A frame can run several steps.
 - [general] A pure class with no Phaser import: unit-test it (120 ms at a 50 ms step is two steps and alpha 0.4; a 60 s stall runs at most
   `maxSteps`).
-- [general] **Phaser's `delta` is smoothed.** `TimeStep.step` passes `smoothDelta(delta)` when `smoothStep` is true (the default): the mean of
-  the last ten deltas, with any delta above `1000 / minFps` (200 ms) replaced by the last sane one (`src/core/TimeStep.js#L570`,
-  `#L442`). That preserves the mean, so an accumulator is fine, but the `delta` you accumulate is not the real time of any one
-  frame. `game.step(time, delta)` (`src/core/Game.js#L454`) does no smoothing: it runs pre-step, scene updates and render with the
-  clock you give it, which is what makes deterministic tests possible (see [verifying](verifying-on-a-gpu.md)).
+- [documented] **Phaser's `delta` is smoothed, and it drops time.** `TimeStep.step` passes `smoothDelta(delta)` when `smoothStep` is true (the default):
+  the mean of the last ten deltas. A delta above `1000 / minFps` (200 ms) is replaced by the OLDEST value in that ten-frame window, so the stall is
+  lost. For the first 120 frames after start, focus or resume (`panicMax`) and for every frame while the window is blurred, each delta is first capped
+  at one 60 Hz frame (16.67 ms) (`src/core/TimeStep.js`, `smoothDelta`, `resetDelta`; [clocks and delta](../../phaser-motion/references/clocks-timers-and-delta.md)). An accumulator is safe for that reason (a stall cannot spiral),
+  but the `delta` you accumulate is not the real time of any one frame and long pauses vanish. `game.step(time, delta)` (`src/core/Game.js#L454`) does no
+  smoothing: it runs pre-step, scene updates and render with the clock you give it, which is what makes deterministic tests possible (see
+  [verifying](../../phaser-verification/references/verifying-on-a-gpu.md)). Under `type: Phaser.HEADLESS` the renderer is `null` and `game.step`
+  throws; drive it with `game.headlessStep(time, delta)` (`src/core/Game.js`; [driving](../../phaser-verification/references/deterministic-test-driving.md)).
 - [general] **Camera follow lerps per frame, not per millisecond** (`startFollow(t, round, 0.2, 0.2)`), so frame counts change what the camera
   sees. If the view asks the sim for world chunks as the camera moves, the set of generated chunks depends on frame count: record
   generation events next to inputs when you need replay to match.
