@@ -26,10 +26,11 @@ it.
 - [general] Use the tool's exported metrics (agent-sprites `ui-phaser.json`: advances, frame rectangles, texture coordinates per tone) and
   register each tone as a `BitmapFont` with `cache.bitmapFont.add(key, { data, texture, frame: '__BASE', fromAtlas: false })`. **A tone
   is a different set of glyph frames, never a tint.**
-- [general] Prefer released agent-sprites 0.88.0's pinned `ui-runtime.mjs`, which exports `normalizeBitmapFont`, `bitmapLineWidth`, `wrapBitmapText`,
+- [general] Agent-sprites 0.88.0 introduced `ui-runtime.mjs` with `normalizeBitmapFont`, `bitmapLineWidth`, `wrapBitmapText`,
   `measureBitmapText` and `placeBitmapText`. Normalize once per loaded font; the immutable snapshot preserves advances, authored
   tones, atlas rectangles and trim offsets. Use the same calculations for Node layout and native binding instead of maintaining
-  another metrics implementation. Keep existing native adapters until their required export and downstream parity are verified.
+  another metrics implementation. Current family/native adoption uses the complete versioned software pin and availability guard in the
+  [shared UI API](../../phaser-architecture/references/shared-ui-api.md). Keep existing native adapters until their required export and downstream parity are verified.
 - [general] A single-density native path can draw one `BitmapText` per wrapped line at font scale 1 and integer offsets. A contextual adapter
   consumes the plan in its declared space, including fractional local destinations. Retain game-authored newline/tab/empty,
   trailing-advance, line-height/spacing and terminal-space policies explicitly; defaults do not prove legacy parity. Keep fitting,

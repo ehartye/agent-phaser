@@ -14,6 +14,7 @@ Targets Phaser 4.2.1; version-sensitive claims carry the version or a probe name
 | Draw a panel, plate or divider with NineSlice, tiled pieces, Graphics or a rounded rectangle | [panels, NineSlice and Graphics](references/panels-nine-slice-and-graphics.md) |
 | Put an input, button or long text over the canvas with `DOMElement` or a page overlay | [DOM overlays and forms](references/dom-overlays-and-forms.md) |
 | Lay out a screen, size hit areas, or make a menu work from keyboard and controller | [layout, focus and navigation](references/ui-layout-focus-and-navigation.md) |
+| Bind shared themed UI families, independent contexts or native mount ownership | [shared UI API](../phaser-architecture/references/shared-ui-api.md) |
 | Make the canvas pixel-exact, choose the integer footprint, handle device pixels, tile panels, fit text | [pixel-perfect and UI](references/pixel-perfect-and-ui.md): [footprint](references/pixel-perfect-footprint.md), [text and panels](references/pixel-perfect-text-and-panels.md) |
 | Clip a scrolling pane in WebGL | [clipped scrolling](references/pixel-ui-clipped-scrolling.md) |
 | Capture input while a modal is open, or keep controls accessible next to a canvas UI | [input and controls](references/pixel-ui-input-and-controls.md) |

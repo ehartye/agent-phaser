@@ -49,9 +49,9 @@ zooms on scaled art, alongside a fractional source-scale-1 UI counterexample. It
 ### Mixed-density calculation and native binding
 
 Keep three spaces explicit: atlas/font **source pixels**, component **local coordinates**, and backbuffer **physical pixels**.
-Released agent-sprites 0.88.0 exports `pixelResolution`, `projectPixelPoint`, `projectPixelRect`, `quantizePhysicalPoint`
-and `quantizePhysicalRect` in `ui-runtime.mjs`. Pin and verify that export; use its contract rather than inventing a camera transform
-in a shared widget package. Its immutable
+Agent-sprites 0.88.0 introduced `pixelResolution`, `projectPixelPoint`, `projectPixelRect`, `quantizePhysicalPoint`
+and `quantizePhysicalRect` in `ui-runtime.mjs`. Current adoption follows the complete pin/availability guard in
+[shared UI API](../../phaser-architecture/references/shared-ui-api.md), including its distinct input/resolved context shapes. Its immutable
 descriptor has a caller-namespaced `id`, nonnegative integer `revision`, uniform positive `localToPhysical.scale`, finite
 `localToPhysical.origin`, and positive integer `physicalPixelsPerSourcePixel`. Rotation, shear and nonuniform transforms reject.
 The game chooses contexts, cameras and density; the helpers neither allocate nor discover them.
