@@ -451,6 +451,54 @@ await check('migration-v3-apis-are-gone-or-stubbed', withPage(html({script: CAPT
   assert.equal(r.roundPixels, false);
 }));
 
+
+// ---------------------------------------------------------------- label triage: animations, other scenes' fields, snapshots
+await check('loader-animations-are-global-shared-by-scenes-and-refuse-a-duplicate-key', withPage(html({script: CAPTURE + 'class A extends Phaser.Scene{constructor(){super("a")}create(){window.a=this;window.creates=(window.creates||0)+1;' +
+  'if(!this.textures.exists("t"))this.textures.createCanvas("t",4,4).refresh();this.anims.create({key:"walk",frames:[{key:"t"}]});if(!window.b)this.scene.launch("b")}}' +
+  'class B extends Phaser.Scene{constructor(){super("b")}create(){window.b=this;window.ready=true}}' + GAME('{width:50,height:50}', 'A,B')}), {}, async page => {
+  const r = await page.evaluate(async () => {
+    const frames = n => new Promise(res => { let k = 0; const f = () => { if (++k >= n) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+    const out = {shared: a.anims === game.anims && b.anims === game.anims, seenByOtherScene: b.anims.exists('walk')};
+    log.length = 0; out.duplicateReturnsTheExisting = b.anims.create({key: 'walk', frames: [{key: 't'}]}) === game.anims.get('walk'); out.duplicateWarning = log.slice();
+    log.length = 0; a.scene.restart(); await frames(5);
+    out.afterRestart = {creates: window.creates, exists: game.anims.exists('walk'), warnings: log.slice()};
+    return out;
+  });
+  assert.deepEqual(r, {shared: true, seenByOtherScene: true, duplicateReturnsTheExisting: true, duplicateWarning: ['W:AnimationManager key already exists: walk'],
+    afterRestart: {creates: 2, exists: true, warnings: ['W:AnimationManager key already exists: walk']}});         // the restart ran create() again: the animation survived and the second create() warned
+}));
+await check('events-another-scenes-field-is-stale-after-it-restarts-and-start-returns-the-plugin-at-once', withPage(html({script: 'class G extends Phaser.Scene{constructor(){super("g")}create(){window.g=this;window.ready=true}}' +
+  'class U extends Phaser.Scene{constructor(){super("ui")}create(){window.ui=this;window.uiCreates=(window.uiCreates||0)+1;this.hud=this.add.text(0,0,"hp");}}' + GAME('{width:50,height:50}', 'G,U')}), {}, async page => {
+  await page.evaluate(() => { g.scene.launch('ui'); });
+  await page.waitForFunction(() => window.uiCreates === 1);
+  const r = await page.evaluate(async () => {
+    const frames = n => new Promise(res => { let k = 0; const f = () => { if (++k >= n) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+    const held = g.scene.get('ui').hud, out = {};
+    const returned = ui.scene.restart();
+    out.restartReturnsPlugin = returned === ui.scene; out.createdBeforeNextStep = window.uiCreates;       // start/restart only queue; nothing has happened yet
+    await frames(5);
+    const fresh = g.scene.get('ui').hud;
+    out.after = {creates: window.uiCreates, sameObject: held === fresh, heldActive: held.active, heldScene: held.scene === undefined ? 'undefined' : 'set', freshActive: fresh.active};
+    return out;
+  });
+  assert.deepEqual(r, {restartReturnsPlugin: true, createdBeforeNextStep: 1, after: {creates: 2, sameObject: false, heldActive: false, heldScene: 'undefined', freshActive: true}});
+}));
+await check('events-registry-and-scene-data-hold-live-objects-and-json-of-an-object-is-a-view-dump', withPage(html({script: SCENE('this.sprite=this.add.text(0,0,"x");this.other=this.add.text(0,0,"x");this.registry.set("hud",this.sprite);this.registry.set("score",5);this.data.set("hud",this.sprite);') + GAME('{width:50,height:50}')}), {}, async page => {
+  const r = await page.evaluate(() => {
+    const out = {};
+    out.sameReferenceInRegistry = game.registry.getAll().hud === sc.sprite; out.sameReferenceInSceneData = sc.data.getAll().hud === sc.sprite;
+    const dump = JSON.parse(JSON.stringify(sc.sprite)), other = JSON.parse(JSON.stringify(sc.other));
+    out.objectDumpKeys = Object.keys(dump).slice(0, 14);
+    out.registryDumpType = JSON.parse(JSON.stringify(game.registry.getAll())).hud.type; out.sceneDataDumpType = JSON.parse(JSON.stringify(sc.data.getAll())).hud.type;
+    out.textureKeysDiffer = dump.textureKey !== other.textureKey;                       // a Text object's canvas texture key is a fresh uuid per object
+    out.plainSnapshot = JSON.parse(JSON.stringify({version: 1, score: game.registry.get('score')}));
+    return out;
+  });
+  assert.deepEqual(r, {sameReferenceInRegistry: true, sameReferenceInSceneData: true,
+    objectDumpKeys: ['name', 'type', 'x', 'y', 'depth', 'scale', 'origin', 'flipX', 'flipY', 'rotation', 'alpha', 'visible', 'blendMode', 'textureKey'],
+    registryDumpType: 'Text', sceneDataDumpType: 'Text', textureKeysDiffer: true, plainSnapshot: {version: 1, score: 5}});
+}));
+
 await browser.close();
 server.close();
 const failed = results.filter(r => !r).length;

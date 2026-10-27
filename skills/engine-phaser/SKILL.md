@@ -43,8 +43,8 @@ Read the reference that matches the work, not all of them.
 
 ## Rules that earned their place
 
-- [general] **Import Phaser wherever a value is used.** A missing import compiles, then throws `Phaser is not defined`; add a
-  scanning test. [tested] The ESM build never sets `window.Phaser` (`config-esm-has-no-global`).
+- [tested] **Import Phaser wherever a value is used.** The ESM build never sets `window.Phaser` (`config-esm-has-no-global`), so a
+  file that uses it unimported throws `Phaser is not defined`; add a scanning test.
 - [general] **Never use wall-clock or `Math.random` in rules.** Use a seeded generator and a fixed timestep, and save the
   generator's state in the snapshot: otherwise a loaded game restarts the random stream and drifts from the original (test it by
   stepping a saved and a restored sim side by side).

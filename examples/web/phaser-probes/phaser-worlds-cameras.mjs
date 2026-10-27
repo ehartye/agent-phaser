@@ -248,4 +248,82 @@ const cost = await p.page.evaluate(async () => {
 p.check('hidden objects cost far less than offscreen ones', cost['10000 images far offscreen, hidden'] < cost['10000 images far offscreen'], cost);
 console.error('CPU ms per renderer.render call (comparison only):', JSON.stringify(cost));
 
+// 10. World to screen without rotation: (worldX - worldView.x) * zoom + cam.x, checked on pixels with a viewport offset and two zooms.
+const c10 = await p.page.evaluate(async () => {
+  const frames = (n) => new Promise((res) => { let k = 0; const f = () => { if (++k >= n) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+  const pix = (x, y) => new Promise((res) => game.renderer.snapshotPixel(Math.round(x), Math.round(y), (c) => res([c.r, c.g, c.b])));
+  const cam = scene.cameras.main, marker = scene.add.image(250, 120, 'px').setScale(2);          // an 8 x 8 white square centred on world (250, 120)
+  const out = [];
+  for (const [zoom, scrollX, scrollY, vx, vy] of [[2, 120, 40, 30, 20], [4, 107.5, 25, 10, 10]]) {
+    cam.setViewport(vx, vy, 300, 200).setZoom(zoom).setScroll(scrollX, scrollY);
+    await frames(3);
+    const sx = (250 - cam.worldView.x) * cam.zoom + cam.x, sy = (120 - cam.worldView.y) * cam.zoom + cam.y;
+    out.push({ zoom, at: [sx, sy], centre: await pix(sx, sy), edge: await pix(sx + 4 * zoom - 1, sy), outside: await pix(sx + 4 * zoom + 2, sy), wrongOrigin: await pix((250 - scrollX) * zoom + vx, (120 - scrollY) * zoom + vy) });
+  }
+  marker.destroy(); cam.setViewport(0, 0, 400, 300).setZoom(1).setScroll(0, 0);
+  return out;
+});
+p.check('the world-to-screen formula (worldX - worldView.x) * zoom + cam.x lands on the object at zoom 2 and 4 with a viewport offset; scroll alone does not', c10.every((r) => r.centre[0] === 255 && r.edge[0] === 255 && r.outside[0] === 0) && c10.every((r) => r.wrongOrigin[0] === 0), c10);
+
+// 11. Time-based follow smoothing: lerp 1 - exp(-dt / tau) every frame covers the same share of the distance whatever the frame rate; a fixed lerp does not.
+const c11 = await p.page.evaluate(async () => {
+  game.loop.sleep();
+  const cam = scene.cameras.main, target = scene.add.image(1000, 150, 'px');
+  const run = (frameMs, lerpFor) => {
+    cam.setScroll(0, 0); cam.startFollow(target, false, 1, 1);
+    cam.scrollX = 0; let now = performance.now();
+    const n = Math.round(1000 / frameMs);
+    for (let i = 0; i < n; i++) { cam.setLerp(lerpFor(frameMs), 1); now += frameMs; game.step(now, frameMs); }
+    const share = cam.scrollX / (1000 - 200);        // the camera is 400 wide, so a followed target settles at scrollX = 1000 - 200
+    cam.stopFollow(); return +share.toFixed(4);
+  };
+  const tau = 0.25, timeBased = (ms) => 1 - Math.exp(-(ms / 1000) / tau), fixed = () => 0.1;
+  const out = { timeBased: { fps60: run(1000 / 60, timeBased), fps30: run(1000 / 30, timeBased), fps144: run(1000 / 144, timeBased) }, fixed: { fps60: run(1000 / 60, fixed), fps30: run(1000 / 30, fixed), fps144: run(1000 / 144, fixed) } };
+  target.destroy(); cam.setScroll(0, 0); game.loop.wake();
+  return out;
+});
+const spread = (o) => Math.max(...Object.values(o)) - Math.min(...Object.values(o));
+p.check('lerp = 1 - exp(-dt / tau) set every frame gives the same follow progress at 30, 60 and 144 fps, where a fixed 0.1 does not', spread(c11.timeBased) < 0.01 && spread(c11.fixed) > 0.03, c11);
+
+// 12. At an integer footprint (zoom 3, art scale 1) texels are equal 3 px blocks wherever the sprite sits; a fractional position moves it a whole device pixel.
+const c12 = await p.page.evaluate(async () => {
+  const frames = (n) => new Promise((res) => { let k = 0; const f = () => { if (++k >= n) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+  const t = scene.textures.createCanvas('four', 4, 1), g = t.getContext();
+  ['#ff0000', '#00ff00', '#0000ff', '#ffffff'].forEach((c, i) => { g.fillStyle = c; g.fillRect(i, 0, 1, 1); }); t.refresh();
+  const cam = scene.cameras.main; cam.setZoom(3).setScroll(0, 0).centerOn(100, 50);
+  const img = scene.add.image(0, 0, 'four').setOrigin(0, 0);
+  const row = async (y) => { const px = await new Promise((res) => game.renderer.snapshot((im) => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0); res(x.getImageData(0, y, 400, 1).data); })); const runs = []; let start = -1, last = ''; for (let i = 0; i < 400; i++) { const key = px[i * 4] + ',' + px[i * 4 + 1] + ',' + px[i * 4 + 2]; const lit = key !== '0,0,0'; if (lit && key !== last) { runs.push({ colour: key, from: i, len: 1 }); } else if (lit) runs[runs.length - 1].len++; last = lit ? key : ''; } return runs; };
+  const out = [];
+  for (const x of [100, 100.4, 100.6, 101]) { img.setPosition(x, 50); await frames(3); out.push({ x, runs: await row(Math.round((50 - cam.worldView.y) * 3 + 1)) }); }
+  img.destroy(); cam.setZoom(1).setScroll(0, 0);
+  return out;
+});
+const lens = c12.map((r) => r.runs.map((run) => run.len));
+const starts = c12.map((r) => r.runs[0]?.from);
+p.check('at zoom 3 every texel of a 4-texel sprite is exactly 3 device pixels wide at any position, and 100.4 and 100.6 differ by one device pixel (not one texel)',
+  lens.every((l) => l.length === 4 && l.every((n) => n === 3)) && starts[2] - starts[1] === 1 && starts[3] - starts[0] === 3, c12);
+
+// 13. Camera filters grade everything the camera draws, UI included; a second camera for the UI, or a Layer filter, keeps the UI ungraded.
+const c13 = await p.page.evaluate(async () => {
+  const frames = (n) => new Promise((res) => { let k = 0; const f = () => { if (++k >= n) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+  const pix = (x, y) => new Promise((res) => game.renderer.snapshotPixel(x, y, (c) => res([c.r, c.g, c.b])));
+  for (const [key, css] of [['red', '#ff0000'], ['green', '#00ff00']]) { const c = scene.textures.createCanvas(key, 8, 8); c.context.fillStyle = css; c.context.fillRect(0, 0, 8, 8); c.refresh(); }
+  const cam = scene.cameras.main, out = {};
+  const pair = () => ({ world: scene.add.image(100, 100, 'green').setScale(2), ui: scene.add.image(300, 100, 'red').setScale(2).setAlpha(0.5) });   // half transparent, so drawing it twice (graded, then red over it) shows
+  const read = async () => ({ world: await pix(100, 100), ui: await pix(300, 100) });
+  const gray = cam.filters.external.addColorMatrix(); gray.colorMatrix.grayscale(1);
+  let o = pair(); await frames(3); out.sameCamera = await read(); o.world.destroy(); o.ui.destroy();
+  // a second camera draws the UI: the main camera ignores it, the UI camera ignores the world
+  const uiCam = scene.cameras.add(0, 0, 400, 300); o = pair(); cam.ignore(o.ui); uiCam.ignore(o.world);
+  await frames(3); out.uiCamera = await read(); o.world.destroy(); o.ui.destroy(); scene.cameras.remove(uiCam); cam.filters.external.remove(gray);
+  // a Layer filter grades the layer's children only
+  o = pair(); const layer = scene.add.layer([o.world]); layer.enableFilters().filters.internal.addColorMatrix().colorMatrix.grayscale(1);
+  await frames(3); out.layer = await read(); layer.destroy(); o.ui.destroy();
+  return out;
+});
+const grey = (px) => px[0] === px[1] && px[1] === px[2];
+p.check('a camera filter grades the UI drawn by the same camera; a second UI camera and a world Layer filter leave the UI red',
+  grey(c13.sameCamera.world) && grey(c13.sameCamera.ui) && grey(c13.uiCamera.world) && c13.uiCamera.ui[0] > 120 && c13.uiCamera.ui[0] < 136 && c13.uiCamera.ui[1] === 0 && grey(c13.layer.world) && c13.layer.ui[0] > 120 && c13.layer.ui[0] < 136 && c13.layer.ui[1] === 0, c13);
+
+
 await p.finish();

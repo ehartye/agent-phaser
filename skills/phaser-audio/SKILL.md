@@ -29,7 +29,7 @@ Phaser 4.2.1 owns loading, decoding, playback and lifecycle of exported recordin
 - [tested] **The gate and its flag are separate.** `sound.locked` clears on the next frame after the gesture, and Playwright's `page.evaluate` grants activation, so assert the gate with a real click and Phaser's own flags.
 - [tested] **`noAudio` hides bugs.** It accepts missing keys and emits nothing; the WebAudio manager throws on both. Do not use it as a test switch.
 - [general] **Phaser owns exported-recording loading and lifecycle; the sound tool owns authoring.** Missing reusable processing belongs in the sound tool, not copied into a game.
-- [general] **Version-pinned patches carry a removal condition.** The decode and visibility patches target Phaser 4.2.1 exactly; remove each when a reviewed upstream release fixes it.
+- [tested] **Version-pinned patches carry a removal condition.** The decode and visibility patches target Phaser 4.2.1 exactly and refuse any other version (`tests/phaser-patches-pinned.test.mjs`); remove each when a reviewed upstream release fixes it.
 
 ## Verify
 

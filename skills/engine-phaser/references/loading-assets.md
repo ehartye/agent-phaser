@@ -25,7 +25,7 @@ Where each asset loads, how keys and memory behave and which format to pick; how
 - [documented] Each cache has its own key space (an image `hero` and a JSON `hero` coexist); `setPrefix` becomes part of the key; a pack section may set its own `path`, `baseURL` and `prefix`, restored afterwards. Absolute `http`, `https`, `blob`, `data` and `capacitor` URLs bypass `path` (`src/loader/File.js`).
 - [general] With Vite, files in `public/` sit at the site root: set `loader.baseURL` from `import.meta.env.BASE_URL` rather than relying on a relative `assets/` path.
 - [tested] `anims.createFromAseprite(key)` reads `cache.json[key].frames[String(i)]` for each tag. Frames keyed `"0"`, `"1"` (or an array in order) work; frames named like `walk 0.aseprite` give a tag animation with zero frames and no warning. A second call for the same tag warns `AnimationManager key already exists` (`loader-aseprite-frames-must-be-numeric-keys`). `load.aseprite` also accepts a parsed object instead of a URL and stores the JSON under the same key.
-- [general] Animations are global, so create them once after loading, namespaced per atlas ([gotcha 5](../../phaser-rendering/references/phaser-4-api-and-effects-gotchas.md)), not in every scene's `create`.
+- [tested] Animations are global: two scenes shared one manager (`scene.anims === game.anims`), an animation made in one was visible from the other and survived a restart, and creating `walk` again warned `key already exists` and returned the existing animation (`loader-animations-are-global-shared-by-scenes-and-refuse-a-duplicate-key`). Create them once after loading, namespaced per atlas ([gotcha 5](../../phaser-rendering/references/phaser-4-api-and-effects-gotchas.md)), not in every scene's `create`.
 
 ## Choosing a format
 
@@ -49,7 +49,7 @@ Where each asset loads, how keys and memory behave and which format to pick; how
 
 - [tested] `load.removePack(packKey)` removes the textures and cache entries a pack added: three pack images freed three GL texture wrappers. The pack JSON itself stays cached; remove it with `cache.json.remove` (`loader-pack-progress-falls-back-and-remove-pack-frees-textures`).
 - [documented] `textures.remove(key)` destroys the texture and its GL texture at once. Game objects still showing it fail on the next render, and animations that name its frames stay in the global manager until `anims.remove` (`src/textures/TextureManager.js`). Swap or destroy the users first.
-- [general] In a restart or level-change test, assert that `textures.getTextureKeys().length` and `renderer.glTextureWrappers.length` return to their starting values.
+- [tested] In a restart or level-change test, assert that `textures.getTextureKeys().length` and `renderer.glTextureWrappers.length` return to their starting values: ten restarts of a clean scene left both flat, and a texture added under a new key each restart grew both by ten (`phaser-verification-leaks.mjs`).
 
 ## Verify
 

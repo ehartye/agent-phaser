@@ -60,12 +60,13 @@ const census = (game, scene) => JSON.stringify(Object.fromEntries(
 
 - [documented] `scene.start(key, data)` and `launch(key, data)` store `data` by reference as `settings.data`; the scene reads it in `init(data)` and `create(data)`, or `sys.getData()` (`src/scene/Systems.js`).
 - [tested] `Systems#start` assigns the data only when it is truthy, so `start('s')` and `restart()` reuse the previous call's data and `restart({})` clears it (`events-start-without-data-keeps-the-previous-data`). Pass the full object every time.
-- [general] Scenes should not read each other's fields (`scene.get('ui').hud`): the other scene may be restarting and the reference is stale. Let both subscribe to the sim host or send a typed event through it.
-- [general] Return a result to the caller by calling a method on the plugin or emitting through it; `start` has no return channel.
+- [tested] Scenes should not read each other's fields (`scene.get('ui').hud`): after the other scene restarted, a reference held from before was a destroyed object (`active` false, `scene` undefined) and the field held a new one (`events-another-scenes-field-is-stale-after-it-restarts-and-start-returns-the-plugin-at-once`). Let both subscribe to the sim host or send a typed event through it.
+- [tested] `start` has no return channel: `scene.start()` and `scene.restart()` only queue the change and return the scene plugin, so `init` and `create` had not run when the call returned (same check). Return a result to the caller by calling a method on the plugin or emitting through it.
 
 ## Save and load boundary
 
-- [general] A snapshot is `sim.save()`: versioned, plain, JSON-safe data ([saves in architecture](architecture.md)). Never serialise `registry.getAll()`, `scene.data` or game objects: they hold live references and view-only values.
+- [general] A snapshot is `sim.save()`: versioned, plain, JSON-safe data ([saves in architecture](architecture.md)).
+- [tested] Do not serialise `registry.getAll()`, `scene.data` or game objects. They hold the live objects (`getAll().hud` was the same Text), and `JSON.stringify` does not throw: it writes each object's `toJSON` view dump (`name`, `type`, `x`, `y`, `scale`, `alpha`, `textureKey`, ...), where a Text's `textureKey` is a fresh uuid, so the output is neither the sim state nor reproducible (`events-registry-and-scene-data-hold-live-objects-and-json-of-an-object-is-a-view-dump`).
 - [general] Restore in this order: build the sim from the snapshot, start the scenes, let views rebuild from the sim's state and events, then write the registry read models from the restored sim. A load must never write the registry first and trust it.
 
 ## Verify

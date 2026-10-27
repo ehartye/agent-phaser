@@ -26,8 +26,9 @@ replay and tests work. Read the reference that matches the work. Phaser's own ag
   hand-driven `game.step` loop moves timers and animations but not tweens, and a 300 ms `tweens.pauseAll()` or `scene.sleep()` is caught up on resume (gaps over 500 ms are cut to
   33 ms). Freeze with `tweens.setGlobalTimeScale(0)` or `tween.pause()`; test with `page.clock.runFor`. Probe checks: `tween-wall-clock`, `short-pause-catches-up`,
   `page-clock-drives-tweens`.
-- [general] **Rules count simulation ticks; tweens, timers and animation events are view-only.** Their firing frame depends on the display rate, `timeScale` and delta
-  smoothing, so a rule that waits on one breaks replay and saves. Timers are for flashes and UI delays.
+- [tested] **Rules count simulation ticks; tweens, timers and animation events are view-only.** Their firing frame depends on the display rate, `timeScale` and delta
+  smoothing (probe checks `tween-wall-clock`, `timer-semantics`, `timestep-smoothing`, `fps-limit`: after 1,167 virtual ms the timer had fired, the animation was on frame 3 and
+  the tween had barely started), so a rule that waits on one breaks replay and saves. Timers are for flashes and UI delays.
 - [tested] **Phaser smooths `delta`, and drops long stalls.** The default is a ten-frame mean: a 100 ms hitch arrives as ten frames of 25 ms; a frame over 200 ms is replaced by an
   older value, so its time is lost; the first 120 frames after start, focus or resume (and every blurred frame) cap each delta at 16.67 ms. `fps: { smoothStep: false }` passes
   the raw delta; `game.step` never smooths. Probe check: `timestep-smoothing`.

@@ -24,7 +24,8 @@ Targets Phaser 4.2.1; version-sensitive claims carry the version or a probe name
 - [general] **A strict pixel-only UI** draws every UI and message pixel from agent-sprites bitmap fonts, skins and icons (no browser
   text, no Phaser `Text`; ban `Text` creation with a test). The UI layer may have a higher resolution than the gameplay layer;
   require whole physical pixels per authored source pixel in each context.
-- [general] **Fractional logical units and camera scales are valid** when final footprints and paint origins align.
+- [tested] **Fractional camera scales are valid** when the final footprint is whole device pixels: art scale 2 at zoom 3.5, 4.5 and 7.5 drew exact 7, 9 and 15 pixel blocks at device pixel ratios 1 and 1.5 (`source-pixels.mjs`, hardware lane).
+- [general] **Fractional logical units are valid** on the same condition, with paint origins aligned.
 - [tested] **A character that is not in the font is skipped**: no glyph, no advance, no `?`, so test the glyph repertoire of every
   string. `RetroFont.Parse` returns the cache entry (do not wrap it in `{ data }`), and `setMaxWidth` wraps at spaces only and ignores
   `letterSpacing` (`node examples/web/phaser-probes/phaser-pixel-ui-text.mjs <project>`).

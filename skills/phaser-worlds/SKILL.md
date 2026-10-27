@@ -31,7 +31,7 @@ How a Phaser 4.2.1 game draws, lights and moves a camera through a world bigger 
 - [tested] **Lights.** A lit object is black until `scene.lights.enable()`. Over `maxLights` (10) Phaser keeps the first lights created, not the nearest, so hide the extras yourself. Cone angles are full widths; rotation 0 points right and PI/2 points down.
 - [tested] **Particles.** Emitter particles live in emitter space (moving the emitter moves them), `frequency: 0` emits per frame so density follows the monitor, `maxParticles` is a lifetime cap, and the WebGL path does not round vertices. A strict pixel game uses a pooled sprite set.
 - [tested] **`setScrollFactor(0)` is not a HUD under zoom.** Put the HUD in its own scene with its own camera.
-- [general] **Camera filters belong to the world camera only**, or to a world Layer when the UI shares the camera, so UI and lights are not graded twice.
+- [tested] **Camera filters belong to the world camera only**, or to a world Layer when the UI shares the camera: a camera filter grayed the UI the same camera drew, while a second UI camera and a Layer filter left it red (`phaser-worlds-cameras.mjs`).
 
 ## Probes
 

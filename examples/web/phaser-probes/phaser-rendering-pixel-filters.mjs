@@ -102,6 +102,20 @@ const { evidence, errors } = await runProbe('pixel-filters', async page => {
     blurFirst.forEach(f => cam.filters.external.remove(f));
     out.order = { blockyThenBlur: { uniform8: uniformBlocks(o1.px, 8), notInSource: notIn(o1.colours, base.colours) }, blurThenBlocky: { uniform8: uniformBlocks(o2.px, 8) } };
 
+    // 5b. Order does not change the cost of the passes: each filter is one full-size pass whatever came before it, so Pixelate or Blocky
+    // ahead of a Blur does not shrink the Blur's work. Count the pooled framebuffers a frame asks for, and their sizes, in both orders.
+    const passes = async list => {
+      const added = list.map(add => add(cam.filters.external)), pool = game.renderer.drawingContextPool, get = pool.get, sizes = [];
+      pool.get = function (w, h) { sizes.push(w + 'x' + h); return get.apply(this, arguments); };
+      await H.frames(2); sizes.length = 0; await H.frames(1);
+      const draws = await H.draws();
+      pool.get = get; added.forEach(f => cam.filters.external.remove(f));
+      const bySize = {}; sizes.forEach(s => { bySize[s] = (bySize[s] || 0) + 1; });
+      return { framebuffers: bySize, draws: draws.elements + draws.instanced };
+    };
+    const addBlur = fl => fl.addBlur(0, 2, 2, 1, 0xffffff, 4), addBlocky = fl => fl.addBlocky({ size: 8 }), addPixelate = fl => fl.addPixelate(8);
+    out.passes = { none: await passes([]), blockyBlur: await passes([addBlocky, addBlur]), blurBlocky: await passes([addBlur, addBlocky]), pixelateBlur: await passes([addPixelate, addBlur]), blurPixelate: await passes([addBlur, addPixelate]), blurOnly: await passes([addBlur]) };
+
     // 6. A filter on one object leaves everything outside it alone: the left half of the source is blocked, the right half is not.
     scene.src.destroy();
     scene.left = scene.add.image(0, 0, 'src').setOrigin(0, 0).setCrop(0, 0, N / 2, N);
@@ -142,6 +156,13 @@ assert.ok(near(evidence.gradientMap.light[0], 255) && evidence.gradientMap.light
 // Order matters.
 assert.ok(evidence.order.blockyThenBlur.uniform8 < 1, 'Blocky then Blur leaves soft edges');
 assert.equal(evidence.order.blurThenBlocky.uniform8, 1, 'Blur then Blocky ends on blocks');
+// Order does not shrink the work: the same pooled framebuffers and the same number of draws in either order.
+assert.deepEqual(evidence.passes.blockyBlur.framebuffers, evidence.passes.blurBlocky.framebuffers, 'Blocky and Blur ask for the same framebuffer sizes in either order');
+assert.deepEqual(evidence.passes.pixelateBlur.framebuffers, evidence.passes.blurPixelate.framebuffers, 'Pixelate and Blur ask for the same framebuffer sizes in either order');
+assert.equal(evidence.passes.blockyBlur.draws, evidence.passes.blurBlocky.draws, 'the same draw count in either order');
+assert.ok(evidence.passes.blurOnly.draws > evidence.passes.none.draws && evidence.passes.blockyBlur.draws > evidence.passes.blurOnly.draws, 'each added filter adds draws');
+assert.deepEqual(Object.keys(evidence.passes.blockyBlur.framebuffers), ['160x120'], 'every pass is full size: no filter shrinks the framebuffer');
+assert.ok(Object.values(evidence.passes.blockyBlur.framebuffers)[0] > Object.values(evidence.passes.blurOnly.framebuffers)[0], 'the check sees an added filter');
 // An object filter stays on the object.
 assert.equal(evidence.objectFilter.blocksInLeftHalf, 1, 'the filtered object is blocky');
 assert.equal(evidence.objectFilter.rightHalfEmpty, true, 'nothing is drawn outside the cropped, filtered object');

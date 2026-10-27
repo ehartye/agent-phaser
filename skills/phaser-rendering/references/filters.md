@@ -15,7 +15,9 @@ Filters replace Phaser 3 FX, masks and PostFX pipelines. Phaser's own API tour i
 | Procedural pattern, not a post effect | Shader, Gradient, Noise ([shaders](custom-shaders-in-phaser.md)) | the input is existing pixels: filter |
 | A pixel effect Phaser lacks | custom filter ([shaders](custom-shaders-in-phaser.md)) | a built-in chain already reproduces it |
 
-- [general] Filters are the expensive end of the toolbox: each one is at least one full pass over a pooled framebuffer. Prefer one camera or Layer filter over a filter per object.
+- [documented] Each filter is a pass: `BaseFilterShader#run` takes an output `DrawingContext` from the pool (`drawingContextPool.get`), draws the input through the shader and releases the input (`src/renderer/webgl/renderNodes/filters/BaseFilterShader.js`).
+- [tested] Adding a Blocky filter to a camera that already had a Blur added one draw (9 to 10) at the full 160 x 120 size (`phaser-rendering-pixel-filters.mjs`, `passes`). Filters are the expensive end of the toolbox.
+- [general] Prefer one camera or Layer filter over a filter per object.
 
 ## Internal, external and what runs first
 
@@ -67,4 +69,4 @@ Filters replace Phaser 3 FX, masks and PostFX pipelines. Phaser's own API tour i
 ## Custom filters and list order
 
 - [tested] A fragment-only `BaseFilterShader` registered through `render.renderNodes` and added with `obj.filters.internal.add(new Controller(obj.filterCamera))` ran; build it as in [custom shaders](custom-shaders-in-phaser.md), including the two construction traps.
-- [general] Order inside a list is draw order, so put cheap size-reducing filters (Pixelate, Quantize) before expensive ones (Blur) when the look allows.
+- [tested] Order inside a list is draw order: Blocky then Blur ends soft, Blur then Blocky ends on blocks. It does not change the cost: Blocky with Blur and Pixelate with Blur each asked the pool for the same framebuffers (36 requests, all 160 x 120) and made the same 10 draws in either order, so no filter here shrinks the work of the one after it. Choose the order for the look; Quantize was not measured.

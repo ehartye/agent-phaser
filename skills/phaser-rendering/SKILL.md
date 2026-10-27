@@ -48,7 +48,7 @@ Phaser 4 replaced the Phaser 3 renderer with render nodes, filters and GPU layer
 - [tested] **Verify on real hardware.** Headless software GL drew HARD_LIGHT and MULTIPLY_TWO untinted; a supplied WebGL 2 context breaks `smoothPixelArt`, Gradient, GradientMap and noise normal maps. Print the renderer string (`WEBGL_debug_renderer_info`) with every pixel claim.
 - [documented] **Phaser 3 advice that is now wrong:** `setPipeline`, `preFX` and `postFX`, `BitmapMask` (removed) and `setMask` (a warning, then nothing), `setTintFill`, Mesh and Plane, and canvas blend modes in WebGL. Use filters, `setLighting(true)`, tint modes and Mesh2D.
 - [general] **Isolate before theorising.** Build the smallest standalone object that should work inside the live scene and compare it with the real pipeline; this found several Phaser bugs in minutes.
-- [general] **Version-pinned patches carry a removal condition.** The install-time patches in `scripts/assets` target Phaser 4.2.1 exactly, fail on any other version and say what makes them unnecessary.
+- [tested] **Version-pinned patches carry a removal condition.** The install-time patches in `scripts/assets` target Phaser 4.2.1 exactly, fail on any other version and say what makes them unnecessary (`tests/phaser-patches-pinned.test.mjs`).
 
 ## Not covered here
 
