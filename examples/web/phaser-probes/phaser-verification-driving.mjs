@@ -137,6 +137,26 @@ try {
     await page.close();
   }
 
+  // 3b. Phaser.HEADLESS installs none of the plugins named in plugins.global; a BOOT-event install from preBoot restores one, and a throwing step() still runs the scenes.
+  {
+    const withPlugin = (type, preBoot) => `(() => { const SimPlugin = class extends Phaser.Plugins.BasePlugin {};
+      return {type: Phaser.${type}, plugins: {global: [{key: 'Sim', plugin: SimPlugin, start: true}]},
+        ${preBoot ? "callbacks: {preBoot: game => { game.events.once(Phaser.Core.Events.BOOT, () => game.plugins.install('Sim', SimPlugin, true)); }}," : ''}
+        scene: class extends Phaser.Scene { create() { window.found = !!this.plugins.get('Sim'); window.ticks = 0; this.events.on('update', () => { window.ticks++; }); window.ready = true; } }}; })()`;
+    const found = async config => { const {page} = await open(config); const value = await page.evaluate(() => window.found); await page.close(); return value; };
+    const r = {canvas: await found(withPlugin('CANVAS')), headless: await found(withPlugin('HEADLESS')), headlessWithBootInstall: await found(withPlugin('HEADLESS', true))};
+    assert.deepEqual(r, {canvas: true, headless: false, headlessWithBootInstall: true});
+    const {page} = await open(withPlugin('HEADLESS'));
+    const steps = await page.evaluate(() => {
+      game.loop.sleep(); const before = window.ticks;
+      try { game.step(1, 16); } catch (e) { /* preRender of the missing renderer */ }
+      return window.ticks - before;
+    });
+    assert.equal(steps, 1, 'the call that throws has already advanced the scene one tick');
+    ok('Phaser.HEADLESS: global plugins are not installed (a BOOT-event install from preBoot works); a throwing step() still ran the scenes once', {...r, ticksFromThrowingStep: steps});
+    await page.close();
+  }
+
   // 4. Seeds: only Phaser.Math.RND (and its helpers) follows the config seed; Between and Shuffle use Math.random.
   {
     const config = `{type: Phaser.HEADLESS, seed: ['fixed'], scene: class extends Phaser.Scene { create() {

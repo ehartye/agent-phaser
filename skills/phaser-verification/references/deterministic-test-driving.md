@@ -31,6 +31,7 @@ Read this before you write a test that advances a game, replays input or compare
 | Phaser's own jsdom helper | scene logic in a unit-test runner | a vitest and jsdom install | no WebGL, no pixels |
 
 - [tested] With `HEADLESS`, `game.renderer` is `null`, a canvas still exists in the DOM, `game.step()` threw `Cannot read properties of null (reading 'preRender')` and `headlessStep()` stepped Arcade physics normally.
+- [tested] With `HEADLESS`, no plugin named in `plugins.global` is installed, so `scene.plugins.get(key)` returns `null` (`WEBGL` and `CANVAS` install it). Installing it from `callbacks.preBoot` with `game.events.once(Phaser.Core.Events.BOOT, () => game.plugins.install(key, Plugin, true))` made it available in the first scene's `create()`. A failing `game.step()` has already run the scenes' `update` once: call `game.loop.sleep()` first and read counters before the throwing call (`phaser-verification-driving.mjs`, block 3b).
 - [general] In a scratch project (not committed here) `vitest@3.2.4` and `jsdom@26.1.0` ran the package's `tests/setup.js` as the vitest setup file, booted `new Phaser.Game({type: Phaser.HEADLESS, ...})` and stepped Arcade physics with `headlessStep` in about 10 ms. Four of the package's own 1,999 tween and physics tests failed in that run, so do not treat its suite as a green baseline (`tests/TESTING.md` lists what Phaser does not test: pixels and WebGL renderer code). This recipe is not committed here.
 
 ## Driving with page.clock

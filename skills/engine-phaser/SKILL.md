@@ -50,7 +50,8 @@ Read the reference that matches the work, not all of them.
   survive a restart. Restart ten times and require a listener census, textures and display objects not to grow
   ([events and data](references/events-and-data.md)).
 - [tested] **Fail loudly at boot.** `parent` is an element id (`'#game'` lands in `body`), a 404 is never retried, and `complete`
-  fires with failures: assert the canvas parent and gate the first scene on `totalFailed === 0`
+  fires with failures: assert the canvas parent and gate the first scene on `totalFailed === 0` and on every requested key
+  existing in its cache, because a response that cannot be decoded is not counted
   ([config](references/config-and-boot.md), [loading](references/loading-assets.md)).
 - [tested] **Integer scale is not automatic.** `FIT` ignores `zoom` and scales by 2.5; `snap` needs `min`; the canvas is not
   device-pixel aware (`NONE`, `zoom: 1 / dpr`). Test sizes at several window sizes and ratios

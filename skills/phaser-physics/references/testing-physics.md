@@ -19,7 +19,7 @@ How to test collision and movement so a failure names its cause. Generic frame s
 
 - [general] Boot the smallest scene that shows the case, build the bodies, step N times, read `body.x`, `body.y`, `blocked`, `touching`, and return plain data. Never return Phaser objects across `page.evaluate`. Assert in Node.
 - [tested] Prove a limit from both sides: below it zero failures over 25 start phases, above it at least one, and the fix (`setMaxVelocity`, `tileBias`) back to zero. The Arcade probe does this at 600, 700, 1200 and 3000 px/s; a test that only shows the passing side proves nothing.
-- [general] Use the default `HEADLESS` type unless a GPU tile layer or filter is involved; software WebGL is enough for collision logic and says nothing about speed.
+- [general] Use the default `HEADLESS` type unless a GPU tile layer or filter is involved; software WebGL is enough for collision logic and says nothing about speed. `HEADLESS` installs none of the `plugins.global` entries ([deterministic test driving](../../phaser-verification/references/deterministic-test-driving.md)).
 - [general] Prove a regression test by mutation: put the bug back (`tileBias` to 16, `killAndHide` for `disableBody`), watch the probe fail, restore.
 
 ## Snapshot and restore

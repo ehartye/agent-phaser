@@ -249,6 +249,53 @@ await check('loader-http-errors-are-not-retried-network-errors-are', async () =>
     assert.deepEqual(r.has, [true, false, false]);
   } finally { await page.close(); }
 });
+await check('loader-decode-failure-is-not-counted-in-total-failed', async () => {
+  const page = await routed(html({script: CAPTURE + `class S extends Phaser.Scene{constructor(){super("s")}preload(){
+      this.load.image("ok","/img/ok.png");this.load.image("gone","/img/gone.png");this.load.image("junk","/img/junk.png");
+      this.load.on("loaderror",f=>log.push("loaderror:"+f.key));this.load.on("complete",(l,done,failed)=>log.push("complete:"+done+":"+failed))}
+      create(){window.sc=this;window.ready=true}}` + GAME()}),
+    (name, route) => name === 'gone.png' ? route.fulfill({status: 404, body: 'no'}) : name === 'junk.png' ? route.fulfill({status: 200, contentType: 'image/png', body: 'not an image'}) : ok(route));
+  try {
+    const r = await page.evaluate(() => ({log, totalFailed: sc.load.totalFailed, has: ['ok', 'gone', 'junk'].map(k => sc.textures.exists(k))}));
+    assert.deepEqual(r.log.filter(l => l.startsWith('loaderror')), ['loaderror:gone']);          // the 404 raises loaderror; the undecodable 200 does not
+    assert.equal(r.totalFailed, 1);                                                               // only the 404 is counted
+    assert.equal(r.log.filter(l => l.includes('Failed to process file')).length, 1);              // the decode failure is one console line
+    assert.deepEqual(r.has, [true, false, false]);                                                // the cache check is what sees it
+  } finally { await page.close(); }
+});
+await check('loader-global-timeout-is-overridden-by-the-file-default', async () => {
+  const hang = () => new Promise(() => {});                                                       // never answers: the request stays open
+  const script = adapter => `window.errs=[];window.seen=[];const _s=XMLHttpRequest.prototype.send;XMLHttpRequest.prototype.send=function(...a){seen.push(this.timeout);return _s.apply(this,a)};
+    class S extends Phaser.Scene{constructor(){super("s")}preload(){window.started=true;window.fails=[];
+      ${adapter ? 'this.load.on("addfile",(k,t,l,file)=>{if(!file.xhrSettings.timeout)file.xhrSettings.timeout=this.load.xhr.timeout});' : ''}
+      this.load.maxRetries=0;this.load.image("hang","/img/hang.png");this.load.image("explicit","/img/explicit.png",{timeout:300});
+      this.load.on("loaderror",f=>fails.push(f.key));this.load.on("complete",()=>{window.done=true})}create(){window.ready=true}}` + GAME('{loader:{timeout:200}}');
+  const plain = await routed(html({script: script(false)}), hang, 'window.started');
+  try {
+    assert.equal(await plain.evaluate(() => game.config.loaderTimeout), 200);                    // the global timeout is configured...
+    const seen = await plain.evaluate(() => new Promise(r => setTimeout(() => r(window.seen.slice()), 600)));
+    assert.deepEqual(seen.slice().sort(), [0, 300]);                                              // ...but the file default 0 replaced it on the file that set nothing
+    assert.equal(await plain.evaluate(() => window.done === true), false);                        // so that request never ends the load
+  } finally { await plain.close(); }
+  const fixed = await routed(html({script: script(true)}), hang, 'window.started');
+  try {
+    await fixed.waitForFunction(() => window.done === true);                                       // finite failure for both files
+    const r = await fixed.evaluate(() => ({seen: window.seen.slice().sort(), fails: window.fails.slice().sort()}));
+    assert.deepEqual(r, {seen: [200, 300], fails: ['explicit', 'hang']});                         // the explicit 300 ms was kept; the default-zero file inherited 200
+  } finally { await fixed.close(); }
+});
+await check('loader-malformed-json-throws-after-failed-processing', async () => {
+  const page = await routed(html({script: CAPTURE + `window.errs=[];window.addEventListener("error",e=>errs.push(e.message));
+      class S extends Phaser.Scene{constructor(){super("s")}preload(){window.started=true;this.load.atlas("a","/img/atlas.png","/img/bad.json")}create(){window.sc=this;window.ready=true}}` + GAME()}),
+    (name, route) => name === 'bad.json' ? route.fulfill({status: 200, contentType: 'application/json', body: '{bad'}) : ok(route), 'window.started');
+  try {
+    await page.waitForFunction(() => window.errs.length > 0);                                      // an uncaught exception from the loader's XHR callback
+    const r = await page.evaluate(() => ({err: window.errs[0], processed: log.some(l => l.includes('Failed to process file')), has: [sc?.textures.exists('a') ?? false, game.cache.json.exists('a')]}));
+    assert.match(r.err, /SyntaxError/);
+    assert.equal(r.processed, true);
+    assert.deepEqual(r.has, [false, false]);                                                      // the key is absent, so a cache check reports it
+  } finally { await page.close(); }
+});
 await check('loader-duplicate-key-is-silent-and-completes-at-once', async () => {
   const page = await routed(html({script: CAPTURE + `class S extends Phaser.Scene{constructor(){super("s")}preload(){this.load.image("ok","/img/ok.png")}create(){window.sc=this;window.ready=true}}` + GAME()}), (n, route) => ok(route));
   try {
