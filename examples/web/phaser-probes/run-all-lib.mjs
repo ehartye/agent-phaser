@@ -10,7 +10,7 @@
  */
 export const LANES = ['software', 'either', 'hardware', 'manual'];
 
-const rendering = ['render-graph', 'filters', 'stencil', 'mesh-and-gpu-layer', 'textures-and-shaders', 'webgl2-context'].map(n => ({ file: `phaser-rendering-${n}.mjs`, lane: 'either' }));
+const rendering = ['render-graph', 'filters', 'stencil', 'mesh-and-gpu-layer', 'textures-and-shaders', 'webgl2-context', 'pixel-filters', 'smooth-pixel-art'].map(n => ({ file: `phaser-rendering-${n}.mjs`, lane: 'either' }));
 const worlds = ['cameras', 'layers', 'lights', 'particles', 'tilemaps'].map(n => ({ file: `phaser-worlds-${n}.mjs`, lane: 'either' }));
 const software = ['engine-phaser-foundations', 'phaser-audio-manager', 'phaser-audio-sounds', 'phaser-input-gamepad', 'phaser-input-keyboard', 'phaser-input-pointer', 'phaser-motion-clocks',
   'phaser-physics-arcade', 'phaser-physics-matter', 'phaser-physics-paths', 'phaser-physics-tilemap', 'phaser-pixel-ui-panels', 'phaser-pixel-ui-text',

@@ -25,12 +25,13 @@ Phaser 4 replaced the Phaser 3 renderer with render nodes, filters and GPU layer
 | Two-colour tint | `MULTIPLY_TWO` with `setTint2` | check on a hardware GPU |
 | OVERLAY, DARKEN or another canvas blend mode | camera Blend filter fed a camera-sized DynamicTexture | fill it neutral gray, keep it opaque |
 
-- [tested] The table is backed by six probes in `examples/web/phaser-probes/phaser-rendering-*.mjs`; each reference names the one that asserts its claims.
+- [tested] The table is backed by eight probes in `examples/web/phaser-probes/phaser-rendering-*.mjs`; each reference names the one that asserts its claims.
 
 | You are about to | Read |
 | --- | --- |
 | Reason about batching, count draw calls, read the render tree, write a custom render node, or port a pipeline | [Render system overview](references/render-system-overview.md) |
 | Add or debug a filter, mask, blur or glow; choose filter versus shader versus stencil | [Filters](references/filters.md) |
+| Pixelate, posterise or recolour pixel art (Blocky, Pixelate, Quantize, GradientMap), or choose `smoothPixelArt` for a fractional zoom | [Pixel-art filters](references/pixel-art-filters.md) |
 | Use Stencil, StencilReference, CustomContext or an alpha strategy | [Stencil and CustomContext](references/stencil-and-custom-context.md) |
 | Draw a deformable textured polygon | [Mesh2D](references/mesh2d-and-triangle-batching.md) |
 | Draw thousands of sprites or choose between sprite, Blitter and layer | [SpriteGPULayer and batching](references/sprite-gpu-layer-and-batching.md) |
