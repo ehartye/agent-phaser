@@ -6,18 +6,24 @@ Browser launch configuration and keeping frozen evidence outside live inputs. In
 
 ```ts
 // playwright.config.ts
+import { createHash } from 'node:crypto';
 // ANGLE backend by platform: d3d11 on Windows, metal on macOS, gl elsewhere
 const angle = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
+// One strict port per checkout (5100-5199, from this folder's path), so parallel worktrees neither collide nor reuse each other's server
+const port = process.env.PW_PORT ?? String(5100 + (parseInt(createHash('sha1').update(process.cwd()).digest('hex').slice(0, 8), 16) % 100));
 export default defineConfig({
   testDir: 'tests/browser',
   use: {
-    baseURL: 'http://127.0.0.1:5199',
+    baseURL: `http://127.0.0.1:${port}`,
     viewport: { width: 1280, height: 720 },
     launchOptions: { args: [`--use-angle=${angle}`, '--ignore-gpu-blocklist', '--force_high_performance_gpu'] },   // same as gpuArgs()
   },
-  webServer: { command: 'npx vite --config vite.evidence.config.mjs', url: 'http://127.0.0.1:5199', reuseExistingServer: false },
+  webServer: { command: `npx vite --config vite.evidence.config.mjs --port ${port} --strictPort`, url: `http://127.0.0.1:${port}`, reuseExistingServer: false },
 });
 ```
+
+- [general] A fixed port fails loudly when a sibling worktree already holds it (`is already used`), and with `reuseExistingServer: true` it passes against the other tree's code. Derive the port from the checkout as above, keep it strict, and print it in the run header. A 1-in-100 hash clash between two checkouts still fails with the strict-port error, so it never goes unnoticed. The harness template does this in [`playwright.config.mjs`](../../../examples/web/harness/playwright.config.mjs).
+- [general] A game page should declare an icon (`<link rel="icon" href="data:,">`) or its dev server should answer `/favicon.ico` (204). In one run (Windows, Playwright 1.63.0, Chromium 153), `channel: 'chromium'` requested it and a 404 produced `Failed to load resource: the server responded with a status of 404`, which a console-error gate reports and which names no URL; the default headless shell made no such request. Log failed request URLs (`requestfailed`, or the server log) next to the console gate so a favicon is told apart from a missing game file.
 
 - [general] The same three flags are exported as `gpuArgs()` (with `angleBackend()`) from [`examples/web/verify-checks.mjs`](../../../examples/web/verify-checks.mjs).
   On a hybrid-GPU laptop the first two are not enough. [tested] On one Windows 11 laptop with an integrated and a discrete GPU (Playwright 1.63.0,

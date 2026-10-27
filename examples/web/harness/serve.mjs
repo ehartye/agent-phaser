@@ -12,6 +12,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.mjs': 'text/javascript; c
 const port = Number(process.argv[2] ?? process.env.PORT ?? 5199);
 http.createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+  if (path === '/favicon.ico') { res.writeHead(204).end(); return; }   // some Chromium launch modes ask for it; a 404 becomes a console error that names no URL
   const file = path === '/phaser.js' ? PHASER : normalize(join(ROOT, path === '/' ? 'index.html' : path));
   if (file !== PHASER && (!file.startsWith(ROOT + sep) || file.includes(`${sep}node_modules${sep}`) || file.includes(`${sep}tests${sep}`))) { res.writeHead(403).end('forbidden'); return; }
   let stat;

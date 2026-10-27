@@ -29,6 +29,11 @@ Read this before you add browser tests to a pipeline, or when a test passes on C
 - [documented] Chromium is removing the automatic software WebGL fallback; headless runs opt in with `--enable-unsafe-swiftshader` ([SwiftShader notes](https://chromium.googlesource.com/chromium/src/+/798e59c5275d4131797e8ea2e96e6c6000256b58/docs/gpu/swiftshader.md)). It was not needed in the run above, so keep the flag on Linux runners rather than find out after an upgrade.
 - [general] Put the renderer class in the test report on every run and assert it when a test depends on it; the check is `not.toMatch(/swiftshader|llvmpipe|software|basic render/i)` on `WEBGL_debug_renderer_info` ([GPU setup](verifying-on-a-gpu.md)).
 
+## Starting processes from a gate script
+
+- [general] `spawn(cmd, args, { shell: true })`, the usual way to make `npx` and other `.cmd` shims start on Windows, joins the arguments with spaces and does not quote them (Node prints `DEP0190`). In one run (Windows 11, Node 24.18) `node -e "setTimeout(()=>{},4000)"` reached the shell with its quotes stripped, `>{}` became a redirect that created a file named `{}`, and the failure looked like a bug in the wrapped command. Any wrapper that forwards arbitrary commands (a GPU lock, a lane runner, a retry wrapper) hits it once an argument holds a space, quote, parenthesis or angle bracket.
+- [tested] Start Node entry points directly: `spawn(process.execPath, [script, ...args])` with no shell, and resolve a tool's JavaScript entry point (`node_modules/@playwright/test/cli.js`) instead of its `.cmd` shim. [`examples/web/harness/run-node.mjs`](../../../examples/web/harness/run-node.mjs) is that helper in about ten lines, and its merge-lane test passes `(a) {b} > "c" 'd' & e` through unchanged. If a shim is unavoidable, quote every argument yourself before using the shell.
+
 ## When WebGL is missing
 
 - [tested] With `--disable-webgl`, `type: Phaser.AUTO` booted on the Canvas renderer (`game.renderer.type === 1`) with no console line, and `type: Phaser.WEBGL` failed with `Cannot create WebGL context, aborting.` and never reached `create`. A smoke test built on `AUTO` can pass on a runner whose WebGL is broken.

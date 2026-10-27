@@ -1,6 +1,16 @@
+import { createHash } from 'node:crypto';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@playwright/test';
 
-const port = process.env.PW_PORT ?? '5199';
+// One port per checkout: parallel worktrees would otherwise collide on a fixed port, or (with server reuse) test each other's code.
+// PW_PORT overrides; the main process leaves its answer in the environment because the workers load this file again.
+if (!process.env.PW_PORT) {
+  const checkout = dirname(fileURLToPath(import.meta.url));
+  process.env.PW_PORT = String(5100 + (parseInt(createHash('sha1').update(checkout).digest('hex').slice(0, 8), 16) % 100));
+  console.log(`[harness] port ${process.env.PW_PORT} (from this checkout's path; set PW_PORT to choose)`);
+}
+const port = process.env.PW_PORT;
 // SOFTWARE_GL=1 (CI with no GPU): Chromium on its own SwiftShader; tests tagged @gpu are skipped (tests/fixtures.mjs).
 const software = !!process.env.SOFTWARE_GL;
 // Platform ANGLE backend for a real GPU. On a laptop with two GPUs add '--force_high_performance_gpu' (see verifying-on-a-gpu.md).
@@ -30,5 +40,5 @@ export default defineConfig({
       { name: 'webkit', use: { browserName: 'webkit', launchOptions: {} } },
     ] : []),
   ],
-  webServer: { command: `node serve.mjs ${port}`, url: `http://127.0.0.1:${port}/`, reuseExistingServer: !process.env.CI, timeout: 30_000 },
+  webServer: { command: `node serve.mjs ${port}`, url: `http://127.0.0.1:${port}/`, reuseExistingServer: false, timeout: 30_000 },   // strict: a real collision fails loudly instead of testing another tree's server
 });
