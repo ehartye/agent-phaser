@@ -21,6 +21,7 @@
 //   H.solid(scene, key, size, css)         -> creates a flat-colour canvas texture
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { gpuArgs } from '../verify-checks.mjs';   // one flag list for the hardware lane, shared with the verifiers
 
 const PRELUDE = `
 window.H = {
@@ -84,10 +85,9 @@ export async function runProbe(name, body, { width = 320, height = 240 } = {}) {
   const require = createRequire(resolve(project, 'package.json'));
   const { chromium } = require('@playwright/test');
   const hardware = process.env.PROBE_GL === 'hardware';
-  const angle = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
   const browser = await chromium.launch({
     channel: process.env.CHROME_CHANNEL || undefined,
-    args: hardware ? [`--use-angle=${angle}`, '--ignore-gpu-blocklist'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+    args: hardware ? gpuArgs() : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
   try {
     const page = await browser.newPage({ viewport: { width, height } });

@@ -1,5 +1,9 @@
 # Phaser probes
 
+**Run them all:** `node run-all.mjs /absolute/path/to/host-project` runs every probe below one at a time (the errata check first), prints one line each and exits 1 on any failure or timeout. The default is the software lane. `--hardware` also runs the probes that need a GPU (`scroll-mask.mjs`, `source-pixels.mjs`) and asks the platform GPU backend of the rendering and worlds probes. A probe the lane cannot run is printed as `skip` and counted as skipped, never as passed; `audio-decode.mjs` and `audio-visibility.mjs` need isolated package copies and are always run by hand. `--only <prefix>`, `--timeout <seconds>`, `--channel <name>` (sets `CHROME_CHANNEL`) and `--list` are also accepted. `tests/phaser-probes-run-all.test.mjs` fails when a probe file is in neither of the runner's lists.
+
+**After upgrading phaser or @playwright/test**, in the host project: (1) `node run-all.mjs <host>` for the software lane; (2) `node run-all.mjs <host> --hardware` on a machine with a GPU, with `EXPECT_GPU` set in the harness spec if you need the discrete adapter; (3) for each `FAIL` line, update the reference the probe backs (the skill table below names it) and, if `phaser-docs-errata.mjs` prints `ABSENT`, re-check that errata row and trim it when Phaser fixed the line. The probes pin Phaser 4.2.1 and exit 2 on another version, which the runner reports as a wrong Phaser version: move the pin in each probe you have re-verified.
+
 Small Playwright scripts for debugging a Phaser game on a real GPU. They expect the
 game on `http://localhost:5173` (override with `--url=` or the second argument) and a global `window.__game` that holds the
 `Phaser.Game` (`__game` is the only name read). Playwright comes from the host project (`npm i -D @playwright/test`).

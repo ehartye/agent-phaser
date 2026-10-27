@@ -7,10 +7,10 @@ import { resolve } from 'node:path';
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(resolve(project, 'package.json'));
 const { chromium } = require('@playwright/test');
-const ANGLE = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
+import { gpuArgs } from '../verify-checks.mjs';   // the platform ANGLE backend, --ignore-gpu-blocklist and --force_high_performance_gpu: one list for every launch site
 const browser = await chromium.launch({
   channel: process.env.CHROME_CHANNEL || undefined,
-  args: [`--use-angle=${ANGLE}`, '--ignore-gpu-blocklist'],
+  args: gpuArgs(),
 });
 try {
   const page = await browser.newPage({ viewport: { width: 400, height: 300 } });

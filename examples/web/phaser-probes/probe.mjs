@@ -1,9 +1,9 @@
 // Evaluate an expression inside the running game and print the result: node tools/probe.mjs "<js using game>"
 import { chromium } from '@playwright/test';
-const ANGLE = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
+import { gpuArgs } from '../verify-checks.mjs';   // the platform ANGLE backend, --ignore-gpu-blocklist and --force_high_performance_gpu: one list for every launch site
 const expr = process.argv[2];
 const url = process.argv[3] ?? 'http://localhost:5173';
-const browser = await chromium.launch({ args: [`--use-angle=${ANGLE}`, '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({ args: gpuArgs() });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(m.text()); });

@@ -18,7 +18,10 @@ test('boots and says what the renderer is', async ({ game }) => {
 test('@gpu runs on a hardware renderer, not software', async ({ game }) => {
   await game.open();
   const { renderer } = await game.renderer();
+  console.log(`[renderer] ${renderer}`);
   expect(renderer, 'software WebGL raises no error: only the renderer string gives it away').not.toMatch(SOFTWARE);
+  // "Hardware" is not "the discrete GPU": on a laptop with two, a run can pass on the integrated one. EXPECT_GPU=nvidia (any regular expression) asserts the adapter.
+  if (process.env.EXPECT_GPU) expect(renderer, `EXPECT_GPU=${process.env.EXPECT_GPU}`).toMatch(new RegExp(process.env.EXPECT_GPU, 'i'));
 });
 
 test('the manual loop is deterministic', async ({ game }) => {

@@ -9,7 +9,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startServer } from './serve.mjs';
-import { parseArgs, chromiumArgs, rendererCheck, audioGateChecks } from './verify-checks.mjs';
+import { parseArgs, chromiumArgs, rendererCheck, audioGateChecks, readGlContext } from './verify-checks.mjs';
 
 let opts;
 try { opts = parseArgs(process.argv.slice(2)); } catch (e) { console.error(e.message); process.exit(2); }
@@ -40,12 +40,7 @@ await page.goto(`http://127.0.0.1:${port}/web/${which}/index.html`, { waitUntil:
 await page.waitForFunction(() => window.__state && window.__state().ready, null, { timeout: 60000 });
 report.loadMs = Date.now() - t0;
 
-report.gl = await page.evaluate(() => {
-  const gl = document.createElement('canvas').getContext('webgl2');
-  if (!gl) return { webgl2: false };
-  const ext = gl.getExtension('WEBGL_debug_renderer_info');
-  return { webgl2: true, renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) };
-});
+report.gl = await page.evaluate(readGlContext);   // the page's own context (window.__gl), a fresh canvas only if it exposes none
 const checks = [rendererCheck(report.gl, opts)];
 console.log(`renderer: ${checks[0].detail}`);
 

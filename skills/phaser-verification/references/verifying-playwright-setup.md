@@ -31,6 +31,8 @@ export default defineConfig({
   `--force_high_performance_gpu` selected the discrete GPU (reproduced with `examples/web/verify.mjs`). Which GPU Chromium picks varies by machine,
   driver and power state, and the last flag is harmless on single-GPU machines. [tested] That "no flags" run was Playwright's default headless shell; on the same machine `channel: 'chromium'` (new headless, the full browser) picked a hardware GPU with no flags, and `--disable-gpu` still gave a software WebGL context (`examples/web/phaser-probes/phaser-verification-renderer.mjs`; [CI for Phaser](ci-for-phaser.md)). Print the renderer string on every run and fail on software (below),
   since software WebGL raises no error; assert the string you expect when a test needs the discrete GPU.
+- [general] "Hardware" is not "the discrete GPU": on a two-GPU laptop a not-software check can pass on the integrated adapter. The harness template prints the renderer in its `@gpu` spec and takes `EXPECT_GPU=<regular expression>` (for example `nvidia`) to assert the adapter.
+- [general] Compare launch variants from a plain node script, not a spec: inside `@playwright/test`, `chromium.launch()` inherits the project's `channel` and `launchOptions`, so a "default, no flags" row measured the project's flags.
 
 For frozen acceptance, own the server, source root, configuration and cache identity. Choose a free strict port and a fresh cache directory;
 do not attach to an unidentified existing server. Keep full raw server stdout/stderr from before process spawn, not only a tail sample.

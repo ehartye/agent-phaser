@@ -8,7 +8,7 @@ import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-const ANGLE = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
+import { gpuArgs } from '../verify-checks.mjs';   // the platform ANGLE backend, --ignore-gpu-blocklist and --force_high_performance_gpu: one list for every launch site
 
 assert.equal(process.argv.length,6,'Expected Playwright project, pristine package, patched package and new evidence directory');
 const [project,pristine,patched,evidence]=process.argv.slice(2).map(value=>resolve(value));
@@ -99,7 +99,7 @@ try{
   // The OS selects and binds a free port atomically; no unrelated listener is reused.
   await new Promise((done,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',done);});
   report.server={pid:process.pid,address:server.address(),freePortBound:true};
-  browser=await chromium.launch({channel:process.env.CHROME_CHANNEL||undefined,args:[`--use-angle=${ANGLE}`,'--ignore-gpu-blocklist']});
+  browser=await chromium.launch({channel:process.env.CHROME_CHANNEL||undefined,args:gpuArgs()});
   context=await browser.newContext({viewport:{width:400,height:300}});page=await context.newPage();page.setDefaultTimeout(15000);
   await context.tracing.start({screenshots:true,snapshots:true,sources:true});
   page.on('console',message=>{const entry={phase,kind,type:message.type(),text:message.text()};report.console.push(entry);console.log(JSON.stringify({console:entry}));});

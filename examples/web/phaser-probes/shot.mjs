@@ -3,7 +3,7 @@
 import { chromium } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-const ANGLE = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
+import { gpuArgs } from '../verify-checks.mjs';   // the platform ANGLE backend, --ignore-gpu-blocklist and --force_high_performance_gpu: one list for every launch site
 
 const arg = (k, d) => process.argv.find((a) => a.startsWith(`--${k}=`))?.slice(k.length + 3) ?? d;
 const seed = arg('seed', '1'), out = arg('out', 'shots/shot.png'), url = arg('url', 'http://localhost:5173');
@@ -11,7 +11,7 @@ const keys = arg('keys', '').split(',').filter(Boolean).map((s) => s.split(':'))
 const wait = Number(arg('wait', '1200'));
 mkdirSync(dirname(out), { recursive: true });
 
-const browser = await chromium.launch({ args: [`--use-angle=${ANGLE}`, '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ args: [...gpuArgs(), '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`${m.type()}: ${m.text()}`); });

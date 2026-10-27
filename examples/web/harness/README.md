@@ -12,7 +12,7 @@ game and keep the three `HARNESS` hooks.
 | `tests/smoke.spec.mjs` | The **GPU smoke spec**: renderer string, deterministic frames, pixel colours at known places. |
 | `tests/no-sleeps.test.mjs` | The **no-sleeps guard** (`node --test`, no browser): fails on `waitForTimeout` or a timer promise in any spec. It tests itself. |
 | `tests/run-node.test.mjs`, `run-node.mjs` | The **gate-script helper** (`node --test`): starts Node with no shell, so arguments with spaces, quotes and parentheses survive on Windows. |
-| `playwright.config.mjs` | Real-GPU ANGLE flags by platform, SwiftShader when `SOFTWARE_GL=1`, **two workers**, one retry locally (two in CI), flaky tests reported, and **one strict port per checkout** (set `PW_PORT` to choose). |
+| `playwright.config.mjs` | Real-GPU ANGLE flags by platform (the same list as `gpuArgs()` in `../verify-checks.mjs`, kept equal by `tests/launch-flags.test.mjs`; `EXPECT_GPU=<regex>` asserts the adapter in the `@gpu` spec), SwiftShader when `SOFTWARE_GL=1`, **two workers**, one retry locally (two in CI), flaky tests reported, and **one strict port per checkout** (set `PW_PORT` to choose). |
 | `ci/smoke.yml` | A workflow with a **gating** SwiftShader Chromium job and an **advisory** Firefox/WebKit job (xvfb, `LIBGL_ALWAYS_SOFTWARE`, PulseAudio null sink). |
 
 ```text

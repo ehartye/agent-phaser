@@ -13,9 +13,10 @@ if (!process.env.PW_PORT) {
 const port = process.env.PW_PORT;
 // SOFTWARE_GL=1 (CI with no GPU): Chromium on its own SwiftShader; tests tagged @gpu are skipped (tests/fixtures.mjs).
 const software = !!process.env.SOFTWARE_GL;
-// Platform ANGLE backend for a real GPU. On a laptop with two GPUs add '--force_high_performance_gpu' (see verifying-on-a-gpu.md).
+// Platform ANGLE backend for a real GPU, with the flags of gpuArgs() in ../verify-checks.mjs (tests/launch-flags.test.mjs keeps the two lists equal).
+// --force_high_performance_gpu picks the discrete GPU on a laptop with two and is harmless on one; set EXPECT_GPU to assert the adapter (tests/smoke.spec.mjs).
 const backend = process.platform === 'win32' ? 'd3d11' : process.platform === 'darwin' ? 'metal' : 'gl';
-const args = software ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] : [`--use-angle=${backend}`, '--ignore-gpu-blocklist'];
+const args = software ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] : [`--use-angle=${backend}`, '--ignore-gpu-blocklist', '--force_high_performance_gpu'];
 
 if (process.argv.some((a) => /firefox|webkit/.test(a))) process.env.OTHER_ENGINES = '1';
 const otherEngines = !!process.env.OTHER_ENGINES;

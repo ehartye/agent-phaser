@@ -41,19 +41,36 @@ export function chromiumArgs({ autoplay, platform }) {
 }
 
 /**
- * @param {{ webgl2: boolean, renderer?: string } | undefined} gl
+ * Runs inside the page (Playwright serialises this function, so it must stay self-contained). Reads the WebGL context the page renders with,
+ * which a page exposes as `window.__gl`; only when it exposes none does it create a fresh canvas, so a game that asks for WebGL 1, its own
+ * context or a power preference is classified by the context it uses. Phaser creates a WebGL 1 context by default.
+ * @returns {{ context: 'webgl2' | 'webgl1' | 'none', source: 'page' | 'fresh-canvas', renderer?: string }}
+ */
+export function readGlContext() {
+  const page = window.__gl || null;
+  const gl = page || document.createElement('canvas').getContext('webgl2') || document.createElement('canvas').getContext('webgl');
+  const source = page ? 'page' : 'fresh-canvas';
+  if (!gl) return { context: 'none', source };
+  const context = typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext ? 'webgl2' : 'webgl1';
+  const ext = gl.getExtension('WEBGL_debug_renderer_info');
+  return { context, source, renderer: ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) };
+}
+
+/**
+ * @param {{ context: string, renderer?: string } | undefined} gl
  * @returns {'gpu' | 'webgl-fallback' | 'none'}
  */
 export function classifyRenderer(gl) {
-  if (!gl || !gl.webgl2 || !gl.renderer) return 'none';
+  if (!gl || !['webgl1', 'webgl2'].includes(gl.context) || !gl.renderer) return 'none';
   return SOFTWARE_RENDERER.test(gl.renderer) ? 'webgl-fallback' : 'gpu';
 }
 
-/** @param {{ webgl2: boolean, renderer?: string } | undefined} gl @param {{ allowSoftware: boolean }} opts */
+/** @param {{ context: string, source?: string, renderer?: string } | undefined} gl @param {{ allowSoftware: boolean }} opts */
 export function rendererCheck(gl, { allowSoftware }) {
   const kind = classifyRenderer(gl);
   const pass = kind === 'gpu' || (kind === 'webgl-fallback' && allowSoftware);
-  return { name: 'renderer is a hardware GPU', pass, detail: `${kind}: ${gl && gl.renderer ? gl.renderer : 'no WebGL 2 renderer string'}` };
+  const via = gl && gl.context && gl.context !== 'none' ? ` [${gl.context} from the ${gl.source === 'page' ? "page's own context" : 'fresh canvas'}]` : '';
+  return { name: 'renderer is a hardware GPU', pass, detail: `${kind}: ${gl && gl.renderer ? gl.renderer : 'no WebGL renderer string'}${via}` };
 }
 
 /**

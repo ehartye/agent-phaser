@@ -24,7 +24,7 @@ node web/verify.mjs phaser                # or three: writes web/results/*-repor
 `verify.mjs` takes Playwright from `npm i -D playwright` (or `PLAYWRIGHT_DIR`, an installed playwright folder) and launches Chromium with
 `--use-angle=<d3d11|metal|gl by platform> --ignore-gpu-blocklist --force_high_performance_gpu` (the third flag picks the discrete GPU
 on a laptop with two and is harmless elsewhere). It prints the WebGL renderer string and fails when it is a software renderer (SwiftShader,
-llvmpipe) unless you pass `--allow-software`. It loads the page, records console errors and failed requests, samples
+llvmpipe) unless you pass `--allow-software`. The renderer string comes from the WebGL context the page renders with, which a page exposes as `window.__gl` (the Phaser page returns `game.renderer.gl`, which is a WebGL 1 context by default; the three.js page returns its renderer's context); a fresh canvas is the fallback only for a page that exposes none, and the report says which context was classified. It loads the page, records console errors and failed requests, samples
 animation state twice, screenshots, checks that audio is locked and nothing played, makes one real click (the gesture
 that unlocks audio), checks that audio runs, then triggers the pickup 12 times and checks the variants. It launches
 without `--autoplay-policy=no-user-gesture-required`, because that flag lets audio run without the gesture and hides

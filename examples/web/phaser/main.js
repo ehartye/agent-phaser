@@ -79,3 +79,5 @@ window.__game = new Phaser.Game({
   type: Phaser.WEBGL, width: W, height: H, parent: 'game', pixelArt: true, backgroundColor: '#05060f',
   scene: SampleScene, audio: { noAudio: true },
 });
+// The WebGL context the game renders with, for the verifier (Phaser creates a WebGL 1 context by default).
+Object.defineProperty(window, '__gl', { get: () => (window.__game && window.__game.renderer && window.__game.renderer.gl) || null });
