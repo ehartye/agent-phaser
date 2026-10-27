@@ -1,6 +1,6 @@
 # Web sample scene scripts
 
-Phaser 3.90.0 and three.js 0.186.1 builds of the [sample scene](../../docs/sample-scene.md), plus a headless Chromium
+Phaser 4.2.1 and three.js 0.186.1 builds of the [sample scene](../../docs/sample-scene.md), plus a headless Chromium
 verifier. three.js churns its API often (0.186 deprecated `THREE.Clock`), so the versions are pinned in `package.json`.
 
 - `phaser/` the campfire and courier through Phaser's Aseprite loader, audio through the agent-beeps player. 2D only.

@@ -5,7 +5,7 @@
   "description": "Web tier of the agent-engine sample scene (Phaser 2D, three.js 3D)",
   "type": "module",
   "dependencies": {
-    "phaser": "3.90.0",
+    "phaser": "4.2.1",
     "three": "0.186.1"
   }
 }
