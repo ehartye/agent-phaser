@@ -1,0 +1,80 @@
+{
+  "schema": "beeps/audio-asset@1",
+  "id": "theme",
+  "label": "Theme",
+  "description": "A looping eight-section theme.",
+  "role": "music",
+  "file": "theme.wav",
+  "loop": true,
+  "durationSec": 172.8,
+  "frames": 8294400,
+  "sampleRate": 48000,
+  "channels": 2,
+  "renderKey": "e47f40c7e550f5d73ca53638596930250583be8f4611a28f3d203f4e8fef3d4b",
+  "loudness": {
+    "metric": "integrated",
+    "lufs": -20
+  },
+  "truePeakDb": -6.57,
+  "normalizationAlreadyApplied": true,
+  "bpm": 100,
+  "meter": 4,
+  "sections": [
+    {
+      "name": "intro",
+      "start": 0,
+      "end": 19.2,
+      "startFrame": 0,
+      "endFrame": 921600
+    },
+    {
+      "name": "drive",
+      "start": 19.2,
+      "end": 38.4,
+      "startFrame": 921600,
+      "endFrame": 1843200
+    },
+    {
+      "name": "survey",
+      "start": 38.4,
+      "end": 76.8,
+      "startFrame": 1843200,
+      "endFrame": 3686400
+    },
+    {
+      "name": "vista",
+      "start": 76.8,
+      "end": 96,
+      "startFrame": 3686400,
+      "endFrame": 4608000
+    },
+    {
+      "name": "sighting",
+      "start": 96,
+      "end": 115.19999999999999,
+      "startFrame": 4608000,
+      "endFrame": 5529600
+    },
+    {
+      "name": "hover",
+      "start": 115.19999999999999,
+      "end": 134.4,
+      "startFrame": 5529600,
+      "endFrame": 6451200
+    },
+    {
+      "name": "return",
+      "start": 134.4,
+      "end": 153.6,
+      "startFrame": 6451200,
+      "endFrame": 7372800
+    },
+    {
+      "name": "outro",
+      "start": 153.6,
+      "end": 172.79999999999998,
+      "startFrame": 7372800,
+      "endFrame": 8294400
+    }
+  ]
+}

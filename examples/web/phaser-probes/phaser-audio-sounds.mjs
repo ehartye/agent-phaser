@@ -11,6 +11,7 @@ import http from 'node:http';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {resolve} from 'node:path';
+import {markersFromSections} from '../../../skills/phaser-audio/scripts/assets/beeps-markers.mjs';
 
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(resolve(project, 'package.json'));
@@ -24,6 +25,12 @@ function wav(sec, hz, rate) { const n = Math.floor(sec * rate), b = new ArrayBuf
   v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
   w(36, 'data'); v.setUint32(40, n * 2, true);
   for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * hz * i / rate) * 0.5 * 32767), true); return b; }
+function stepWav(rate, regions, hz) { const per = Math.floor(rate / 2), n = per * regions.length, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+  v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * hz * i / rate) * regions[Math.floor(i / per)] * 32767), true); return b; }
 class Level extends Phaser.Scene {
   constructor() { super('Level'); }
   create() {
@@ -86,7 +93,7 @@ try {
   await page.mouse.click(50, 50);
   await page.waitForFunction(() => game.sound.context.state === 'running' && game.sound.locked === false);
   await page.evaluate(async () => {
-    await decode([{key: 'tone', data: wav(1, 440, 22050)}, {key: 'blip', data: wav(0.3, 880, 22050)}, {key: 'sfx', data: wav(1, 660, 22050)}]);
+    await decode([{key: 'tone', data: wav(1, 440, 22050)}, {key: 'blip', data: wav(0.3, 880, 22050)}, {key: 'sfx', data: wav(1, 660, 22050)}, {key: 'steps', data: stepWav(22050, [0.2, 0.5, 0.9], 440)}]);
     game.cache.json.add('sfx', {spritemap: {a: {start: 0, end: 0.2}, b: {start: 0.2, end: 0.5, loop: true}}});
     tap();
   });
@@ -145,6 +152,32 @@ try {
   assert.equal(sprite.retainedTwicePlaying, 1, 'play() on a retained instance restarts it'); assert.equal(sprite.fireAndForgetOverlap, 3);
   assert.equal(sprite.threeHundredVoices, 300, 'WebAudio has no voice cap');
   ok('audio sprite markers, marker loops, restart versus overlap, no voice cap, seek follows rate', sprite);
+
+  // 3b. Markers from beeps section times: a 1.5 s file whose three half-second regions have peaks 0.2, 0.5 and 0.9 stands in for a song.
+  const rate = 22050, sidecar = {sampleRate: rate, sections: ['s1', 's2', 's3'].map((name, i) => ({name, start: i / 2, end: (i + 1) / 2, startFrame: i * rate / 2, endFrame: (i + 1) * rate / 2}))};
+  const regions = await page.evaluate(async ({plain, looping}) => {
+    const s = game.sound, ctx = s.context, r = {added: []};
+    const run = async (name, markers, seconds) => {
+      const snd = s.add('steps'); r.added.push(...markers.map(m => snd.addMarker(m)));
+      let looped = 0; snd.on('looped', () => looped++);
+      const t0 = ctx.currentTime, peaks = []; let done = null; snd.once('complete', () => { done = ctx.currentTime - t0; });
+      snd.play(name);
+      while (ctx.currentTime - t0 < seconds && done === null) { await audioFor(0.04); if (ctx.currentTime - t0 > 0.1 && ctx.currentTime - t0 < 0.42) peaks.push(peak()); }
+      const out = {low: Math.min(...peaks), high: Math.max(...peaks), completedAfter: done === null ? null : +done.toFixed(3), looped, duration: snd.duration};
+      snd.stop(); snd.destroy(); return out;
+    };
+    r.s1 = await run('s1', plain, 1.0); r.s2 = await run('s2', plain, 1.0); r.s3 = await run('s3', looping, 1.3); return r;
+  }, {plain: markersFromSections(sidecar), looping: markersFromSections(sidecar, {loopSections: ['s3']})});
+  assert.ok(regions.added.every(Boolean), 'every converter marker was accepted by addMarker');
+  // The analyser's absolute level is not the file's amplitude, so compare the regions with each other: 0.2 : 0.5 : 0.9, and steady inside a marker.
+  for (const [name, share] of [['s1', 0.2 / 0.9], ['s2', 0.5 / 0.9]]) {
+    assert.ok(Math.abs(regions[name].high / regions.s3.high - share) < 0.05, name + ' sits at ' + share.toFixed(2) + ' of the loudest region');
+    assert.ok(regions[name].low > 0.9 * regions[name].high, name + ' stays inside its own region');
+  }
+  assert.ok(regions.s3.low > 0.9 * regions.s3.high, 's3 stays inside its own region'); assert.equal(regions.s2.duration, 0.5);
+  assert.ok(regions.s2.completedAfter > 0.46 && regions.s2.completedAfter < 0.57, 'marker s2 completes after its half second on the audio clock');
+  assert.ok(regions.s1.completedAfter > 0.46 && regions.s1.completedAfter < 0.57); assert.ok(regions.s3.looped >= 2 && regions.s3.completedAfter === null, 'a looped section loops its own region');
+  ok('markersFromSections: a section marker plays only its region on the audio clock, and a looped one repeats it', regions);
 
   // 4. Loops need frames: with the Phaser loop asleep the third repetition is never scheduled.
   const loop = async framesRun => page.evaluate(async framesRun => {
