@@ -1,0 +1,282 @@
+{
+  "about": "Prompts for the blind-router check of the Phaser skills' descriptions. `expect` is the one skill that should be chosen; `alt` lists an acceptable second choice for a genuine overlap; `term` is a regular expression that must appear in the expected skill's description (set only where a description was edited to carry a trigger, so it cannot lose it unnoticed). Used by tests/phaser-routing-prompts.test.mjs and, by hand, to score two blind routers.",
+  "prompts": [
+    {
+      "id": 1,
+      "topic": "scene-transition",
+      "text": "Fade out of the title scene and into the level scene, passing the chosen character along, then drop the title scene.",
+      "expect": "phaser-motion",
+      "alt": [
+        "engine-phaser"
+      ],
+      "term": "transition"
+    },
+    {
+      "id": 2,
+      "topic": "scene-transition",
+      "text": "My scene.transition call returns false and the old scene keeps taking clicks while the new one fades in.",
+      "expect": "phaser-motion",
+      "alt": [
+        "engine-phaser"
+      ],
+      "term": "scene\\.transition"
+    },
+    {
+      "id": 3,
+      "topic": "cutscene",
+      "text": "Script a cutscene with timed dialogue, a camera pan and a sound cue, and let the player skip it.",
+      "expect": "phaser-motion",
+      "term": "cutscene"
+    },
+    {
+      "id": 4,
+      "topic": "cutscene",
+      "text": "Pause and resume a Timeline cutscene when the pause menu opens.",
+      "expect": "phaser-motion",
+      "term": "timeline"
+    },
+    {
+      "id": 5,
+      "topic": "cutscene",
+      "text": "After I skip the cutscene a tween step inside it is left half way.",
+      "expect": "phaser-motion",
+      "term": "cutscene"
+    },
+    {
+      "id": 6,
+      "topic": "cutscene",
+      "text": "In my hand-stepped test the tween step of a timeline never moves, though its other steps fire.",
+      "expect": "phaser-motion",
+      "alt": [
+        "phaser-verification"
+      ],
+      "term": "timeline"
+    },
+    {
+      "id": 7,
+      "topic": "gravity-well",
+      "text": "Particles should swirl toward a black hole in the middle of the screen.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 8,
+      "topic": "gravity-well",
+      "text": "A gravity well I added to an emitter does nothing until I raise something; what are its defaults?",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 9,
+      "topic": "gravity-well",
+      "text": "Particles pulled by a well fly straight past it instead of settling.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 10,
+      "topic": "color-ease",
+      "text": "Fade a spark emitter from red to blue over its life with an ease curve.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 11,
+      "topic": "self-shadow",
+      "text": "Lit sprites with a normal map should shade their own dark crevices.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 12,
+      "topic": "self-shadow",
+      "text": "I called setSelfShadow on one sprite and every lit sprite changed.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 13,
+      "topic": "pixel-filters",
+      "text": "Posterise the whole screen to a limited retro palette.",
+      "expect": "phaser-rendering",
+      "term": "Quantize"
+    },
+    {
+      "id": 14,
+      "topic": "pixel-filters",
+      "text": "A pixelated mosaic transition that keeps the art's original colours.",
+      "expect": "phaser-rendering",
+      "alt": [
+        "phaser-motion"
+      ],
+      "term": "Blocky"
+    },
+    {
+      "id": 15,
+      "topic": "pixel-filters",
+      "text": "Recolour the whole game through a brightness ramp for a palette swap.",
+      "expect": "phaser-rendering",
+      "term": "GradientMap"
+    },
+    {
+      "id": 16,
+      "topic": "pixel-filters",
+      "text": "Does Pixelate(8) make blocks eight pixels wide?",
+      "expect": "phaser-rendering",
+      "term": "Pixelate"
+    },
+    {
+      "id": 17,
+      "topic": "smooth-pixel-art",
+      "text": "My pixel art looks soft at camera zoom 3.5; should I use smoothPixelArt or pixelArt?",
+      "expect": "phaser-rendering",
+      "alt": [
+        "phaser-pixel-ui",
+        "engine-phaser"
+      ],
+      "term": "smoothPixelArt"
+    },
+    {
+      "id": 18,
+      "topic": "pixel-filters",
+      "text": "A blur followed by a blocky filter ends up blocky, but the other order ends up blurry; which order should I use?",
+      "expect": "phaser-rendering",
+      "term": "Blocky"
+    },
+    {
+      "id": 19,
+      "topic": "hybrid-audio",
+      "text": "Share one AudioContext between Phaser's music and agent-beeps live sound effects.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 20,
+      "topic": "hybrid-audio",
+      "text": "My beeps live cue keeps playing when I mute the game.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 21,
+      "topic": "music-reactive",
+      "text": "Make the screen pulse with the music.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 22,
+      "topic": "music-reactive",
+      "text": "I added the analyser from Phaser's audio guide and the game got louder.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 23,
+      "topic": "variant-picker",
+      "text": "Pick among four exported variants of a pickup sound without repeating the last one.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 24,
+      "topic": "markers",
+      "text": "Loop only the bridge of a song file by playing a region of it.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 25,
+      "topic": "older",
+      "text": "Start a new Phaser 4 game: pin the version, write the config and set up Vite.",
+      "expect": "engine-phaser"
+    },
+    {
+      "id": 26,
+      "topic": "older",
+      "text": "Every scene restart adds another listener and the memory keeps growing.",
+      "expect": "engine-phaser"
+    },
+    {
+      "id": 27,
+      "topic": "older",
+      "text": "Bullets tunnel through thin walls at high speed.",
+      "expect": "phaser-physics"
+    },
+    {
+      "id": 28,
+      "topic": "older",
+      "text": "Keys stay stuck after I Alt-Tab away and back.",
+      "expect": "phaser-input"
+    },
+    {
+      "id": 29,
+      "topic": "older",
+      "text": "A DOM text field fights the canvas and the menu cannot be reached from the keyboard.",
+      "expect": "phaser-pixel-ui"
+    },
+    {
+      "id": 30,
+      "topic": "older",
+      "text": "Prove in CI that restarting a level does not leak textures or listeners.",
+      "expect": "phaser-verification"
+    },
+    {
+      "id": 31,
+      "topic": "older",
+      "text": "A tile layer draws in the wrong place and paints empty cells.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 32,
+      "topic": "older",
+      "text": "A tween ignores game.step in my test.",
+      "expect": "phaser-motion",
+      "alt": [
+        "phaser-verification"
+      ]
+    },
+    {
+      "id": 33,
+      "topic": "older",
+      "text": "Two of our Phaser games need the same dialog system and the same playbot.",
+      "expect": "phaser-architecture"
+    },
+    {
+      "id": 34,
+      "topic": "older",
+      "text": "A blur on my sprite is clipped at the sprite's bounds.",
+      "expect": "phaser-rendering"
+    },
+    {
+      "id": 35,
+      "topic": "older",
+      "text": "Sound is silent until the first click and stops when the tab is hidden.",
+      "expect": "phaser-audio"
+    },
+    {
+      "id": 36,
+      "topic": "older",
+      "text": "A flashlight cone of light that follows the player in a top-down game.",
+      "expect": "phaser-worlds"
+    },
+    {
+      "id": 37,
+      "topic": "near-miss",
+      "text": "Which engine should an agent-built small 2D game use?",
+      "expect": "engine-selection"
+    },
+    {
+      "id": 38,
+      "topic": "near-miss",
+      "text": "Wire a useFrame loop beside React state in a three.js game.",
+      "expect": "engine-r3f"
+    },
+    {
+      "id": 39,
+      "topic": "near-miss",
+      "text": "A thin-instanced mesh draws at the origin in Babylon.js.",
+      "expect": "engine-babylon"
+    },
+    {
+      "id": 40,
+      "topic": "near-miss",
+      "text": "Bring an agent-sprites atlas into a Godot project and say what was verified.",
+      "expect": "engine-asset-import"
+    },
+    {
+      "id": 41,
+      "topic": "near-miss",
+      "text": "Add a GPU post-effect shader to our own canvas renderer.",
+      "expect": "engine-custom-shaders"
+    }
+  ]
+}
