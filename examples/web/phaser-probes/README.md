@@ -47,10 +47,10 @@ flat-colour pixels but not for GPU correctness or speed. The `[tested]` label me
 | `phaser-motion` | `phaser-motion-clocks.mjs`: which clock drives tweens, timers and animations (optionally also against an extracted 4.2.0 package); `phaser-motion-scenes.mjs`: scene transitions and Timeline cutscenes (11 checks) |
 | `phaser-pixel-ui` | `phaser-pixel-ui-text.mjs`, `phaser-pixel-ui-panels.mjs` |
 | `phaser-input` | `phaser-input-keyboard.mjs`, `-pointer.mjs`, `-gamepad.mjs` (a fake `navigator.getGamepads`, no physical controller) |
-| `phaser-audio` | `phaser-audio-manager.mjs`, `phaser-audio-sounds.mjs` |
+| `phaser-audio` | `phaser-audio-manager.mjs` (manager choice, unlock, decode, output levels, listener traps, joining a live cue at `game.sound.destination`, a supplied `audio.context`, the music-reactive tap), `phaser-audio-sounds.mjs` |
 | `phaser-verification` | `phaser-verification-driving.mjs` (clocks, HEADLESS and its missing global plugins, seeds), `-pixels.mjs`, `-leaks.mjs`, `-renderer.mjs` |
 
 The pure-logic helpers have ordinary Node tests in the merge lane: `tests/phaser-physics-grid-sweep.test.mjs`,
-`tests/phaser-pixel-ui-focus.test.mjs`, `tests/engine-phaser-migration-patterns.test.mjs` and `tests/phaser-docs-errata.test.mjs`.
+`tests/phaser-pixel-ui-focus.test.mjs`, `tests/engine-phaser-migration-patterns.test.mjs`, `tests/phaser-docs-errata.test.mjs` and `tests/phaser-audio-pick-variant.test.mjs`.
 
 `phaser-docs-errata.mjs /absolute/path/to/host-project` is also standalone and needs no browser: after a Phaser upgrade it checks that each needle in the `engine-phaser` errata tables is still in the installed package's own documents, prints present or ABSENT per row and exits 1 when any row needs a re-check. `errata-rows.mjs` reads those tables for it and for the merge-lane test.

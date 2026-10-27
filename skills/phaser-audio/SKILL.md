@@ -16,6 +16,8 @@ Phaser 4.2.1 owns loading, decoding, playback and lifecycle of exported recordin
 | Prove audio works without hearing it, or say what stays unverified | [testing audio](references/testing-audio.md) |
 | Play exported recordings and own loading and lifecycle in Phaser | [native recorded audio](references/native-audio.md), [4.2.1 corrections](references/native-audio-corrections.md) |
 | Use the beeps procedural or adaptive player and direct game sound decisions | [audio directors](references/audio-directors.md) |
+| Share one `AudioContext` between Phaser and beeps live cues, or choose where a cue joins the mix | [hybrid playback](references/hybrid-playback.md) |
+| Make visuals follow the music: an analyser tap, a level that pulses, nothing when muted | [music-reactive visuals](references/music-reactive-visuals.md) |
 | Ship audio: lock, store, Opus-only format, unsupported-browser notice, decoded-memory budget, a CI that fetches instead of rendering | [audio integration](../engine-asset-import/references/audio-integration.md), [CI for generated assets](../engine-asset-import/references/ci-for-generated-assets.md) |
 
 ## Rules that earned their place

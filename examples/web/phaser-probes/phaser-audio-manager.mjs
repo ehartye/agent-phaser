@@ -29,7 +29,7 @@ function wav(sec, hz, rate) { const n = Math.floor(sec * rate), b = new ArrayBuf
   for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * hz * i / rate) * 0.5 * 32767), true); return b; }
 const audio = new URLSearchParams(location.search).get('audio');
 window.game = new Phaser.Game({ type: Phaser.CANVAS, width: 200, height: 100, parent: document.body,
-  audio: audio === 'none' ? { noAudio: true } : audio === 'html5' ? { disableWebAudio: true } : {},
+  audio: audio === 'none' ? { noAudio: true } : audio === 'html5' ? { disableWebAudio: true } : audio === 'shared' ? { context: (window.sharedCtx = new AudioContext()) } : {},
   scene: { create() { window.ready = true; } } });
 </script>`;
 
@@ -243,6 +243,75 @@ try {
   assert.deepEqual(mix.globalMute, [0, 0]);
   assert.ok(near(mix.soundQuarter[0], mix.center[0] / 4));
   ok('analyser on masterVolumeNode reads pan, volume and mute as numbers', mix);
+
+  // 4b. Joining a source that is not a Phaser sound: game.sound.destination (the mute node) follows the global mute; masterVolumeNode skips it.
+  const join = await page.evaluate(async () => {
+    const s = game.sound, ctx = s.context, out = { destinationIsMuteNode: s.destination === s.masterMuteNode };
+    const cue = target => { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.value = 440; g.gain.value = 0.5; o.connect(g); g.connect(target); o.start(); return () => { o.stop(); g.disconnect(); }; };
+    const level = async target => { const stop = cue(target); await audioFor(0.15); const p = Math.max(...lr()); stop(); await audioFor(0.05); return +p.toFixed(3); };
+    out.unmuted = { viaDestination: await level(s.destination), viaMasterVolume: await level(s.masterVolumeNode) };
+    s.mute = true;
+    out.muted = { viaDestination: await level(s.destination), viaMasterVolume: await level(s.masterVolumeNode) };
+    s.mute = false; return out;
+  });
+  assert.equal(join.destinationIsMuteNode, true);
+  assert.ok(near(join.unmuted.viaDestination, 0.5, 0.05) && near(join.unmuted.viaMasterVolume, 0.5, 0.05), 'both joins are audible when unmuted');
+  assert.equal(join.muted.viaDestination, 0, 'a cue joined at game.sound.destination is silent under the global mute');
+  assert.ok(near(join.muted.viaMasterVolume, 0.5, 0.05), 'a cue joined at masterVolumeNode skips the mute node and keeps playing');
+  ok('game.sound.destination follows mute; masterVolumeNode skips it', join);
+
+  // 4c. A context supplied through audio.context: Phaser's own unlock resumes it, and destroy() suspends it instead of closing it.
+  {
+    const results = {};
+    for (const [label, query] of [['supplied', '?audio=shared'], ['own', '']]) {
+      const opened = await open(query);
+      await opened.page.evaluate(helpers);
+      const before = await opened.page.evaluate(() => ({ state: game.sound.context.state, locked: game.sound.locked, shared: window.sharedCtx ? game.sound.context === window.sharedCtx : null }));
+      await opened.page.mouse.click(20, 20);
+      await opened.page.evaluate(() => until(() => game.sound.context.state === 'running'));
+      await opened.page.evaluate(() => until(() => game.sound.locked === false));          // the manager clears its flag on the next frame after the resume
+      const afterClick = await opened.page.evaluate(() => ({ state: game.sound.context.state, locked: game.sound.locked }));
+      const stateAfterDestroy = await opened.page.evaluate(async () => {
+        const ctx = game.sound.context; game.destroy(true);
+        await until(() => ctx.state !== 'running'); await new Promise(r => setTimeout(r, 100)); return ctx.state;
+      });
+      results[label] = { before, afterClick, stateAfterDestroy };
+      await opened.page.close();
+    }
+    assert.deepEqual(results.supplied.before, { state: 'suspended', locked: true, shared: true }, 'the supplied context is the manager context and starts locked');
+    assert.deepEqual(results.supplied.afterClick, { state: 'running', locked: false }, 'one real click made Phaser resume the supplied context');
+    assert.equal(results.supplied.stateAfterDestroy, 'suspended', 'destroy() suspends a supplied context');
+    assert.equal(results.own.stateAfterDestroy, 'closed', 'destroy() closes the context Phaser made');
+    ok('a supplied audio.context is unlocked by Phaser and suspended, not closed, on destroy', results);
+  }
+
+  // 4d. Music-reactive visuals: a tap branches off masterVolumeNode and never to the destination; Phaser's own snippet adds a path to it.
+  const reactive = await page.evaluate(async () => {
+    const s = game.sound, ctx = s.context, out = {};
+    const proto = AudioNode.prototype, original = proto.connect; let toDestination = 0;
+    proto.connect = function (target, ...rest) { if (target === ctx.destination) toDestination++; return original.call(this, target, ...rest); };
+    const analyser = ctx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0;
+    const before = toDestination; s.masterVolumeNode.connect(analyser);
+    out.tapConnectionsToDestination = toDestination - before;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const read = () => { analyser.getByteFrequencyData(data); let peak = 0, bin = 0; data.forEach((v, i) => { if (v > peak) { peak = v; bin = i; } }); return { peak, hz: +(bin * ctx.sampleRate / analyser.fftSize).toFixed(1) }; };
+    const t = s.add('tone', { loop: true }); t.play(); await audioFor(0.25);
+    out.playing = read(); out.visualStep = Math.round(out.playing.peak / 255 * 8) / 8;     // a level quantised to eight pixel-art steps
+    s.mute = true; await audioFor(0.25); out.muted = read(); s.mute = false;
+    t.stop(); await audioFor(0.25); out.stopped = read();
+    const snippet = ctx.createAnalyser(), mark = toDestination;
+    s.masterVolumeNode.connect(snippet); snippet.connect(ctx.destination);                 // Phaser's own document's snippet
+    out.snippetConnectionsToDestination = toDestination - mark;
+    proto.connect = original; snippet.disconnect(); analyser.disconnect(); t.destroy();
+    return out;
+  });
+  assert.equal(reactive.tapConnectionsToDestination, 0, 'the tap adds no connection to the destination');
+  assert.equal(reactive.snippetConnectionsToDestination, 1, 'the Phaser guide snippet adds one');
+  assert.ok(reactive.playing.peak >= 200 && Math.abs(reactive.playing.hz - 440) <= 24, 'the 440 Hz tone is the loudest bin');
+  assert.equal(reactive.muted.peak, 0, 'a tap on masterVolumeNode reads zero under the global mute');
+  assert.equal(reactive.stopped.peak, 0, 'and zero when nothing plays');
+  assert.equal(reactive.visualStep * 8, Math.round(reactive.visualStep * 8));
+  ok('music-reactive tap: branch off masterVolumeNode, nothing new reaches the destination, zero when muted or silent; the Phaser guide snippet adds a second destination path', reactive);
 
   // 5. Listener position traps (needs the frame loop running: the manager applies the listener in update).
   const listener = await page.evaluate(async () => {

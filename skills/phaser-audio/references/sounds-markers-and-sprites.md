@@ -23,6 +23,11 @@ Read this before you write a sound-effects layer: which call to use for a one-sh
 - [general] Pass the full config on every call, or keep random per-play variation (`rate`, `detune`, `volume`) on `sound.play(key, config)` where each call has its own sound. Compose a mix as `authored * bus * duck`, written once per frame ([spatial and mix](spatial-and-mix.md)).
 - [tested] `sound.volume` reads the gain node, so it lags a render quantum behind the setter; assert `sound.currentConfig.volume` or read a frame later.
 
+## Picking among variants (agent-beeps exports)
+
+- [tested] A sidecar from `beeps export --variants --manifest` lists `variants` (`file`, `weight`) and `noRepeat`, and the native sound manager runs none of that. [`scripts/assets/pick-variant.mjs`](../scripts/assets/pick-variant.mjs) is the picker, pure and with an injectable random source: `createVariantPicker(sidecar, rng).next()` returns the next `{ file, weight, index }`. It follows the beeps player's rules (weights default to 1, `noRepeat` defaults to true, one variant is always returned) and gave the same index as the player's own picker on all 18,000 draws of a comparison (six weight sets, both `noRepeat` settings, three seeds). `tests/phaser-audio-pick-variant.test.mjs` pins no immediate repeat over 5,000 picks, weights within 2 points over 20,000, zero weights and reproducible sequences.
+- [general] Pass the full config on every `sound.play(key, config)` for the picked file (the config sticks, above), and pass a seeded `rng` in tests and replays. The sections-to-markers and kit-to-audio-sprite converters are not here: they wait for section times in the beeps export.
+
 ## Markers
 
 - [documented] `addMarker({name, start, duration, config})` returns `false` for a missing or non-string name; a duplicate name logs `console.error` and returns `false`; `duration` defaults to `totalDuration - start`; `removeMarker(name)` sets the slot to `null` rather than deleting it (`src/sound/BaseSound.js`).
