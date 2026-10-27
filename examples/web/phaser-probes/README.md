@@ -42,7 +42,7 @@ flat-colour pixels but not for GPU correctness or speed. The `[tested]` label me
 | --- | --- |
 | `engine-phaser` | `engine-phaser-foundations.mjs`: config and boot, scale, loader, events and data, game objects, Phaser 3 leftovers (40 checks) |
 | `phaser-rendering` | `phaser-rendering-render-graph.mjs`, `-filters.mjs`, `-stencil.mjs`, `-mesh-and-gpu-layer.mjs`, `-textures-and-shaders.mjs`, `-webgl2-context.mjs`, `-pixel-filters.mjs` (Blocky, Pixelate, Quantize, GradientMap), `-smooth-pixel-art.mjs` (`smoothPixelArt` against `pixelArt` at a fractional zoom), sharing `phaser-rendering-harness.mjs` (not run alone); also runs on a hardware GPU with `PROBE_GL=hardware` |
-| `phaser-worlds` | `phaser-worlds-cameras.mjs`, `-lights.mjs`, `-particles.mjs`, `-tilemaps.mjs`, `-layers.mjs`, sharing `phaser-worlds-lib.mjs` (not run alone) |
+| `phaser-worlds` | `phaser-worlds-cameras.mjs`, `-lights.mjs`, `-normal-atlas.mjs` (a real agent-sprites paired export from `tests/fixtures/normal-atlas/`), `-particles.mjs`, `-tilemaps.mjs`, `-layers.mjs`, sharing `phaser-worlds-lib.mjs` (not run alone) |
 | `phaser-physics` | `phaser-physics-arcade.mjs`, `-matter.mjs`, `-tilemap.mjs`, `-paths.mjs` |
 | `phaser-motion` | `phaser-motion-clocks.mjs`: which clock drives tweens, timers and animations (optionally also against an extracted 4.2.0 package); `phaser-motion-scenes.mjs`: scene transitions and Timeline cutscenes (11 checks) |
 | `phaser-pixel-ui` | `phaser-pixel-ui-text.mjs`, `phaser-pixel-ui-panels.mjs` |

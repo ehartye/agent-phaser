@@ -11,7 +11,7 @@ Probe: `node examples/web/phaser-probes/phaser-worlds-lights.mjs /path/to/host-p
 - [documented] Each object opts in with `setLighting(true)`. Lit classes in 4.2.1: Image, Sprite, TileSprite, Text, BitmapText, Blitter, Graphics, Shape, Mesh2D, ParticleEmitter, SpriteGPULayer, Stamp, Video, TilemapLayer and TilemapGPULayer. `Container` and `Layer` have no lighting flag; set it on each child. `PointLight` is a separate glow object that lights nothing else.
 - [tested] CPU and GPU tilemap layers are both lit.
 - [general] `lighting` is a flag on the object: a recreated layer starts unlit, while a reused pooled layer keeps it.
-- [documented] Normal maps ride on the texture: `load.image(key, [colorUrl, normalUrl])` or `{ normalMap }`; atlases take `normalMap` too; a GPU tilemap layer reads the tileset texture's `dataSource[0]` (`SubmitterTilemapGPULayer.js`). Without one the renderer's flat normal is used and shading depends only on distance and light height `z`.
+- [documented] Normal maps ride on the texture: `load.image(key, [colorUrl, normalUrl])` or `{ normalMap }`; atlases take `normalMap` too ([paired atlas from agent-sprites](normal-mapped-sprites.md)); a GPU tilemap layer reads the tileset texture's `dataSource[0]` (`SubmitterTilemapGPULayer.js`). Without one the renderer's flat normal is used and shading depends only on distance and light height `z`.
 - [documented] `addLight(x, y, radius, rgb, intensity, z)`: `z` defaults to `radius * 0.1`; a Light is a Circle with origin, scrollFactor and visible, so `light.setScrollFactor(0)` pins it to the screen (`src/gameobjects/lights/Light.js`).
 
 ## Cone lights (4.2.0)

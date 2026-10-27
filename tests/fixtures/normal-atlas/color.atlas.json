@@ -1,0 +1,312 @@
+{
+  "frames": [
+    {
+      "filename": "0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "1",
+      "frame": {
+        "x": 30,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 125
+    },
+    {
+      "filename": "2",
+      "frame": {
+        "x": 60,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    },
+    {
+      "filename": "3",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "4",
+      "frame": {
+        "x": 30,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 125
+    },
+    {
+      "filename": "5",
+      "frame": {
+        "x": 60,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    },
+    {
+      "filename": "lamp-0",
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 75
+    },
+    {
+      "filename": "lamp-1",
+      "frame": {
+        "x": 30,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 125
+    },
+    {
+      "filename": "lamp-2",
+      "frame": {
+        "x": 60,
+        "y": 0,
+        "w": 30,
+        "h": 22
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 1,
+        "y": 1,
+        "w": 30,
+        "h": 22
+      },
+      "sourceSize": {
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    }
+  ],
+  "meta": {
+    "app": "https://github.com/ehartye/agent-sprites",
+    "version": "1.0",
+    "image": "surface-lighting.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 90,
+      "h": 22
+    },
+    "scale": "1",
+    "frameTags": [
+      {
+        "name": "sweep",
+        "from": 3,
+        "to": 5,
+        "direction": "pingpong_reverse",
+        "loop": false
+      }
+    ],
+    "slices": [
+      {
+        "name": "pivot",
+        "color": "#0000ffff",
+        "keys": [
+          {
+            "frame": 0,
+            "bounds": {
+              "x": 0,
+              "y": 0,
+              "w": 32,
+              "h": 24
+            },
+            "pivot": {
+              "x": 16,
+              "y": 22
+            }
+          }
+        ]
+      }
+    ],
+    "lighting": {
+      "mode": "offline-2d-baked-color",
+      "alpha": "preserved",
+      "cells": {
+        "0,0": {
+          "cell": 1,
+          "smooth": false,
+          "block": 0.55,
+          "shape": "round",
+          "ambient": 0.16,
+          "ambientColor": "#bdcce2",
+          "sky": 0,
+          "skyColor": "#ffffff",
+          "skyReach": 24,
+          "skyDir": [
+            0,
+            -1
+          ],
+          "relief": 1,
+          "palettePolicy": "rgb"
+        },
+        "0,1": {
+          "cell": 1,
+          "smooth": false,
+          "block": 0.55,
+          "shape": "round",
+          "ambient": 0.16,
+          "ambientColor": "#bdcce2",
+          "sky": 0,
+          "skyColor": "#ffffff",
+          "skyReach": 24,
+          "skyDir": [
+            0,
+            -1
+          ],
+          "relief": 1,
+          "palettePolicy": "rgb"
+        },
+        "0,2": {
+          "cell": 1,
+          "smooth": false,
+          "block": 0.55,
+          "shape": "round",
+          "ambient": 0.16,
+          "ambientColor": "#bdcce2",
+          "sky": 0,
+          "skyColor": "#ffffff",
+          "skyReach": 24,
+          "skyDir": [
+            0,
+            -1
+          ],
+          "relief": 1,
+          "palettePolicy": "rgb"
+        }
+      }
+    },
+    "normalMap": {
+      "image": "surface-lighting.normal.png",
+      "atlas": "surface-lighting.normal.atlas.json",
+      "encoding": "RGB=(x,-y,z)*0.5+0.5",
+      "green": "up",
+      "flat": [
+        128,
+        128,
+        255
+      ],
+      "alpha": "matches color"
+    }
+  }
+}

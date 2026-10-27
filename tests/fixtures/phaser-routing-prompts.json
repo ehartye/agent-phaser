@@ -277,6 +277,23 @@
       "topic": "near-miss",
       "text": "Add a GPU post-effect shader to our own canvas renderer.",
       "expect": "engine-custom-shaders"
+    },
+    {
+      "id": 42,
+      "topic": "normal-atlas",
+      "text": "I exported a colour atlas and a matching normal atlas from the sprite tool; how do I get a lit sprite out of them in Phaser?",
+      "expect": "phaser-worlds",
+      "alt": [
+        "engine-asset-import"
+      ],
+      "term": "normal-mapped"
+    },
+    {
+      "id": 43,
+      "topic": "normal-atlas",
+      "text": "My lit sprite is bright on the bottom when the light is above it; is the normal map flipped?",
+      "expect": "phaser-worlds",
+      "term": "normal-mapped"
     }
   ]
 }

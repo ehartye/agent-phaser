@@ -1,6 +1,6 @@
 ---
 name: phaser-worlds
-description: Build and run a Phaser 4 world bigger than the screen - Tiled and procedural tilemaps, CPU and GPU tile layers, chunk streaming, cameras and zoom, dynamic and cone lights, day and night, weather and particles, Layer versus Container. Use when drawing, streaming or lighting a scrolling Phaser world, when a tile layer draws in the wrong place, paints empty tiles or animates the wrong tiles, when a camera follows, zooms, shakes or snaps wrongly, when adding a flashlight, lantern, fog or rain, or when choosing a particle emitter, a pooled sprite set or a GPU layer for ambient motion. Not for the WebGL pipeline and filters (phaser-rendering), physics and tile collision (phaser-physics), tweens and animation (phaser-motion), pixel UI and integer scale (phaser-pixel-ui) or measuring frame cost (phaser-verification).
+description: Build and run a Phaser 4 world bigger than the screen - Tiled and procedural tilemaps, CPU and GPU tile layers, chunk streaming, cameras and zoom, dynamic and cone lights, normal-mapped sprites from a paired atlas, day and night, weather and particles, Layer versus Container. Use when drawing, streaming or lighting a scrolling Phaser world, when a tile layer draws in the wrong place, paints empty tiles or animates the wrong tiles, when a camera follows, zooms, shakes or snaps wrongly, when adding a flashlight, lantern, fog or rain, or when choosing a particle emitter, a pooled sprite set or a GPU layer for ambient motion. Not for the WebGL pipeline and filters (phaser-rendering), physics and tile collision (phaser-physics), tweens and animation (phaser-motion), pixel UI and integer scale (phaser-pixel-ui) or measuring frame cost (phaser-verification).
 ---
 
 # Phaser worlds
@@ -11,6 +11,7 @@ How a Phaser 4.2.1 game draws, lights and moves a camera through a world bigger 
 | --- | --- |
 | Set up cameras: follow, zoom, bounds, minimap, shake, snapping; find out why a HUD, pointer or worldView is off | [cameras](references/cameras.md) |
 | Add a flashlight, lantern, headlight, vision cone or point lights; a lit object is black or lights go missing | [dynamic lights](references/dynamic-lights.md) |
+| Light a sprite from an agent-sprites colour atlas plus normal atlas: loader call, frames, tags, pivot, which way the light falls | [normal-mapped sprites](references/normal-mapped-sprites.md) |
 | Add an emitter, rain, snow or dust; choose emitter, pooled sprites or `SpriteGPULayer` | [particles](references/particles.md) |
 | Pull particles toward a point (`GravityWell`) or ease their colour over life (`colorEase`) | [particle processors](references/particle-processors.md) |
 | Load Tiled, CSV or array maps; choose a CPU or GPU layer; edit tiles at runtime; read object layers | [tilemap data and formats](references/tilemap-data-and-formats.md) |
