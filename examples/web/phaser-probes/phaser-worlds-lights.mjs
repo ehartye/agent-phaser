@@ -94,4 +94,52 @@ for (const gpu of [false, true]) {
 p.check('CPU tilemap layer is lit by a point light', grey(layers.cpu.centre) >= 250 && grey(layers.cpu.far) === 0, layers.cpu);
 p.check('GPU tilemap layer is lit by a point light', grey(layers.gpu.centre) >= 250 && grey(layers.gpu.far) === 0, layers.gpu);
 
+// 8. Self-shadow: it darkens dark texels that do not face the light and leaves bright ones alone, and one settings object is shared by every object.
+const ss = await p.page.evaluate(async () => {
+  const frames = () => new Promise((res) => { let k = 0; const f = () => { if (++k >= 3) res(); else game.events.once('postrender', f); }; game.events.once('postrender', f); });
+  const pix = (x, y) => new Promise((res) => game.renderer.snapshotPixel(x, y, (c) => res(c.r)));
+  const stripes = scene.textures.createCanvas('stripes', 64, 64);
+  for (let i = 0; i < 64; i += 8) { stripes.context.fillStyle = ((i / 8) % 2 === 0) ? 'rgb(255,255,255)' : 'rgb(25,25,25)'; stripes.context.fillRect(i, 0, 8, 64); }
+  stripes.refresh();
+  const img = scene.add.image(100, 100, 'stripes').setLighting(true);
+  const white = 72, dark = 80;                                      // centres of the first white and the first dark stripe
+  const light = scene.lights.addLight(100, 100, 600, 0xffffff, 1, 200);
+  const read = async () => { await frames(); return { white: await pix(white, 100), dark: await pix(dark, 100) }; };
+  const out = { defaults: { enabled: img.selfShadow.enabled, penumbra: img.selfShadow.penumbra, diffuseFlatThreshold: +img.selfShadow.diffuseFlatThreshold.toFixed(3), game: game.config.selfShadow } };
+  img.setSelfShadow(false); out.off = await read();
+  img.setSelfShadow(true, 0.5, 1 / 3); out.on = await read();
+  img.setSelfShadow(true, 0.5, 1); out.wideThreshold = await read();
+  img.setSelfShadow(true, 0.05, 1 / 3); out.sharpPenumbra = await read();
+  // The settings object is shared: setSelfShadow on one object changes every object, including ones made later.
+  const other = scene.add.image(300, 100, 'stripes').setLighting(true);
+  img.setSelfShadow(true, 0.9, 0.2);
+  out.shared = { sameObject: img.selfShadow === other.selfShadow, otherSeesIt: { enabled: other.selfShadow.enabled, penumbra: other.selfShadow.penumbra }, newObject: scene.add.image(300, 200, 'stripes').selfShadow.enabled };
+  // A per-object copy isolates it.
+  other.selfShadow = { enabled: false, penumbra: 0.5, diffuseFlatThreshold: 1 / 3 };
+  img.setSelfShadow(true, 0.5, 1 / 3);
+  other.setSelfShadow(false);
+  out.isolated = { img: img.selfShadow.enabled, other: other.selfShadow.enabled };
+  // Draw calls: two lit images with the same shader variant batch together; one with self-shadow and one without do not.
+  const drawCalls = async () => {
+    const r = game.renderer, de = r.drawElements, di = r.drawInstancedArrays; let n = 0;
+    r.drawElements = function () { n++; return de.apply(this, arguments); }; r.drawInstancedArrays = function () { n++; return di.apply(this, arguments); };
+    await frames(); n = 0; await new Promise((res) => game.events.once('postrender', res)); r.drawElements = de; r.drawInstancedArrays = di; return n;
+  };
+  const b = scene.add.image(200, 100, 'stripes').setLighting(true);
+  const set = (a, c) => { img.selfShadow = { enabled: a, penumbra: 0.5, diffuseFlatThreshold: 1 / 3 }; b.selfShadow = { enabled: c, penumbra: 0.5, diffuseFlatThreshold: 1 / 3 }; };
+  img.setPosition(100, 100); other.setVisible(false);
+  scene.children.list.filter((o) => o !== img && o !== b).forEach((o) => o.setVisible(false));
+  set(false, false); out.draws = { bothOff: await drawCalls() };
+  set(true, true); out.draws.bothOn = await drawCalls();
+  set(true, false); out.draws.mixed = await drawCalls();
+  scene.lights.removeLight(light);
+  scene.children.list.slice().forEach((o) => o.destroy());
+  return out;
+});
+p.check('self-shadow is off by default (game config false, object enabled null, penumbra 0.5, flat threshold 1/3)', ss.defaults.enabled === null && ss.defaults.game === false && ss.defaults.penumbra === 0.5 && ss.defaults.diffuseFlatThreshold === 0.333, ss.defaults);
+p.check('self-shadow leaves bright texels alone and darkens dark ones; a flat threshold of 1 darkens them more; a sharp penumbra changes nothing under a high light', ss.off.white === ss.on.white && ss.on.dark < ss.off.dark && ss.wideThreshold.dark < ss.on.dark && ss.sharpPenumbra.dark === ss.off.dark, ss);
+p.check('setSelfShadow edits one settings object shared by every object, existing and new', ss.shared.sameObject && ss.shared.otherSeesIt.enabled === true && ss.shared.otherSeesIt.penumbra === 0.9 && ss.shared.newObject === true, ss.shared);
+p.check('assigning an object its own selfShadow settings isolates it from the shared ones', ss.isolated.img === true && ss.isolated.other === false, ss.isolated);
+p.check('lit images with different self-shadow settings split the batch: mixed costs more draw calls than both on or both off', ss.draws.mixed > ss.draws.bothOn && ss.draws.mixed > ss.draws.bothOff && ss.draws.bothOn === ss.draws.bothOff, ss.draws);
+
 await p.finish();

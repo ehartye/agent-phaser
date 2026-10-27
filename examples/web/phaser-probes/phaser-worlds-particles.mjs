@@ -2,7 +2,8 @@
 // Run:     node phaser-worlds-particles.mjs /absolute/path/to/host-project   (host has phaser 4.2.1 and playwright-core or @playwright/test)
 // Expect:  JSON with every check ok and exit code 0. A failing check means a Phaser upgrade changed that behaviour.
 // Covers:  particles live in emitter-local space, frequency 0 emits per frame, maxParticles vs maxAliveParticles,
-//          scrollFactor 0 emitters stay on screen, WebGL particle quads are not vertex-rounded, and the CPU cost of alive particles.
+//          scrollFactor 0 emitters stay on screen, WebGL particle quads are not vertex-rounded, the CPU cost of alive particles,
+//          GravityWell defaults and space, and colorEase.
 import { startProbe } from './phaser-worlds-lib.mjs';
 
 const p = await startProbe(process.argv[2], {
@@ -109,5 +110,41 @@ const cost = await p.page.evaluate(async () => {
 });
 p.check('10000 alive particles cost more than 2000 to render', cost['10000 alive'].renderCallMs >= cost['2000 alive'].renderCallMs, cost);
 console.error('CPU ms (comparison only):', JSON.stringify(cost));
+
+// 7. GravityWell: power defaults to 0, coordinates are emitter-local, and an attractor with no drag is passed, not stopped.
+const well = await p.page.evaluate(() => {
+  const run = (wells, frames = 30) => {
+    const e = scene.add.particles(100, 100, 'px', { speed: 0, lifespan: 100000, frequency: -1, emitting: false });
+    wells.forEach((w) => e.createGravityWell(w));
+    e.explode(1);
+    for (let i = 0; i < frames; i++) e.preUpdate(0, 16.67);
+    const q = e.alive[0], res = { x: +q.x.toFixed(2), y: +q.y.toFixed(2), vx: +q.velocityX.toFixed(2), processors: e.getAliveParticleCount() === 1 };
+    e.destroy(); return res;
+  };
+  const g = new Phaser.GameObjects.Particles.GravityWell();
+  return {
+    defaults: { power: g._power, epsilonSquared: g._epsilon, gravity: g._gravity },
+    noPower: run([{ x: 400, y: 0 }]),
+    far: run([{ x: 400, y: 0, power: 10 }]),
+    near: run([{ x: 100, y: 0, power: 10 }]),
+  };
+});
+p.check('a GravityWell created with only x and y has power 0 and does nothing (epsilon 100, gravity 50 by default)', well.defaults.power === 0 && well.defaults.epsilonSquared === 10000 && well.defaults.gravity === 50 && well.noPower.x === 0 && well.noPower.y === 0, well);
+p.check('with power it pulls toward the well in the emitter-local space: y stays 0 for a well at local y 0 on an emitter at world y 100', well.far.x > 10 && well.far.vx > 0 && well.far.y === 0, well.far);
+p.check('an attractor has no drag: a particle started 100 units away passes a well at x 100 and is pulled back', well.near.x > 100 && well.near.vx < 0, well.near);
+
+// 8. colorEase: the default is linear, and an ease changes how far along the colour list a particle is at the same life.
+const ease = await p.page.evaluate(() => {
+  const at = (cfgEase) => {
+    const cfg = { speed: 0, lifespan: 1000, frequency: -1, emitting: false, color: [0xff0000, 0x0000ff] };
+    if (cfgEase) cfg.colorEase = cfgEase;
+    const e = scene.add.particles(100, 100, 'px', cfg); e.explode(1);
+    const q = e.alive[0]; for (let i = 0; i < 30; i++) e.preUpdate(0, 16.67);
+    const res = { tint: q.tint, blue: q.tint & 0xff, red: (q.tint >> 16) & 0xff, name: e.colorEase, life: +q.lifeT.toFixed(2) };
+    e.destroy(); return res;
+  };
+  return { unset: at(null), linear: at('linear'), quadOut: at('quad.out') };
+});
+p.check('colorEase is linear when unset, and quad.out is further along the colour list at the same particle life', ease.unset.tint === ease.linear.tint && ease.quadOut.blue > ease.linear.blue && ease.quadOut.red < ease.linear.red, ease);
 
 await p.finish();

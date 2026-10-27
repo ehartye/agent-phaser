@@ -12,6 +12,8 @@ replay and tests work. Read the reference that matches the work. Phaser's own ag
 | You are about to | Read |
 | --- | --- |
 | Pick a tween, chain, counter, timeline or stagger; clean tweens up; hit the 4.2.0 chain-delay bug | [tweens and chains](references/tweens-and-chains.md) |
+| Change scenes with `scene.transition`: events, data, input during it, sleep or remove the old scene | [scene transitions](references/scene-transitions.md) |
+| Script, pause, skip or test a cutscene with `add.timeline` | [cutscenes](references/cutscenes.md) |
 | Load Aseprite tags, set frame timing, switch animations, or evict them | [sprite animations](references/sprite-animations.md) |
 | Time anything: timers, `time.timeScale`, delta smoothing, `fps.limit`, pause, hit stop, slow motion | [clocks, timers and delta](references/clocks-timers-and-delta.md) |
 | Move along a curve, place evenly spaced points, restart a `PathFollower` | [curves, paths and followers](references/curves-paths-and-followers.md) |

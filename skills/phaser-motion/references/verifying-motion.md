@@ -29,7 +29,7 @@ How to make a test or a capture see the same motion on every run when tweens, ti
 - [tested] `manual-tween-update`: the first `update()` only starts a tween, and `seek(ms)` stops one frame (16.6 ms) short: `seek(500)` gives progress 0.483 and `seek(1000)` leaves
   the tween active at 0.983. Ask for `ms + 16.6`, or compare with a tolerance of one frame.
 - [tested] `complete-leaves-target-midway`: `tween.complete()` fires `onComplete` but leaves the target where it was (x = 50 of 100). `tween.forward(5000)` runs it to the end value;
-  `seek` also reaches the end but suppresses events. Skip a cutscene with `forward(tween.totalDuration)`, not `complete()`.
+  `seek` also reaches the end but suppresses events. Skip a cutscene with `forward(tween.totalDuration)`, not `complete()`. On a tween created this frame, call it twice: the first call only starts it (`tween-forward-fresh-needs-two-calls`, [cutscenes](cutscenes.md)).
 - [documented] A tween without `persist` is destroyed after it completes (state 28 once the manager has stepped), so read its end state from the target, or create the tween with
   `persist: true` in a test and call `remove()` afterwards (`src/tweens/TweenManager.js`, `step`).
 - [documented] Assert an animation by frame name at a tick: `sprite.anims.currentFrame.textureFrame` and `sprite.anims.currentAnim.key`, after `step` calls of known length. Frame changes

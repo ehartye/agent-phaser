@@ -12,6 +12,7 @@ How a Phaser 4.2.1 game draws, lights and moves a camera through a world bigger 
 | Set up cameras: follow, zoom, bounds, minimap, shake, snapping; find out why a HUD, pointer or worldView is off | [cameras](references/cameras.md) |
 | Add a flashlight, lantern, headlight, vision cone or point lights; a lit object is black or lights go missing | [dynamic lights](references/dynamic-lights.md) |
 | Add an emitter, rain, snow or dust; choose emitter, pooled sprites or `SpriteGPULayer` | [particles](references/particles.md) |
+| Pull particles toward a point (`GravityWell`) or ease their colour over life (`colorEase`) | [particle processors](references/particle-processors.md) |
 | Load Tiled, CSV or array maps; choose a CPU or GPU layer; edit tiles at runtime; read object layers | [tilemap data and formats](references/tilemap-data-and-formats.md) |
 | Group a world: Layer or Container, depth, parallax, hiding far objects, HUD versus world space | [world structure and streaming](references/world-streaming-and-layers.md) |
 | Draw a chunked tilemap with pooled views, blends, animated water or procedural terrain | [tilemaps and terrain](references/tilemaps-and-terrain.md) |

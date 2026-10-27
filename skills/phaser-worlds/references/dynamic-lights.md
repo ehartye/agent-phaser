@@ -31,6 +31,13 @@ Probe: `node examples/web/phaser-probes/phaser-worlds-lights.mjs /path/to/host-p
 - [documented] The guide calls a cone a small amount of shader math per active cone. Its advice: one player cone plus a few radius lights, not many large overlapping cones; use ambient colour for general darkness instead of many dim lights.
 - [tested] Radius and `z` are world units: a point light 28 px away reads the same at zoom 1 and zoom 3.
 
+## Self-shadow
+
+- [documented] `obj.setSelfShadow(enabled, penumbra, diffuseFlatThreshold)` (`src/gameobjects/components/Lighting.js`) needs `setLighting(true)` and WebGL. Each setting is an object `{ enabled, penumbra, diffuseFlatThreshold }` with defaults `null`, 0.5 and 1/3; `enabled: null` follows `render.selfShadow`, which defaults to `false`. The shader (`DefineLights-glsl.js`) scales each light's diffuse by `smoothstep((diffuse - threshold) / penumbra)` with `threshold = 1 - (r + g + b) / diffuseFlatThreshold`: only texels whose colour is dark enough to push the threshold above 0 can be shadowed, and they are lit only where their normal faces the light.
+- [tested] Self-shadow darkens dark texels and leaves bright ones alone. On a texture of white and near-black (25) stripes under a light high above it, the white stripes stayed 224 and the dark ones went from 22 (off) to 13 (on), to 2 with `diffuseFlatThreshold` 1, and stayed 22 with `penumbra` 0.05 (`phaser-worlds-lights.mjs`). So the effect is authored in the colour map: very dark crevice texels get contact shadow, bright art does not.
+- [tested] The settings object is shared. `setSelfShadow` on one object changed the settings every other object sees, existing ones and ones made afterwards, because they all read one prototype-level object. Give an object its own copy first (`obj.selfShadow = { enabled: false, penumbra: 0.5, diffuseFlatThreshold: 1 / 3 }`) and then call `setSelfShadow` on it: after that it changed only that object.
+- [tested] Different self-shadow settings split the batch: two lit images with the same setting drew in 1 call, and one with it on beside one with it off drew in 2. Set it per layer (the ground, the actors), not per sprite.
+
 ## Choosing a lighting approach
 
 | Want | Use | Why |
