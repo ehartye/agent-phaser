@@ -19,3 +19,9 @@ The method is split by stage:
 | A debug API, a manual frame loop and a page object (what replaces the sleeps) | [verifying-loop-and-waiting.md](verifying-loop-and-waiting.md) |
 
 Further references in this skill: [debugging a game](debugging-a-phaser-game.md), [deterministic driving](deterministic-test-driving.md), [pixel assertions](visual-and-pixel-assertions.md), [leaks and lifecycle](leaks-and-lifecycle-tests.md), [CI for Phaser](ci-for-phaser.md).
+
+## Windows shells
+
+- [documented] Under Git Bash on Windows, an argument that looks like a POSIX path (`/api/...`, `owner/repo:/path`) is rewritten before the program sees it, so a `gh api` or `docker run -v` step in a verification script fails only locally. Set `MSYS_NO_PATHCONV=1` for that command ([CI for generated assets, Traps](../../engine-asset-import/references/ci-for-generated-assets.md)).
+- [documented] A shell started in a non-interactive Windows session cannot open a window or capture the screen, which looks like a graphics bug: windowed and screen-capture steps fail while headless Chromium works. Pick the headless mode there ([engine profiles, shell check](../../engine-selection/references/engine-profiles.md)).
+- [documented] A Node gate script that starts other commands must not use `spawn` with `shell: true`; see [starting processes from a gate script](ci-for-phaser.md).

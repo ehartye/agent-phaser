@@ -71,7 +71,7 @@ the buses and which sting to ask for.
 - [general] `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
 - [general] Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
   template [`examples/web/ci/pages-audio.yml`](../../../examples/web/ci/pages-audio.yml)). The decoded set is the memory budget; since player 4 (agent-beeps 0.9.0) it evicts least-recently-used
-  assets past `memoryBudgetBytes` ([audio integration](../../engine-asset-import/references/audio-integration.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
+  assets past `memoryBudgetBytes` when that option is set ([audio memory and wiring](../../engine-asset-import/references/audio-memory-and-wiring.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
   inside a size budget.
 - [general] **Memory budget** (reported from one project, not reproduced here): a crossfade holds the old and the new song at once, so the budget must cover that peak, not the steady state
   (in that project the crossfade peak was about three times a song at rest, and a phone budget sized for the steady state failed). Find the floor by starving the budget in a test that plays the real

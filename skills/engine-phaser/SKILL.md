@@ -15,12 +15,13 @@ Read the reference that matches the work, not all of them.
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
 | Write `new Phaser.Game(config)`, choose `pixelArt`, limit fps, wire Vite or ESM, destroy a game | [config and boot](references/config-and-boot.md) |
 | Fit, resize or fullscreen the canvas, or fix blur on a high-density screen | [scale and responsive](references/scale-and-responsive.md) |
-| Load, retry, progress-bar or release assets, or pick an atlas or compressed format | [loading assets](references/loading-assets.md) |
+| Load, retry, progress-bar or release assets, or pick an atlas or compressed format | [loading assets](references/loading-assets.md), [failures](references/loading-failures.md) |
 | Boot, scenes, a global plugin, the fixed-step loop and interpolation | [scenes, loop and plugins](references/scenes-loop-and-plugins.md) |
 | Hit a scene restart that leaks, double-registers or fires events twice | [scene lifecycle gotchas](references/phaser-4-scene-lifecycle-gotchas.md) |
 | Subscribe to events, pass data between scenes or decide where state lives | [events and data](references/events-and-data.md) |
 | Group sprites, use a Container, Layer or pool, or destroy objects | [game objects and containers](references/game-objects-and-containers.md) |
 | Load agent-sprites or agent-beeps output | [asset wiring](references/asset-wiring.md) |
+| Copy a name or behaviour from Phaser's own skill documents | errata: [names](references/phaser-docs-errata-names.md), [behaviour](references/phaser-docs-errata-behaviour.md) |
 | Port Phaser 3 code or follow an old tutorial | [Phaser 3 to 4](references/v3-to-v4-migration.md) |
 
 ## First five minutes
@@ -32,7 +33,8 @@ Read the reference that matches the work, not all of them.
 2. [documented] **Read Phaser's own skills.** Phaser 4 ships about 600 KB of skill documents in `node_modules/phaser/skills`
    (scenes, tilemaps, filters and post effects, v4 features, v3 to v4 migration, data manager, particles). They match the
    installed version and beat memory and web posts, with the exceptions these references test (for example `FIT` ignores
-   `zoom`, see [scale](references/scale-and-responsive.md)).
+   `zoom`, see [scale](references/scale-and-responsive.md)). Known-wrong lines: the errata
+   ([names](references/phaser-docs-errata-names.md), [behaviour](references/phaser-docs-errata-behaviour.md)).
 3. [general] **Put rules in a headless layer.** Keep game state and rules in plain TypeScript that never imports Phaser, and let
    Phaser draw it. See [architecture](references/architecture.md). This single choice makes the game unit-testable, saves small,
    and scene restarts safe.
@@ -51,8 +53,8 @@ Read the reference that matches the work, not all of them.
   ([events and data](references/events-and-data.md)).
 - [tested] **Fail loudly at boot.** `parent` is an element id (`'#game'` lands in `body`), a 404 is never retried, and `complete`
   fires with failures: assert the canvas parent and gate the first scene on `totalFailed === 0` and on every requested key
-  existing in its cache, because a response that cannot be decoded is not counted
-  ([config](references/config-and-boot.md), [loading](references/loading-assets.md)).
+  reaching its cache (a decode failure is not counted)
+  ([config](references/config-and-boot.md), [loading failures](references/loading-failures.md)).
 - [tested] **Integer scale is not automatic.** `FIT` ignores `zoom` and scales by 2.5; `snap` needs `min`; the canvas is not
   device-pixel aware (`NONE`, `zoom: 1 / dpr`). Test sizes at several window sizes and ratios
   ([scale](references/scale-and-responsive.md)).

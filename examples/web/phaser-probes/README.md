@@ -47,4 +47,6 @@ flat-colour pixels but not for GPU correctness or speed. The `[tested]` label me
 | `phaser-verification` | `phaser-verification-driving.mjs` (clocks, HEADLESS and its missing global plugins, seeds), `-pixels.mjs`, `-leaks.mjs`, `-renderer.mjs` |
 
 The pure-logic helpers have ordinary Node tests in the merge lane: `tests/phaser-physics-grid-sweep.test.mjs`,
-`tests/phaser-pixel-ui-focus.test.mjs` and `tests/engine-phaser-migration-patterns.test.mjs`.
+`tests/phaser-pixel-ui-focus.test.mjs`, `tests/engine-phaser-migration-patterns.test.mjs` and `tests/phaser-docs-errata.test.mjs`.
+
+`phaser-docs-errata.mjs /absolute/path/to/host-project` is also standalone and needs no browser: after a Phaser upgrade it checks that each needle in the `engine-phaser` errata tables is still in the installed package's own documents, prints present or ABSENT per row and exits 1 when any row needs a re-check. `errata-rows.mjs` reads those tables for it and for the merge-lane test.

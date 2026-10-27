@@ -23,7 +23,7 @@
   (`*.project.json`, `operations.json`) because every build regenerates them.
 - [general] Use `pixelArt: true` and `roundPixels: true`, and choose an integer **source-pixel footprint**: art units per source pixel × camera zoom. A layer drawn at art scale 2 can use camera zoom 3.5 for 7-device-pixel blocks. Keep source-scale-1 UI camera zoom integral. Measure actual framebuffer blocks before adding a renderer workaround; see [pixel scaling](../../phaser-pixel-ui/references/pixel-perfect-and-ui.md).
 
-- [general] Loader failures, key reuse, numeric Aseprite frame keys and memory release are in [loading assets](loading-assets.md).
+- [general] Loader failures are in [loading failures](loading-failures.md); key reuse, numeric Aseprite frame keys and memory release are in [loading assets](loading-assets.md).
 
 ## agent-beeps
 
