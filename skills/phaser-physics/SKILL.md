@@ -33,4 +33,4 @@ Collision and movement in Phaser 4.2.1: whether engine physics belongs in the ru
 
 ## Not covered here
 
-Drawing, chunk streaming and GPU layer bugs are [phaser-worlds](../phaser-worlds/SKILL.md). Tweens, timelines, animation, path arithmetic and followers as decoration are [phaser-motion](../phaser-motion/SKILL.md). The fixed-step loop and the headless sim are [engine-phaser](../engine-phaser/SKILL.md). Real-GPU proofs and profiling are [phaser-verification](../phaser-verification/SKILL.md). Physics in the other engines of this plugin is in [engine-r3f](../engine-r3f/SKILL.md) and [engine-babylon](../engine-babylon/SKILL.md).
+Drawing, chunk streaming and GPU layer bugs are [phaser-worlds](../phaser-worlds/SKILL.md). Tweens, timelines, animation, path arithmetic and followers as decoration are [phaser-motion](../phaser-motion/SKILL.md). The fixed-step loop and the headless sim are [engine-phaser](../engine-phaser/SKILL.md). Real-GPU proofs and profiling are [phaser-verification](../phaser-verification/SKILL.md). Physics in React Three Fiber and Babylon.js is in agent-engine:engine-r3f and agent-engine:engine-babylon.

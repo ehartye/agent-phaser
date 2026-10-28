@@ -36,5 +36,5 @@ Read only the reference needed for the decision.
 
 ## Scope and routing
 
-- [documented] Native implementation stays with [engine-phaser](../engine-phaser/SKILL.md); engine choice stays with [engine-selection](../engine-selection/SKILL.md). This capability adds no widget engine, replacement game engine, cloud service or cross-game mutable registry.
+- [documented] Native implementation stays with [engine-phaser](../engine-phaser/SKILL.md); engine choice stays with agent-engine:engine-selection. This capability adds no widget engine, replacement game engine, cloud service or cross-game mutable registry.
 - [general] Extract a separate game-architecture plugin only when references, recurring cross-tool coordination or release cadence outgrow this folder. Shared runtime availability follows the actual producer export/version and consumer acceptance; this guidance does not add runtime code to Engine.

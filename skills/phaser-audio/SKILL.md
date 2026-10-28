@@ -1,6 +1,6 @@
 ---
 name: phaser-audio
-description: Play, mix and test sound in a Phaser 4 game - the sound manager and first-gesture unlock, music that survives scene restarts, loops, markers and audio sprites, pan, distance and ducking, the 4.2.1 decode and visibility patches, and checking audio without ears. Use when loading or playing exported sound or music in Phaser, when audio is silent until a click, stops when the tab hides, falls silent mid-loop, doubles on a level restart, throws on a missing key, or when deciding who owns sound decisions. Not for authoring sounds (agent-beeps), shipping audio to other engines (engine-asset-import), or input (phaser-input).
+description: Play, mix and test sound in a Phaser 4 game - the sound manager and first-gesture unlock, music that survives scene restarts, loops, markers and audio sprites, pan, distance and ducking, the 4.2.1 decode and visibility patches, and checking audio without ears. Use when loading or playing exported sound or music in Phaser, when audio is silent until a click, stops when the tab hides, falls silent mid-loop, doubles on a level restart, throws on a missing key, or when deciding who owns sound decisions. Not for authoring sounds (agent-beeps), shipping audio to other engines (agent-engine:engine-asset-import), or input (phaser-input).
 ---
 
 # Phaser audio
@@ -18,7 +18,7 @@ Phaser 4.2.1 owns loading, decoding, playback and lifecycle of exported recordin
 | Use the beeps procedural or adaptive player and direct game sound decisions | [audio directors](references/audio-directors.md) |
 | Share one `AudioContext` between Phaser and beeps live cues, or choose where a cue joins the mix | [hybrid playback](references/hybrid-playback.md) |
 | Make visuals follow the music: an analyser tap, a level that pulses, nothing when muted | [music-reactive visuals](references/music-reactive-visuals.md) |
-| Ship audio: lock, store, Opus-only format, unsupported-browser notice, decoded-memory budget, a CI that fetches instead of rendering | [audio integration](../engine-asset-import/references/audio-integration.md), [CI for generated assets](../engine-asset-import/references/ci-for-generated-assets.md) |
+| Ship audio: lock, store, Opus-only format, unsupported-browser notice, decoded-memory budget, a CI that fetches instead of rendering | [audio directors](references/audio-directors.md), then the audio-integration and ci-for-generated-assets references of agent-engine:engine-asset-import |
 
 ## Rules that earned their place
 
@@ -37,4 +37,4 @@ Phaser 4.2.1 owns loading, decoding, playback and lifecycle of exported recordin
 
 ## Not covered here
 
-Procedural sound design is agent-beeps. Importing audio into other engines is [engine-asset-import](../engine-asset-import/SKILL.md).
+Procedural sound design is agent-beeps. Importing audio into other engines is agent-engine:engine-asset-import.

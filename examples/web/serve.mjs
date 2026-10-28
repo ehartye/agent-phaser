@@ -1,4 +1,4 @@
-// Tiny static file server for the web tier. Serves the scenes workspace root so pages can reach /assets and /web.
+// Tiny static file server for the Phaser sample page. Serves the scenes workspace root (the folder above web/) so the page can reach /assets and /web.
 //   node web/serve.mjs [port]      (default 4177; prints the URL)
 import http from 'node:http';
 import { createReadStream, statSync } from 'node:fs';
@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
-  '.json': 'application/json', '.png': 'image/png', '.glb': 'model/gltf-binary', '.wav': 'audio/wav',
+  '.json': 'application/json', '.png': 'image/png', '.wav': 'audio/wav',
   '.css': 'text/css; charset=utf-8', '.map': 'application/json',
 };
 

@@ -5,13 +5,14 @@ import { parseArgs, chromiumArgs, classifyRenderer, rendererCheck, readGlContext
 
 test('parseArgs takes the page and the two options', () => {
   assert.deepEqual(parseArgs(['phaser']), { page: 'phaser', allowSoftware: false, autoplay: false });
-  assert.deepEqual(parseArgs(['three', '--allow-software']), { page: 'three', allowSoftware: true, autoplay: false });
+  assert.deepEqual(parseArgs(['phaser', '--allow-software']), { page: 'phaser', allowSoftware: true, autoplay: false });
   assert.deepEqual(parseArgs(['--autoplay', 'phaser']), { page: 'phaser', allowSoftware: false, autoplay: true });
 });
 
 test('parseArgs refuses an unknown page or option', () => {
   assert.throws(() => parseArgs([]), /usage/);
   assert.throws(() => parseArgs(['unity']), /usage/);
+  assert.throws(() => parseArgs(['three']), /usage/);
   assert.throws(() => parseArgs(['phaser', '--fast']), /usage/);
 });
 

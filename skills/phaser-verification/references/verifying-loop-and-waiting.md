@@ -49,7 +49,7 @@ Code: `examples/web/harness/tests/wait.mjs`, `no-sleeps.test.mjs`.
   failure, and always restores the file. A survivor means the tests do not guard that line.
 
 Run the suite twice: **gating** on SwiftShader (`@gpu` tests skipped) and the real-GPU suite locally before merge. A CI job for Firefox and WebKit needs `xvfb-run` with
-`LIBGL_ALWAYS_SOFTWARE=1` and a PulseAudio null sink, and stays advisory until it has been green for a while ([CI traps](../../engine-asset-import/references/ci-for-generated-assets.md)); template `examples/web/harness/ci/smoke.yml`.
+`LIBGL_ALWAYS_SOFTWARE=1` and a PulseAudio null sink, and stays advisory until it has been green for a while (the ci-for-generated-assets reference of agent-engine:engine-asset-import); template `examples/web/harness/ci/smoke.yml`.
 
 The harness covers the Playwright config, waits and no-sleeps guard; mutation scripts, visual regression and perf budgets are not included.
 

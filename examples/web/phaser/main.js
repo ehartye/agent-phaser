@@ -1,4 +1,4 @@
-// Phaser 4.2.1 build of the agent-engine sample scene (2D parts: campfire, courier, audio).
+// Phaser 4.2.1 build of the sample scene (2D parts: campfire, courier, audio).
 // The campfire and courier load through Phaser's Aseprite loader from the agent-sprites atlas unchanged, which
 // is the wiring agent-sprites documents. Audio goes through the vendored agent-beeps browser player.
 import { createPlayer } from '/web/vendor/beeps-player/player/player.js';

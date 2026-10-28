@@ -1,4 +1,4 @@
-// Verify a web scene in headless Chromium: node web/verify.mjs phaser|three [--allow-software] [--autoplay]
+// Verify the Phaser sample page in headless Chromium: node web/verify.mjs phaser [--allow-software] [--autoplay]
 // Playwright is resolved from this folder upwards (`npm i -D playwright`), or from PLAYWRIGHT_DIR (an existing install, so no second browser download).
 // It loads the page, records console errors and failed requests, prints the WebGL renderer string and fails on a
 // software renderer (unless --allow-software), samples animation state twice, takes two screenshots, checks that audio

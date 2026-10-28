@@ -1,6 +1,6 @@
 ---
 name: phaser-verification
-description: Prove a Phaser 4 change works and runs fast enough - deterministic stepping, pixel reads, scene-graph and physics debug draw, scene-restart leak tests, WebGL context loss, real-GPU and CI Playwright runs, mutation-proven regression tests and frame-budget profiling in Chrome. Use when proving a Phaser change on a real GPU, writing browser specs for a Phaser game, finding out what a Phaser scene really drew, making a test deterministic (tweens, seeds, input), checking a level restart for leaks, setting up CI for a Phaser game, or when a game misses a 60 or 120 fps budget. Not for choosing an engine (engine-selection), the renderer's behaviour (phaser-rendering) or cross-game test strategy (phaser-architecture).
+description: Prove a Phaser 4 change works and runs fast enough - deterministic stepping, pixel reads, scene-graph and physics debug draw, scene-restart leak tests, WebGL context loss, real-GPU and CI Playwright runs, mutation-proven regression tests and frame-budget profiling in Chrome. Use when proving a Phaser change on a real GPU, writing browser specs for a Phaser game, finding out what a Phaser scene really drew, making a test deterministic (tweens, seeds, input), checking a level restart for leaks, setting up CI for a Phaser game, or when a game misses a 60 or 120 fps budget. Not for choosing an engine (agent-engine:engine-selection), the renderer's behaviour (phaser-rendering) or cross-game test strategy (phaser-architecture).
 ---
 
 # Phaser verification and performance

@@ -1,6 +1,6 @@
 ---
 name: engine-phaser
-description: Start and structure a Phaser 4 game - pin the version, write the game config (WebGL, pixelArt), boot it with Vite or ESM, size and scale the canvas for windows and high-density screens, load assets and handle failures, organise scenes and the fixed-step loop, own events and state across scene restarts, use containers, groups and pools, and port Phaser 3 code. Use before writing Phaser code, when a scene restart leaks, an asset fails to load, the canvas is the wrong size or shape after a resize, or a tutorial's API does not exist in 4.2.1. Domain skills: rendering, worlds, physics, motion (tweens, transitions, cutscenes), pixel UI, input, audio, verification. Not for choosing an engine (engine-selection) or importing assets into other engines (engine-asset-import).
+description: Start and structure a Phaser 4 game - pin the version, write the game config (WebGL, pixelArt), boot it with Vite or ESM, size and scale the canvas for windows and high-density screens, load assets and handle failures, organise scenes and the fixed-step loop, own events and state across scene restarts, use containers, groups and pools, and port Phaser 3 code. Use when starting a Phaser game, before writing Phaser code, when a scene restart leaks, an asset fails to load, the canvas is the wrong size or shape after a resize, or a tutorial's API does not exist in 4.2.1. The domain skills cover rendering, worlds, physics, motion (tweens, transitions, cutscenes), pixel UI, input, audio and verification. Not for choosing an engine (agent-engine:engine-selection) or importing assets into other engines (agent-engine:engine-asset-import).
 ---
 
 # Phaser core
@@ -84,6 +84,6 @@ project supplies `phaser` 4.2.1 and `@playwright/test`, and a software renderer 
 
 ## Not covered here
 
-Choosing between Phaser, three.js, Godot and the rest is [engine-selection](../engine-selection/SKILL.md). Custom Canvas or WebGL
-post effects outside Phaser are [engine-custom-shaders](../engine-custom-shaders/SKILL.md). Exporting assets for other engines is
-[engine-asset-import](../engine-asset-import/SKILL.md).
+Choosing between Phaser, three.js, Godot and the rest is agent-engine:engine-selection. Custom Canvas or WebGL
+post effects outside Phaser are agent-engine:engine-custom-shaders. Exporting assets for other engines is
+agent-engine:engine-asset-import.

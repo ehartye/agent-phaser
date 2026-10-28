@@ -22,6 +22,6 @@ Further references in this skill: [debugging a game](debugging-a-phaser-game.md)
 
 ## Windows shells
 
-- [documented] Under Git Bash on Windows, an argument that looks like a POSIX path (`/api/...`, `owner/repo:/path`) is rewritten before the program sees it, so a `gh api` or `docker run -v` step in a verification script fails only locally. Set `MSYS_NO_PATHCONV=1` for that command ([CI for generated assets, Traps](../../engine-asset-import/references/ci-for-generated-assets.md)).
-- [documented] A shell started in a non-interactive Windows session cannot open a window or capture the screen, which looks like a graphics bug: windowed and screen-capture steps fail while headless Chromium works. Pick the headless mode there ([engine profiles, shell check](../../engine-selection/references/engine-profiles.md)).
+- [documented] Under Git Bash on Windows, an argument that looks like a POSIX path (`/api/...`, `owner/repo:/path`) is rewritten before the program sees it, so a `gh api` or `docker run -v` step in a verification script fails only locally. Set `MSYS_NO_PATHCONV=1` for that command (the Traps section of the ci-for-generated-assets reference of agent-engine:engine-asset-import).
+- [documented] A shell started in a non-interactive Windows session cannot open a window or capture the screen, which looks like a graphics bug: windowed and screen-capture steps fail while headless Chromium works. Pick the headless mode there (the shell check in the engine-profiles reference of agent-engine:engine-selection).
 - [documented] A Node gate script that starts other commands must not use `spawn` with `shell: true`; see [starting processes from a gate script](ci-for-phaser.md).
