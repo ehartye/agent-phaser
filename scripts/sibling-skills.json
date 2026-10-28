@@ -1,0 +1,57 @@
+{
+  "agent-beeps": [
+    "beeps-audition",
+    "beeps-compose",
+    "beeps-craft",
+    "beeps-music",
+    "beeps-setup",
+    "beeps-ship",
+    "beeps-taste"
+  ],
+  "agent-engine": [
+    "engine-asset-import",
+    "engine-babylon",
+    "engine-custom-shaders",
+    "engine-r3f",
+    "engine-selection",
+    "engine-visual-polish"
+  ],
+  "agent-meshes": [
+    "mesh-authoring",
+    "mesh-believable",
+    "mesh-build",
+    "mesh-quality-review",
+    "mesh-rigging",
+    "mesh-setup",
+    "mesh-tool-selection"
+  ],
+  "agent-sprites": [
+    "game-integration",
+    "sprite-character",
+    "sprite-composition",
+    "sprite-craft",
+    "sprite-editing",
+    "sprite-export",
+    "sprite-motion",
+    "sprite-new",
+    "sprite-open",
+    "sprite-palette",
+    "sprite-review",
+    "sprite-setup",
+    "sprite-shading",
+    "sprite-verification"
+  ],
+  "agent-unreal": [
+    "uefn",
+    "unreal-animation",
+    "unreal-architecture",
+    "unreal-editor-scripting",
+    "unreal-effects",
+    "unreal-gameplay",
+    "unreal-import",
+    "unreal-native",
+    "unreal-procedural",
+    "unreal-quality",
+    "unreal-rendering"
+  ]
+}
