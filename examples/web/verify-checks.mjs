@@ -19,8 +19,8 @@ export const AUTOPLAY_ARG = '--autoplay-policy=no-user-gesture-required';
 /** Software rasterisers: WebGL works on them with no error, so only the renderer string gives them away. */
 export const SOFTWARE_RENDERER = /swiftshader|llvmpipe|software|basic render/i;
 
-const PAGES = ['phaser', 'three'];
-const USAGE = 'usage: node web/verify.mjs phaser|three [--allow-software] [--autoplay]';
+const PAGES = ['phaser'];
+const USAGE = 'usage: node examples/web/verify.mjs phaser [--allow-software] [--autoplay]';
 
 /** @param {string[]} argv */
 export function parseArgs(argv) {

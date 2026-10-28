@@ -1,6 +1,6 @@
 # Custom shaders in Phaser 4.2.1: Shader objects, custom filters, GLSL rules
 
-Phaser's walk-through is `node_modules/phaser/docs/Phaser 4 Shader Guide`; this page corrects it where the source disagrees and lists the traps. Every [tested] label is asserted by `phaser-rendering-textures-and-shaders.mjs`, `phaser-rendering-filters.mjs` or `phaser-rendering-webgl2-context.mjs` in `examples/web/phaser-probes` (run `node <file> /absolute/path/to/project-with-phaser-and-playwright`). For shaders outside Phaser see the engine-custom-shaders skill.
+Phaser's walk-through is `node_modules/phaser/docs/Phaser 4 Shader Guide`; this page corrects it where the source disagrees and lists the traps. Every [tested] label is asserted by `phaser-rendering-textures-and-shaders.mjs`, `phaser-rendering-filters.mjs` or `phaser-rendering-webgl2-context.mjs` in `examples/web/phaser-probes` (run `node <file> /absolute/path/to/project-with-phaser-and-playwright`). For shaders outside Phaser see agent-engine:engine-custom-shaders.
 
 ## Pick the vehicle
 

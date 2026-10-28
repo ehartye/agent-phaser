@@ -8,7 +8,7 @@ Read this before you start music, pause a game or restart a level. Three things 
 - [documented] `update()` runs from the manager's `PRE_STEP` listener (`src/sound/BaseSoundManager.js`), and `Game.step` returns before emitting `PRE_STEP` when `game.isPaused` is true (`src/core/Game.js`).
 - [tested] With `game.loop.sleep()` (no frames), a 0.3 s loop played its first two repetitions (0.6 s) and then went silent: the output peak fell from 0.354 to 0 while `sound.isPlaying` stayed `true` and no `looped` event fired. With frames running, the same loop sounded continuously and emitted `looped` four times in 1.2 s.
 - [general] What stops frames: `game.loop.sleep()`, `game.pause()`, a hidden tab when `pauseOnBlur` is false (browsers stop `requestAnimationFrame`), and a main-thread stall longer than the loop. Keep `pauseOnBlur` true so a hidden tab suspends the context; never "pause the game" with `loop.sleep()` while music must continue; keep loops much longer than your worst load hitch; in a hand-driven test keep stepping while you wait ([testing audio](testing-audio.md)).
-- [general] A loop is gapless only as far as the decoded buffer is: encoder delay and padding that a browser leaves in the file become an audible gap or click because Phaser plays the whole buffer. Check the decoded frame count, not the file ([audio integration](../../engine-asset-import/references/audio-integration.md)).
+- [general] A loop is gapless only as far as the decoded buffer is: encoder delay and padding that a browser leaves in the file become an audible gap or click because Phaser plays the whole buffer. Check the decoded frame count, not the file (the audio-integration reference of agent-engine:engine-asset-import).
 
 ## Music that survives scene changes
 

@@ -1,5 +1,5 @@
 {
-  "about": "Prompts for the blind-router check of the Phaser skills' descriptions. `expect` is the one skill that should be chosen; `alt` lists an acceptable second choice for a genuine overlap; `term` is a regular expression that must appear in the expected skill's description (set only where a description was edited to carry a trigger, so it cannot lose it unnoticed). Used by tests/phaser-routing-prompts.test.mjs and, by hand, to score two blind routers.",
+  "about": "Prompts for the blind-router check of the Phaser skills' descriptions. `expect` is the one skill that should be chosen; `alt` lists an acceptable second choice for a genuine overlap; `external` names the plugin that owns an expected skill outside this plugin (checked against scripts/sibling-skills.json, never against a checkout); an `alt` outside this plugin is written `plugin:skill`; `term` is a regular expression that must appear in the expected skill's description (set only where a description was edited to carry a trigger, so it cannot lose it unnoticed). Used by tests/phaser-routing-prompts.test.mjs and, by hand, to score two blind routers.",
   "prompts": [
     {
       "id": 1,
@@ -252,31 +252,36 @@
       "id": 37,
       "topic": "near-miss",
       "text": "Which engine should an agent-built small 2D game use?",
-      "expect": "engine-selection"
+      "expect": "engine-selection",
+      "external": "agent-engine"
     },
     {
       "id": 38,
       "topic": "near-miss",
       "text": "Wire a useFrame loop beside React state in a three.js game.",
-      "expect": "engine-r3f"
+      "expect": "engine-r3f",
+      "external": "agent-engine"
     },
     {
       "id": 39,
       "topic": "near-miss",
       "text": "A thin-instanced mesh draws at the origin in Babylon.js.",
-      "expect": "engine-babylon"
+      "expect": "engine-babylon",
+      "external": "agent-engine"
     },
     {
       "id": 40,
       "topic": "near-miss",
       "text": "Bring an agent-sprites atlas into a Godot project and say what was verified.",
-      "expect": "engine-asset-import"
+      "expect": "engine-asset-import",
+      "external": "agent-engine"
     },
     {
       "id": 41,
       "topic": "near-miss",
       "text": "Add a GPU post-effect shader to our own canvas renderer.",
-      "expect": "engine-custom-shaders"
+      "expect": "engine-custom-shaders",
+      "external": "agent-engine"
     },
     {
       "id": 42,
@@ -284,7 +289,7 @@
       "text": "I exported a colour atlas and a matching normal atlas from the sprite tool; how do I get a lit sprite out of them in Phaser?",
       "expect": "phaser-worlds",
       "alt": [
-        "engine-asset-import"
+        "agent-engine:engine-asset-import"
       ],
       "term": "normal-mapped"
     },

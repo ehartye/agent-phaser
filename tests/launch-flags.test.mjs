@@ -1,5 +1,5 @@
-// One list of Chromium flags for a real GPU: gpuArgs() in examples/web/verify-checks.mjs. The probes that launch a GPU browser import it; the harness template is
-// copied into games, so it inlines the same flags, and this test fails when the copy drifts or a launch site drops the list.
+// One list of Chromium flags for a real GPU: gpuArgs() in examples/web/verify-checks.mjs. The sample page verifier and the probes that launch a GPU browser import it;
+// the harness template is copied into games, so it inlines the same flags, and this test fails when the copy drifts or a launch site drops the list.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -28,6 +28,13 @@ test('every standalone probe that launches a GPU browser imports gpuArgs()', () 
     assert.match(source, /gpuArgs\(\)/, `${file} does not call gpuArgs()`);
     assert.ok(!/--use-angle=\$\{(ANGLE|angle)\}/.test(source), `${file} builds its own --use-angle list`);
   }
+});
+
+test('the sample page verifier takes its launch flags from verify-checks.mjs', () => {
+  const source = read('examples/web/verify.mjs');
+  assert.match(source, /import \{[^}]*\bchromiumArgs\b[^}]*\} from '\.\/verify-checks\.mjs'/, 'verify.mjs does not import chromiumArgs');
+  assert.match(source, /chromium\.launch\(\{[^}]*\bargs\b/, 'verify.mjs launches Chromium without the shared flag list');
+  assert.ok(!/--use-angle/.test(source), 'verify.mjs builds its own --use-angle list');
 });
 
 test('the smoke spec can assert the adapter', () => {

@@ -56,7 +56,7 @@ if (this.sound.locked) this.sound.once(Phaser.Sound.Events.UNLOCKED, start); els
 - [tested] 300 simultaneous `sound.play()` calls all reported playing.
 - [documented] HTML5 Audio plays through a pool of `<audio>` tags sized by `instances` at load (`load.audio(key, url, {instances: 4})`, default 1); with `override` true (default) a busy pool hijacks the sound furthest along (`src/loader/filetypes/HTML5AudioFile.js`, `src/sound/html5/HTML5AudioSoundManager.js`).
 - [general] Write the cap yourself: ignore a cue played within a few tens of milliseconds of the same key, and refuse new one-shots above a voice count (`this.sound.getAllPlaying().length`).
-- [general] A decoded buffer costs `frames * channels * 4` bytes and stays in `cache.audio` after its sounds are destroyed; remove it with `this.cache.audio.remove(key)` when a level is done. The budget method is in [audio integration](../../engine-asset-import/references/audio-integration.md).
+- [general] A decoded buffer costs `frames * channels * 4` bytes and stays in `cache.audio` after its sounds are destroyed; remove it with `this.cache.audio.remove(key)` when a level is done. The budget method is in the audio-integration reference of agent-engine:engine-asset-import.
 
 ## Related
 

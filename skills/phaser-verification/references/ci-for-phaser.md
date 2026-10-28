@@ -1,6 +1,6 @@
 # CI for a Phaser 4 game
 
-Read this before you add browser tests to a pipeline, or when a test passes on CI and fails on your machine. A runner has no GPU and no sound card, and the default Chromium that Playwright launches is not the one you debug in. This page adds what the [harness workflow](../../../examples/web/harness/ci/smoke.yml) and [CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md) do not cover: renderer selection, WebGL failure modes and what each tier can prove. Backed by [`phaser-verification-renderer.mjs`](../../../examples/web/phaser-probes/phaser-verification-renderer.mjs).
+Read this before you add browser tests to a pipeline, or when a test passes on CI and fails on your machine. A runner has no GPU and no sound card, and the default Chromium that Playwright launches is not the one you debug in. This page adds what the [harness workflow](../../../examples/web/harness/ci/smoke.yml) and the ci-for-generated-assets reference of agent-engine:engine-asset-import do not cover: renderer selection, WebGL failure modes and what each tier can prove. Backed by [`phaser-verification-renderer.mjs`](../../../examples/web/phaser-probes/phaser-verification-renderer.mjs).
 
 ## What each tier proves
 

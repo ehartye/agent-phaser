@@ -1,11 +1,10 @@
 {
-  "name": "agent-engine-web-scene",
+  "name": "agent-phaser-web-scene",
   "private": true,
   "version": "0.0.0",
-  "description": "Web tier of the agent-engine sample scene (Phaser 2D, three.js 3D)",
+  "description": "Web tier of the sample scene (Phaser 2D)",
   "type": "module",
   "dependencies": {
-    "phaser": "4.2.1",
-    "three": "0.186.1"
+    "phaser": "4.2.1"
   }
 }

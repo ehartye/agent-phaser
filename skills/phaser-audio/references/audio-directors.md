@@ -66,12 +66,12 @@ the buses and which sting to ask for.
   no audio bytes before the gesture and only a handful of files after the first cue, a small fraction of the build (reported from one project, not reproduced here).
 - [general] That sample checked Ogg Opus loops frame-exact in Chromium and Firefox. Safari and iOS decode it from 18.4 (checked by ear on a
   device, not by frame count); older Safari and WebKit on Linux and Windows do not, so the game shows a one-time notice and runs silent
-  (measured table and probe design: [audio integration](../../engine-asset-import/references/audio-integration.md)). Unlock on `pointerdown`, `keydown`, `touchend` and `click`.
+  (measured table and probe design: the audio-integration reference of agent-engine:engine-asset-import). Unlock on `pointerdown`, `keydown`, `touchend` and `click`.
   With a hand-driven frame loop (`game.loop.sleep()` plus `game.step`), keep running frames while waiting for audio: decoding finishes on the event loop. In the released player, fetch or decode failure reports `E_LOAD`; report it through the existing status UI and preserve its retry path.
 - [general] `document.visibilitychange` must reach the player (`player.setHidden(document.hidden)`).
-- [general] Do not render the audio in CI: commit the lock, push to the store and fetch by hash ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md),
+- [general] Do not render the audio in CI: commit the lock, push to the store and fetch by hash (the ci-for-generated-assets reference of agent-engine:engine-asset-import,
   template [`examples/web/ci/pages-audio.yml`](../../../examples/web/ci/pages-audio.yml)). The decoded set is the memory budget; since player 4 (agent-beeps 0.9.0) it evicts least-recently-used
-  assets past `memoryBudgetBytes` when that option is set ([audio memory and wiring](../../engine-asset-import/references/audio-memory-and-wiring.md)). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
+  assets past `memoryBudgetBytes` when that option is set (the audio-memory-and-wiring reference of agent-engine:engine-asset-import). Gate the hosted build on a test that every catalogue entry has its file and the folder stays
   inside a size budget.
 - [general] **Memory budget** (reported from one project, not reproduced here): a crossfade holds the old and the new song at once, so the budget must cover that peak, not the steady state
   (in that project the crossfade peak was about three times a song at rest, and a phone budget sized for the steady state failed). Find the floor by starving the budget in a test that plays the real

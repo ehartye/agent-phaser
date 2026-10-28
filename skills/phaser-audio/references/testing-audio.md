@@ -14,8 +14,8 @@ Read this before you claim audio "works". A headless Chromium has a running audi
 | Is the loop alive? | `looped` events rising while frames run | one per loop length |
 | Did anything leak? | `sound.sounds.length` before and after ten restarts | equal |
 
-- [tested] Headless Chromium advanced `AudioContext.currentTime` and ran the analyser, so audio-clock waits work in headless runs; the repo's CI notes say Firefox needs a PulseAudio null sink ([CI for generated assets](../../engine-asset-import/references/ci-for-generated-assets.md)).
-- [tested] Decoded length is in the context's rate, not the file's: a 1 s file at 22050 Hz decoded to 48000 frames in a 48000 Hz context. Compare to `Math.round(seconds * ctx.sampleRate)` and, for a loop, to the catalogue's frame count ([audio integration](../../engine-asset-import/references/audio-integration.md)).
+- [tested] Headless Chromium advanced `AudioContext.currentTime` and ran the analyser, so audio-clock waits work in headless runs; the repo's CI notes say Firefox needs a PulseAudio null sink (the ci-for-generated-assets reference of agent-engine:engine-asset-import).
+- [tested] Decoded length is in the context's rate, not the file's: a 1 s file at 22050 Hz decoded to 48000 frames in a 48000 Hz context. Compare to `Math.round(seconds * ctx.sampleRate)` and, for a loop, to the catalogue's frame count (the audio-integration reference of agent-engine:engine-asset-import).
 - [tested] A tap on the master gain read, for a half-scale sine: centre 0.354 per channel; hard left 0.707 / 0; `sound.volume = 0.25` gave 0.088; global `volume = 0.5` gave 0.177; global or per-sound `mute` gave 0. These are ratios you can assert with a 0.02 tolerance:
 
 ```js
