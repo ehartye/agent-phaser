@@ -18,7 +18,7 @@ Phaser is the right tool and `agent-engine:engine-asset-import` for the other ta
 
 ## Status
 
-Early (0.1.7). Ten skills. This is the first release of the Phaser skills as their own plugin; they were developed in
+Early (0.1.8). Ten skills. This is the first release of the Phaser skills as their own plugin; they were developed in
 agent-engine up to 0.33.0, and their history is kept here. Phaser 4.2.1 is the pinned version. Nothing in the skills is
 specific to one game.
 
