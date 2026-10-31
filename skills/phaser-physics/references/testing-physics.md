@@ -15,6 +15,28 @@ How to test collision and movement so a failure names its cause. Generic frame s
 - [tested] Randomise the start phase. The seeded tunnelling test lets 376 of 400 shots through when only the end point is tested, and none through the sweep. A fixed phase can hide the bug entirely, as it does for the same test in the other engines of this plugin.
 - [general] State everything a restore needs as plain numbers (position, velocity, grounded flag, timers, RNG words) so a save is a JSON round trip.
 
+### Bind a consumer to the actual grid contract
+
+- [documented] [grid-sweep.mjs](../scripts/assets/grid-sweep.mjs) takes a top-left box `{ x, y, w, h }`, displacement `(dx, dy)`
+  in world units, and `{ tile, isSolid(cx, cy) }` with integer cell coordinates. The box uses half-open extents. `moveAndCollide`
+  sweeps X first, then Y at the new X, and returns coordinates and hit signs; it does not mutate a body or own velocity, time,
+  gravity, grounded state, terrain, saves or rendering. An embedded start is not ejected. `sweepAabb` instead tests one static
+  box; `raycastGrid` tests a segment and reports a solid starting cell at `t: 0`. These are distinct queries.
+- [general] Before a pilot, declare finite coordinates/displacements, positive box dimensions and tile size, a stable solid-cell
+  query, and one consistent unit system. Convert velocity to per-step displacement and centre/feet anchors to top-left boxes
+  explicitly. Tile-unit positions, non-square cells, slopes, moving obstacles and actor-specific door/terrain rules require their
+  own mapping or a different algorithm; do not silently approximate them with a uniform static grid. The helper does not validate
+  every malformed input or provide depenetration. Keep the game's intended embedded-start and boundary policies explicit.
+- [general] Authenticate the consumer revision, helper bytes/import and actual movement call before claiming adoption. Keep
+  alternative collision code classified separately unless copy provenance is established; similar X-then-Y arithmetic is not
+  provenance. Record search roots/exclusions and missing access. If the inspected feature has no uniform tile collision, mark
+  this integration not applicable to that feature instead of treating an unused helper as a successful migration.
+- [general] At the consumer boundary, compare the former and proposed units, shape, sweep order, solid-cell rules, embedded
+  starts and hit-response policy. A later pilot must verify those mappings and restore the world/query state, clock, RNG and
+  actor state it actually uses. The four-number snapshot test above covers its fixed fixture only; a green producer test or a
+  retained save file proves neither consumer restoration nor native integration. Preserve the end-position tunnelling negative
+  when running `node --test tests/phaser-physics-grid-sweep.test.mjs`.
+
 ## Browser probes
 
 - [general] Boot the smallest scene that shows the case, build the bodies, step N times, read `body.x`, `body.y`, `blocked`, `touching`, and return plain data. Never return Phaser objects across `page.evaluate`. Assert in Node.

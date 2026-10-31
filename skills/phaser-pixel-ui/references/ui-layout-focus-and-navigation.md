@@ -35,7 +35,7 @@ spatial rule in prose are in [gamepad and input](../../phaser-input/references/g
 - [documented] Phaser 4.2.1 has no focus manager. Focus is a field in your UI model (an id), drawn by one reused ring object and
   moved, not recreated, so the object count is constant ([pixel UI input and controls](pixel-ui-input-and-controls.md), 6 and 7).
 - [tested] `nextFocus(items, currentId, direction, { wrap, group })` moves to the nearest item strictly ahead along the pressed
-  axis, charging cross-axis drift at twice the distance; it wraps within the same row or column, ignores disabled items, stays
+  axis, charging cross-axis drift at twice the distance; it wraps toward the far side with a drift penalty, ignores disabled items, stays
   inside a `group` (pass the modal's group so focus cannot leave it), and enters at the first item in reading order when nothing
   is focused. A vertical list does not move on Left or Right.
 
@@ -58,6 +58,26 @@ expect(unreachable(items, nextFocus(items, null, 'down', { group: 'screen' }), {
   opened it. A modal contains focus in its group and blocks the layer below in both the Phaser and the semantic projection.
 - [general] Activation (Enter, Space, pad south, click) calls one handler; Escape or pad east calls `back`. Scroll the focused row into
   view before drawing the ring ([clipped scrolling](pixel-ui-clipped-scrolling.md)).
+
+## Integrate the helper without changing navigation policy accidentally
+
+- [documented] The helper owns rectangle selection only. Its defaults are `wrap: true`, `driftWeight: 2` and `epsilon: 0.001`;
+  only `enabled === false` excludes an item. Unknown directions throw. A missing, removed or excluded current id enters at the
+  first eligible item in reading order; an empty candidate set returns the current id, which can therefore remain stale.
+  The caller must clear that id when its screen has no focusable controls. See [the module contract](../scripts/assets/spatial-focus.mjs).
+- [general] Keep layout, modal scope, disabled policy, input repeat, activation and scroll ownership in the UI model/adapter.
+  Supply rectangles in one coordinate space and a fresh candidate set after removal or resize. Pass the active modal's group;
+  filtering candidates does not itself block pointer/gameplay input or restore focus when the modal closes. Decide explicitly
+  whether disabled controls may receive explanatory focus: that policy differs from this helper's disabled-item exclusion.
+- [general] Compare the current navigator's entry order, wrap, drift score, tie handling and scroll-pane rules before replacing it.
+  Index-based selection, cyclic reading order, pane-first movement and a stale-id recovery policy are different contracts even
+  when they share a function name. Scroll a selected row into view and map its content rectangle to the visible ring separately;
+  the helper neither scrolls nor reads clipping, camera transforms, DOM focus or accessibility state.
+- [general] Record adoption at a named consumer revision with producer identity, imported or matching vendored bytes, and a real
+  call from the active input path. An unused import, matching export name or similar scoring formula establishes no integration.
+  Retain inspected roots and exclusions for a bounded non-adoption result; unavailable source stays unverified. Call a copy
+  diverged only when its provenance and changed contract are established. Pure helper tests prove their inputs, while a later
+  consumer pilot must exercise its actual modal, disabled/removal, resize, scrolling and activation paths.
 
 ## Resize, scale and density
 
