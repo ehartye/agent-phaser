@@ -1,0 +1,1 @@
+captureFixture.receipt('after');
