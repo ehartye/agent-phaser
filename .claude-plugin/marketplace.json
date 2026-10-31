@@ -8,7 +8,7 @@
     {
       "name": "agent-phaser",
       "description": "Skills for building, debugging and proving Phaser 4 games from a coding agent, with browser probes and a test harness behind the claims; pairs with agent-sprites, agent-meshes and agent-beeps assets",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "source": "./",
       "license": "MIT"
     }
