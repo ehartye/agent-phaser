@@ -27,6 +27,8 @@ export const PROBES = [
   { file: 'phaser-verification-causal-pixels.mjs', lane: 'hardware' },
   { file: 'audio-decode.mjs', lane: 'manual' },
   { file: 'audio-visibility.mjs', lane: 'manual' },
+  { file: 'phaser-capture-ready.mjs', lane: 'manual' },
+  { file: 'phaser-capture-clock-experiment.mjs', lane: 'manual' },
 ];
 
 /** Files in this folder that are not probes, so a new file has to be put in one list or the other (tests/phaser-probes-run-all.test.mjs). */

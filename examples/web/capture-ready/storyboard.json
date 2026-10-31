@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "name": "capture-fixture",
+  "goal": "training",
+  "flavor": "cozy-game",
+  "channels": ["youtube-pixel"],
+  "viewport": {"width":384,"height":216,"scale":5},
+  "app": {"url":"http://127.0.0.1:1","localStorage":{"capture-skip-title":"1"}},
+  "scenes": [{"type":"app","id":"fixture","capture":{"mode":"stepped","fps":60,"seed":7},"setup":[{"waitUntil":"window.captureFixture && captureFixture.snapshot().ready"},{"activate":"#start"},{"script":"configure.js"}],"beats":[{"say":"","do":[{"wait":1000},{"activate":"#cue"},{"wait":9000},{"script":"receipt.js"}],"hold":0}]}]
+}
