@@ -16,7 +16,7 @@ Read only the reference needed for the decision.
 | --- | --- |
 | Choose contract owners, align sessions, share themed dialogs or add a bespoke panel | [Owners and extensions](references/owners-and-extensions.md) |
 | Bind the shared Sprites UI exports, native ports, contexts or mount lifecycle | [Shared UI API and native ownership](references/shared-ui-api.md) |
-| Align playbot configuration, transports, starting states or acceptance evidence | [Playbot evidence](references/playbot-evidence.md) |
+| Authenticate a playbot producer pin or bind game-owned actions, observations, transports and starting states | [Playbot evidence](references/playbot-evidence.md) |
 | Reduce browser/build duplication, select checks or separate publication from deep acceptance | [Resources and validation](references/resources-and-validation.md) |
 | Set or verify a frame budget across games, or cost a content increase against it | [Profiling method](../phaser-verification/references/profiling-method.md) |
 
