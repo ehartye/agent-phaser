@@ -53,13 +53,14 @@ the pure planner does not infer a minimum. Existing Canvas wrappers keep their p
 Attribute a copied runtime's software source/version separately from the font/skin art manifest. Updating pure helper code does
 not require regenerating font images or relabeling historical PNGs with a new producer version.
 
-- [general] Dim behind a modal with the skin's **dithered scrim** (a hard-alpha checkerboard) in a `TileSprite`, not a translucent rectangle.
+- [general] Declare the modal backdrop policy. **Strict palette mode** uses hard-alpha dither in a `TileSprite`, aligned to whole physical blocks; change density patterns to fade, keeping object alpha 1. A **translucent backdrop exception** may use a rectangle only inside the declared scrim region, with underlay, alpha token, indexed fade samples and blended-colour budget. It does not relax opaque chrome or raw-source checks.
+- [tested] `phaser-pixel-ui-panels.mjs` measures steady states and ten samples per policy: exact dither palette/blocks versus two declared blended colours, alpha at most `144 / 255`. The opaque-underlay WebGL fixture establishes no arbitrary-backdrop, readability or accessibility claim; see [policy evidence](panels-nine-slice-and-graphics.md#modal-backdrop-policies).
 - [general] In the common whole-zoom/single-density path with physically aligned origins, slide with a tween that rounds local positions
   every frame (`setPosition(Math.round(fx + (tx - fx) * t), ...)`). For contextual motion, project the intended position to physical
   space, apply the declared physical paint quantization, then project back for native placement. Do not round local coordinates:
   at `S = 1.5`, local x = 1 becomes physical x = 1.5 even when `P = 2`. Preserve continuous semantic geometry independently; when
   motion changes a context mapping, advance its revision and cancel held input before publishing it as described in section 1.
-  Leave by sliding. Nothing fades: a half-transparent pixel is a colour the art does not contain.
+  Leave opaque chrome by sliding. Fractional-alpha fading adds colours the art does not contain; it is confined to an explicitly declared translucent backdrop exception. Strict dither fades change hard-alpha patterns.
 - [general] Interface code never uses tint, rotation, alpha blends, `Graphics` or shapes as chrome. Enforce each with a source-scanning test.
 
 ## 5. Text must fit, in three layers

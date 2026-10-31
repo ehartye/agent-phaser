@@ -14,7 +14,8 @@ canvas). The strict tiled-piece recipe is section 4 of [text and panels](pixel-p
 | Authored frame, patterned centre, any size | four corners plus `TileSprite` edges and centre | yes |
 | Flat plate or divider | `Rectangle` shape or `Graphics.fillRect` at whole coordinates | yes, with the pixel-art context below |
 | Rounded or curved plate | authored corner art in a `NineSlice` | `Graphics` arcs are tessellated, not pixel art |
-| Dim behind a modal | dithered `TileSprite` | a translucent rectangle adds a colour the art lacks |
+| Strict-palette modal backdrop | hard-alpha dithered `TileSprite` | aligned whole blocks; fade by changing density patterns |
+| Declared translucent modal backdrop | `Rectangle` inside the scrim region | explicit underlay, alpha and blended-colour budget; opaque chrome stays strict |
 
 - [general] Choose by the widths the layout can produce, not by the one you drew first: a panel that is always the same size can
   be a plain `Image`; one that takes any width needs tile-snapped sizes or separate pieces.
@@ -65,6 +66,13 @@ const snapPanelWidth = (want: number, left: number, right: number, centre: numbe
   `setFillStyle`.
 - [documented] `Layer` became a true `GameObject` in 4.1.0 (filters now work on it); a `Container` has no size until `setSize` and no
   texture, so give a panel container its size before `setInteractive` ([pointer and mouse](../../phaser-input/references/pointer-and-mouse.md)).
+
+## Modal backdrop policies
+
+- [general] Select the policy explicitly. Strict mode uses authored opaque/transparent scrim texels, object alpha 1 and physically aligned tiles; its palette includes the opaque scrim colour. Change pattern density instead of fading object alpha. A translucent backdrop is a scoped compositing exception: declare the underlay, alpha token/time samples, permitted blended colours and colour budget. Never apply that exception to opaque chrome or raw-source authentication.
+- [tested] `phaser-pixel-ui-panels.mjs` retains PNG/RGBA, source/fixture hashes, renderer/camera state and exact [RGBA-region metrics](../../phaser-verification/references/visual-evidence-instruments.md). Its identity-camera WebGL fixture uses grid 2, an opaque white/red underlay and black scrim. Ten dither samples use densities `[0,2,4,6,8,10,12,14,15,16] / 16`; ten translucent samples use alpha bytes `[0,16,32,48,64,80,96,112,128,144] / 255`. Steady states use density `8 / 16` and alpha `128 / 255`. Each sample keeps complete unsplit blocks; strict samples have zero off-palette pixels, while translucent samples allow only their two declared colours. Green opaque chrome remains exact throughout.
+- [tested] The default probe also retains three adverse controls. `--scrim-mutation dither-colour`, `dither-alpha` or `translucent-budget` requires a standalone failure after all samples are captured. Blue dither texels and alpha 0.5 fail strict palette membership; alpha `192 / 255` exceeds the declared maximum and blended palette. Lossless frames and measured failures are written before assertions; owned game/capture resources are released on positive and adverse runs.
+- [general] Counts describe these indexed samples, not a continuous tween or every backdrop. Existing `phaser-rendering-textures-and-shaders.mjs` keep/dither checks establish renderer alpha behaviour separately; neither probe establishes a UI preference, readability, accessibility or consumer acceptance.
 
 ## Verify
 

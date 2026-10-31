@@ -55,7 +55,7 @@ One page to scan before writing Phaser 4 code. Each row is a rule and the refere
 | --- | --- |
 | One integer scale per layer, chosen from device pixels; UI is its own scene and camera; match devicePixelRatio | [pixel-perfect](../../phaser-pixel-ui/references/pixel-perfect-and-ui.md) 1, 2; [source-pixels probe](../../../examples/web/phaser-probes/source-pixels.mjs) |
 | All text is `BitmapText` from the tool export; no `Text`, CSS or DOM text; tone is glyph frames, not tint | pixel-perfect 3 |
-| Panels tiled, not `NineSlice`-stretched; scrim is a dither; tweens round every frame | pixel-perfect 4 |
+| Tile panels; hard-alpha scrims or budgeted translucent backdrops; opaque chrome stays strict | pixel-perfect 4 |
 | Phaser 4 WebGL clipping uses native filter masks or camera viewports, not legacy `setMask`; clip input separately and bound surfaces | pixel-perfect 8; [scroll-mask probe](../../../examples/web/phaser-probes/scroll-mask.mjs) |
 | Accessible controls and native text entry project the same screen/action model as Phaser; no DOM-count ban or duplicate layout | pixel-perfect 7 |
 | Text fit in three layers (static table, runtime guard, GPU walk-through) | pixel-perfect 5 |
