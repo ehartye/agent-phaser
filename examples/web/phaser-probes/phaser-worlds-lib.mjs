@@ -7,16 +7,19 @@
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 
-export async function startProbe(projectArg, { width = 400, height = 300, game: gameConfig = {}, setup = '' } = {}) {
+export async function startProbe(projectArg, { width = 400, height = 300, game: gameConfig = {}, setup = '', startupTimeout = 0 } = {}) {
   const project = resolve(projectArg ?? '.');
   const require = createRequire(resolve(project, 'package.json'));
   let pw;
   try { pw = require('@playwright/test'); } catch { pw = require('playwright-core'); }
   const args = ['--ignore-gpu-blocklist', '--enable-precise-memory-info', '--js-flags=--expose-gc'];
   if (process.env.ANGLE) args.push(`--use-angle=${process.env.ANGLE}`);
-  const browser = await pw.chromium.launch({ channel: process.env.CHROME_CHANNEL || undefined, args });
-  const page = await browser.newPage({ viewport: { width, height } });
+  const browser = await pw.chromium.launch({ channel: process.env.CHROME_CHANNEL || undefined, args, ...(startupTimeout ? { timeout: startupTimeout } : {}) });
+  let startupTimer;
   const errors = [];
+  try {
+  const initialize = async () => {
+  const page = await browser.newPage({ viewport: { width, height } });
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setContent('<style>body{margin:0;background:#000}</style>');
   await page.addScriptTag({ path: require.resolve('phaser') });
@@ -52,4 +55,17 @@ export async function startProbe(projectArg, { width = 400, height = 300, game: 
     },
   };
   return probe;
+  };
+  if (!startupTimeout) return await initialize();
+  return await Promise.race([initialize(), new Promise((_, reject) => {
+    startupTimer = setTimeout(() => reject(new Error('Phaser probe startup timed out')), startupTimeout);
+  })]);
+  } catch (error) {
+    if (errors.length) error.pageErrors = errors.slice();
+    try { await browser.close(); }
+    catch (cleanupError) { throw new AggregateError([error, cleanupError], 'Probe startup and browser cleanup failed', { cause: error }); }
+    throw error;
+  } finally {
+    clearTimeout(startupTimer);
+  }
 }

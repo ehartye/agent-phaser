@@ -1,16 +1,17 @@
 # Phaser 4.2.1 tilemap gotchas
 
-Tilemap layers, tile animation, containers and per-tile motion. Numbers match the index in [phaser-4-gotchas.md](../../phaser-rendering/references/phaser-4-gotchas.md).
+Numbering follows [phaser-4-gotchas.md](../../phaser-rendering/references/phaser-4-gotchas.md).
+
+- [tested] Orientation conversion and paint can disagree. The [14-row CPU matrix](tilemap-data-and-formats.md#measured-cpu-orientation-boundary) has a partial verdict: only four exact combinations agree. It records stagger axis/index and hex side-length mismatches, including undefined x/even hex coordinates. GPU remains orthogonal-only; collision and arbitrary-camera behavior stay unverified.
 
 ## 1. `TilemapGPULayer` draws at twice its position
 
-- [general] **Symptom.** Only the tilemap at the world origin renders. Others vanish or appear far away.
+- [general] **Symptom.** Layers away from the world origin vanish or draw far away.
 
 **Cause.** `SubmitterTilemapGPULayer.run()` builds `spriteMatrix.applyITRS(x, y, ...)` and then computes the quad corners
-from `(x, y)` to `(x + width, y + height)`. The layer position is applied twice (a fix: build the quad from (0, 0) to (width, height)).
+from `(x, y)` to `(x + width, y + height)`. The position is doubled; build the quad from (0, 0) to (width, height).
 
-**Evidence.** A layer at x = -256 ended exactly at world 0 (it was drawn at -512). Moving every layer to (0, 0) and
-positioning a parent container fixed it. A test with all four chunks near the origin passed anyway: overlapping ranges hid it.
+**Evidence.** A layer at x = -256 drew at -512, ending at world 0. Positioning layers through a parent container fixed it. Overlapping near-origin chunks hid the failure.
 
 **Workaround.** Keep GPU layers at (0, 0) and position a parent `Container`; the container matrix reaches the layer
 through `parentMatrix` and is correct. Tile collision reads the layer's own x, y, not the container's ([tilemap collision](../../phaser-physics/references/tilemap-collision.md)). A container has one depth, so split layers that need different depths (for
@@ -18,15 +19,13 @@ example a roof above entities and ground below them) into separate containers.
 
 ## 2. Empty tiles in a GPU layer render as an opaque tile 0
 
-**Symptom.** A mostly empty GPU layer used as an overlay covers everything beneath it with the tileset's first tile.
-Terrain looks like uniform dust even though the data underneath is correct.
+**Symptom.** A mostly empty GPU overlay covers terrain with the tileset's first tile despite correct data.
 
-**Cause.** A `-1` (empty) tile in a `TilemapGPULayer` is drawn as tile index 0 instead of being transparent in this
-configuration.
+**Cause.** An empty `-1` cell in `TilemapGPULayer` draws tile 0 instead of transparency.
 
 **Evidence.** A 4x4 GPU layer, left half asphalt and right half `-1`, over a water layer: the right half drew dust (tile
 0) [general] and hid the water. `layer.getTileAt(x, y, true).index` returned `-1`, so the data was right and the draw was wrong.
-In a real map, two overlay layers about 95% empty hid the terrain on every chunk.
+Two 95%-empty overlays hid every chunk.
 
 **Workaround.** A GPU layer must be full. Use it for the dense base ground and make the code that fills it incapable of
 emitting -1. Use a CPU `TilemapLayer` for anything sparse (overlays, objects, roofs, floors).
@@ -34,8 +33,8 @@ emitting -1. Use a CPU `TilemapLayer` for anything sparse (overlays, objects, ro
 **Refinement (read from `TilemapGPULayer-frag.js`).** The layer data does mark `-1` as empty, but the shader's empty branch
 returns texel coordinate `(0, 0)` of the tileset for the whole quad, so the tile is filled with the colour of the sheet's
 **top-left pixel**, not a lookup of tile 0's art. That makes a sparse GPU layer possible: make cell 0 of the tileset fully
-transparent (an explicit `empty` cell first in the sheet) and "empty" becomes transparent. Sheets whose first cell is opaque
-(a terrain sheet starting with dust) still need full layers. See gotcha 10 for what sparse GPU layers are good for.
+transparent (an explicit first `empty` cell) and "empty" becomes transparent. Sheets whose first cell is opaque
+(a terrain sheet starting with dust) still need full layers. See gotcha 10 for sparse layers.
 
 **Related crash.** `removeTileAt(x, y, true)` leaves `null` in the layer; `generateLayerDataTexture()` then throws
 `Cannot read properties of null (reading 'index')`. Use `removeTileAt(x, y, false)` on a GPU layer.
