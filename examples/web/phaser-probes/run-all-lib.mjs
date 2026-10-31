@@ -24,6 +24,7 @@ export const PROBES = [
   ...worlds,
   { file: 'scroll-mask.mjs', lane: 'hardware' },
   { file: 'source-pixels.mjs', lane: 'hardware' },
+  { file: 'phaser-verification-causal-pixels.mjs', lane: 'hardware' },
   { file: 'audio-decode.mjs', lane: 'manual' },
   { file: 'audio-visibility.mjs', lane: 'manual' },
 ];
