@@ -8,16 +8,56 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { resolve, join } from 'node:path';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(join(project, 'package.json'));
 const playwright = ['@playwright/test', 'playwright', 'playwright-core'].map(name => { try { return require(name); } catch { return null; } }).find(Boolean);
 assert.ok(playwright, 'the project must provide @playwright/test, playwright or playwright-core');
 const PHASER = require.resolve('phaser');
+const options = process.argv.slice(3);
+let mutation = null, outputRoot = tmpdir();
+for (let i = 0; i < options.length; i += 2) {
+  const value = options[i + 1];
+  assert.ok(value, `${options[i]} requires a value`);
+  if (options[i] === '--mutation') mutation = value;
+  else if (options[i] === '--out') outputRoot = resolve(value);
+  else throw new Error(`Unknown option: ${options[i]}`);
+}
+assert.ok(mutation === null || ['transition-order', 'repeat-count'].includes(mutation), 'unknown mutation');
+mkdirSync(outputRoot, { recursive: true });
+const output = mkdtempSync(join(outputRoot, 'motion-scenes-'));
+const hash = path => createHash('sha256').update(readFileSync(path)).digest('hex');
+// Expected observations are declared before any native callback is captured. Mutations change native configuration, never these oracles.
+const transitionRows = ['fresh', 'sleeping'].flatMap(target => [false, true].flatMap(moveBelow => ['default', 'custom'].map(scope => ({ target, moveBelow, scope }))));
+const repeatRows = [{ amount: 0, runs: 1, loops: 0 }, { amount: 1, runs: 2, loops: 1 }, { amount: 2, runs: 3, loops: 2 }, { amount: -1, runs: 3, loops: 2 }, { amount: -2, runs: 1, loops: 0 }];
+for (const row of transitionRows) {
+  row.expectedOrder = row.moveBelow ? ['B', 'A'] : ['A', 'B'];
+  row.expectedEvents = row.target === 'fresh'
+    ? ['B.init', 'B.create', 'B.transitionstart', 'onStart', 'A.transitionout', 'B.transitioncomplete', 'A.shutdown']
+    : ['B.wake', 'B.transitionwake', 'onStart', 'A.transitionout', 'B.transitioncomplete', 'A.shutdown'];
+}
+for (const row of repeatRows) {
+  row.expectedTrace = [];
+  for (let iteration = 0; iteration < row.runs; iteration++) {
+    if (iteration) row.expectedTrace.push({ event: 'loop', scope: true, iteration });
+    row.expectedTrace.push({ event: 'run', scope: true, iteration });
+    if (!iteration) row.expectedTrace.push({ event: 'once', scope: true, iteration });
+    row.expectedTrace.push({ event: 'tail', scope: true, iteration });
+  }
+  if (row.amount !== -1) row.expectedTrace.push({ event: 'complete' });
+}
+const report = { format: 'phaser-motion-scenes@1', mutation, output, source: { probe: hash(fileURLToPath(import.meta.url)), phaser: hash(PHASER) }, expected: { transitionRows, repeatRows }, observations: [], cleanup: [], checks: [] };
+const save = () => writeFileSync(join(output, 'result.json'), JSON.stringify(report, null, 2) + '\n');
+save();
 
 // In-page helpers. `start` boots a game whose first scene is 'A' (and optionally more, added but not started) and resolves once it is ready;
 // `stepper` returns step(dt, n) over the game's own virtual clock; `click` sends a real mouse down and up to the middle of the canvas.
 const PAGE_HELPERS = `
+window.ownedGames = [];
 window.mkScene = (name, log) => class extends Phaser.Scene {
   constructor() { super(name); }
   init(data) { log?.push(name + '.init ' + JSON.stringify(data)); }
@@ -33,6 +73,7 @@ window.mkScene = (name, log) => class extends Phaser.Scene {
 window.start = async (names, log) => {
   const game = new Phaser.Game({ type: Phaser.CANVAS, width: 200, height: 200, banner: false, audio: { noAudio: true }, scene: [mkScene(names[0], log)] });
   window.game = game;
+  ownedGames.push(game);
   await new Promise(r => game.events.once('ready', r));
   for (const n of names.slice(1)) game.scene.add(n, mkScene(n, log), false);
   game.loop.sleep();
@@ -42,22 +83,40 @@ window.stepper = () => { let t = game.loop.time; return (dt, n = 1) => { for (le
 window.click = () => { const c = game.canvas, rc = c.getBoundingClientRect(); for (const ty of ['mousedown', 'mouseup']) c.dispatchEvent(new MouseEvent(ty, { clientX: rc.left + 100, clientY: rc.top + 100, bubbles: true, button: 0, buttons: ty === 'mousedown' ? 1 : 0 })); };
 `;
 
-const browser = await playwright.chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const browser = await playwright.chromium.launch({ timeout: 15000, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 let passed = 0;
-const ok = (id, detail = '') => { passed++; console.log(`ok ${id}${detail ? ' ' + detail : ''}`); };
+const ok = (id, detail = '') => { passed++; report.checks.push(id); save(); console.log(`ok ${id}${detail ? ' ' + detail : ''}`); };
 
 async function page(fn, { clock = false } = {}) {
   const context = await browser.newContext({ viewport: { width: 200, height: 200 } });
-  const p = await context.newPage();
-  const errors = [];
+  let p, timer, failure;
+  const errors = [], cleanup = { contextClosed: false, games: [] };
+  try {
+  p = await context.newPage();
+  p.setDefaultTimeout(15000);
   p.on('pageerror', e => errors.push(e.message));
   await p.setContent('<!doctype html><body style="margin:0"></body>');
   await p.addScriptTag({ path: PHASER });
+  assert.equal(await p.evaluate(() => Phaser.VERSION), '4.2.1', 'pinned native version');
   if (clock) { await p.clock.install({ time: 0 }); await p.clock.pauseAt(1000); }   // paused before the game exists: nothing ticks until runFor
   await p.evaluate(PAGE_HELPERS);
-  try { return await fn(p); } finally {
-    await context.close();
-    assert.deepEqual(errors, [], 'no page errors');
+  const result = await Promise.race([fn(p), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Motion case exceeded 15000 ms')), 15000); })]);
+  report.observations.push(result); save();
+  return result;
+  } catch (error) { failure = error; report.failure = error.stack; save(); throw error; }
+  finally {
+    clearTimeout(timer);
+    try {
+      if (p && !p.isClosed()) cleanup.games = await p.evaluate(() => (window.ownedGames ?? []).map(game => {
+        const canvas = game.canvas, manager = game.scene;
+        game.loop.sleep(); game.destroy(true, false); game.step(0, 0);
+        return { canvasConnected: canvas.isConnected, scenes: manager.scenes.length, pendingDestroy: game.pendingDestroy, loopRunning: game.loop.running, listeners: game.events.eventNames().length };
+      }));
+      for (const state of cleanup.games) assert.deepEqual(state, { canvasConnected: false, scenes: 0, pendingDestroy: false, loopRunning: false, listeners: 0 }, 'owned game cleanup');
+      assert.deepEqual(errors, [], 'no page errors');
+    } catch (error) { cleanup.error = error.stack; if (!failure) failure = error; }
+    finally { await context.close(); cleanup.contextClosed = true; report.cleanup.push(cleanup); save(); }
+    if (failure) throw failure;
   }
 }
 
@@ -292,6 +351,7 @@ try {
               window.tl.play(); resolve();
             } } });
             window.game = game;
+            ownedGames.push(game);
           });
         });
         await p.clock.runFor(500); const half = await p.evaluate(() => ({ x: Math.round(thing.x * 100) / 100, log: log.slice() }));
@@ -319,7 +379,103 @@ try {
     ok('tween-forward-fresh-needs-two-calls', JSON.stringify(r));
   }
 
+  // 12. Fresh/sleeping targets, native list order and onStart scope/data. No asynchronous loader is installed here.
+  for (const row of transitionRows) {
+    const { expectedOrder, expectedEvents } = row;
+    const r = await page(p => p.evaluate(async ({ row, mutation }) => {
+      await start(['A', 'B']); const step = stepper(); step(10, 2);
+      const A = game.scene.getScene('A'), B = game.scene.getScene('B'), trace = [], data = { row: `${row.target}/${row.moveBelow}/${row.scope}`, n: 7 };
+      if (row.target === 'sleeping') { game.scene.start('B'); step(10, 2); game.scene.sleep('B'); step(10, 2); }
+      const order = () => game.scene.scenes.map(s => s.sys.settings.key);
+      const emit = (event, extra = {}) => trace.push({ event, order: order(), ...extra });
+      const originalInit = B.init, originalCreate = B.create;
+      B.init = function (value) { emit('B.init', { data: value, sameData: value === data }); return originalInit.call(this, value); };
+      B.create = function (...args) { emit('B.create'); return originalCreate.apply(this, args); };
+      B.events.on('wake', (systems, value) => emit('B.wake', { data: value, sameData: value === data, sameSystems: systems === B.sys }));
+      for (const event of ['transitionstart', 'transitionwake']) B.events.on(event, (from, duration) => emit(`B.${event}`, { from: from.sys.settings.key, duration }));
+      B.events.on('transitioncomplete', () => emit('B.transitioncomplete'));
+      A.events.on('transitionout', (to, duration) => emit('A.transitionout', { to: to.sys.settings.key, duration }));
+      A.events.on('shutdown', () => emit('A.shutdown'));
+      const customScope = { label: 'custom' }, before = { order: order(), targetStatus: B.sys.settings.status };
+      const config = {
+        target: 'B', duration: 40, data,
+        // Wrong native ordering is visible to the same list/order witnesses as the healthy case.
+        moveBelow: mutation === 'transition-order' && row.moveBelow ? false : row.moveBelow,
+        onStart(from, to, duration) {
+          emit('onStart', { from: from.sys.settings.key, to: to.sys.settings.key, duration, sameFrom: from === A, sameTo: to === B,
+            scope: this === customScope ? 'custom' : this === A ? 'default' : 'wrong', statuses: [A.sys.settings.status, B.sys.settings.status],
+            transitioning: [A.sys.isTransitioning(), B.sys.isTransitioning()] });
+        },
+        ...(row.scope === 'custom' ? { onStartScope: customScope } : {}),
+      };
+      const admitted = A.scene.transition(config), immediate = trace.slice();
+      let frames = 0;
+      while (A.sys.isTransitioning() && frames < 10) { step(10); frames++; }
+      return { row, before, admitted, immediate, trace, frames, final: { order: order(), statuses: [A.sys.settings.status, B.sys.settings.status], transitioning: [A.sys.isTransitioning(), B.sys.isTransitioning()] } };
+    }, { row, mutation }));
+    assert.deepEqual(r.before.order, ['A', 'B']);
+    assert.equal(r.before.targetStatus, row.target === 'sleeping' ? 7 : 1);
+    assert.equal(r.admitted, true);
+    assert.deepEqual(r.trace.map(v => v.event), expectedEvents, 'transition callback order');
+    for (const event of r.trace) assert.deepEqual(event.order, expectedOrder, 'transition native scene order');
+    assert.deepEqual(r.immediate.map(v => v.event), expectedEvents.slice(0, -2), 'synchronous fixture start/wake precedes onStart and transitionout');
+    const received = r.trace[0];
+    assert.deepEqual(received.data, { row: `${row.target}/${row.moveBelow}/${row.scope}`, n: 7 });
+    assert.equal(received.sameData, true, 'init/wake receives the original data');
+    if (row.target === 'sleeping') assert.equal(received.sameSystems, true);
+    const callback = r.trace.find(v => v.event === 'onStart');
+    assert.deepEqual(callback, { event: 'onStart', order: expectedOrder, from: 'A', to: 'B', duration: 40, sameFrom: true, sameTo: true, scope: row.scope, statuses: [5, 5], transitioning: [true, true] });
+    assert.equal(r.frames, 4);
+    assert.deepEqual(r.final, { order: expectedOrder, statuses: [8, 5], transitioning: [false, false] });
+  }
+  ok('scene-transition-order-scope-matrix', '8 fresh/sleeping, moveBelow and scope rows');
+
+  // 13. Independent finite counts, bounded infinite cancellation, distinct -2 and full reset after each row.
+  for (const row of repeatRows) {
+    const r = await page(p => p.evaluate(async ({ row, mutation }) => {
+      await start(['A']); const step = stepper(); step(10, 2);
+      const A = game.scene.getScene('A'), trace = [], target = { label: 'target' };
+      const tl = A.add.timeline([
+        { at: 0, target, loop() { trace.push({ event: 'loop', scope: this === target, iteration: tl.iteration }); }, run() { trace.push({ event: 'run', scope: this === target, iteration: tl.iteration }); } },
+        { at: 10, once: true, run() { trace.push({ event: 'once', scope: this === tl, iteration: tl.iteration }); } },
+        { at: 20, run() { trace.push({ event: 'tail', scope: this === tl, iteration: tl.iteration }); } },
+      ]);
+      tl.on('complete', () => trace.push({ event: 'complete' }));
+      const actualRepeat = mutation === 'repeat-count' && row.amount === 0 ? 1 : row.amount;
+      tl.repeat(actualRepeat).play();
+      let frames = 0;
+      while (!tl.complete && frames < 20) {
+        step(10); frames++;
+        if (row.amount === -1 && trace.filter(v => v.event === 'tail').length === 3) break;
+      }
+      const state = () => ({ complete: tl.complete, paused: tl.paused, playing: tl.isPlaying(), iteration: tl.iteration, events: tl.events.map(e => ({ time: e.time, repeat: e.repeat, complete: e.complete })) });
+      const beforeStop = state(), original = trace.slice();
+      tl.stop(); const afterStop = state(); step(10, 5); const afterStopTrace = trace.slice();
+      // Full reset clears remaining event repeat counters but cannot recreate the removed once event.
+      tl.repeat(0).reset(); const afterReset = state(); trace.length = 0;
+      step(10, 4); const resetTrace = trace.slice(), resetFinal = state();
+      return { amount: row.amount, actualRepeat, frames, original, beforeStop, afterStop, afterStopTrace, afterReset, resetTrace, resetFinal };
+    }, { row, mutation }));
+    assert.deepEqual(r.original, row.expectedTrace, 'timeline repeat callback counts/order');
+    assert.equal(r.original.filter(v => v.event === 'loop').length, row.loops);
+    assert.equal(r.frames, row.runs * 2, 'two ten-ms frames per twenty-ms cycle');
+    assert.equal(r.beforeStop.complete, row.amount !== -1);
+    assert.equal(r.beforeStop.iteration, row.amount === -1 ? 3 : row.loops);
+    assert.equal(r.beforeStop.events.length, 2, 'once event is removed');
+    assert.deepEqual(r.beforeStop.events.map(v => v.repeat), [row.loops, row.loops]);
+    assert.deepEqual(r.afterStopTrace, r.original, 'bounded cancellation fires nothing later');
+    assert.equal(r.afterStop.complete, true); assert.equal(r.afterStop.paused, true); assert.equal(r.afterStop.playing, false);
+    assert.deepEqual(r.afterReset, { complete: false, paused: false, playing: true, iteration: 0, events: [{ time: 0, repeat: 0, complete: false }, { time: 20, repeat: 0, complete: false }] });
+    assert.deepEqual(r.resetTrace, [{ event: 'run', scope: true, iteration: 0 }, { event: 'tail', scope: true, iteration: 0 }, { event: 'complete' }], 'reset clears loop callbacks and does not resurrect once');
+    assert.equal(r.resetFinal.complete, true);
+  }
+  ok('timeline-repeat-boundaries', 'repeat 0/1/2/-1/-2, event loops, once removal and reset');
+
   console.log(`all checks passed (${passed})`);
+} catch (error) {
+  report.failure = error.stack; save(); throw error;
 } finally {
   await browser.close();
+  report.browserClosed = !browser.isConnected(); save();
+  console.log(`evidence ${output}`);
 }

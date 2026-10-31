@@ -12,6 +12,13 @@ A Timeline is a list of timed steps on the scene clock: callbacks, state changes
 
 - [tested] `pause()` held `elapsed` exactly (0 ms gained over 30 frames), `resume()` continued from there and fired the next step, and `stop()` fired nothing: it set `complete` and `paused` and left later steps unfired (`timeline-pause-resume-stop`). A cutscene that must survive a pause menu pauses the timeline, not the scene clock.
 
+## Repetition and reset
+
+- [tested] `timeline-repeat-boundaries` measures `repeat(0)`, `repeat(1)` and `repeat(2)` as one, two and three complete passes. An event's `loop` callback runs before its `run` on repeated passes only: zero, one and two calls respectively. Both callbacks use the event target when supplied. The 20-ms fixture takes two 10-ms steps per pass.
+- [tested] `repeat(-1)` remains active: the probe stops after three passes, then verifies five further steps produce no callbacks. `repeat(-2)` instead completes after one pass with no loop callback. Do not generalize the pinned source documentation's “negative means infinite” wording to every negative value; only `-1` is qualified here. The probe records complete/paused/iteration states and exact callback order independently of those source comments.
+- [tested] `once: true` executes on the first pass and is removed. `reset()` clears elapsed time, iteration and remaining event repeat counters, resumes the timeline, and does not recreate removed once events. Each repeat row is then reset with `repeat(0)` and runs once without a loop callback or the removed event (`timeline-repeat-boundaries`). Rebuild the timeline if the once event must return.
+- [tested] `--mutation repeat-count` changes the native first case to `repeat(1)` while retaining the independent one-pass expectation; the actual callback-count/order comparison fails. `--out <directory>` retains traces and cleanup alongside the existing eleven checks. This is scene-clock behavior, not a wall-clock tween or hardware-performance result.
+
 ## Skipping
 
 - [tested] `stop()` leaves every later step unfired (`timeline-skip`), so it cancels a cutscene and does not finish it. To skip to the end set `timeline.timeScale = 1e6` and step one frame: every remaining step fires in array order in that one update and `complete` becomes true. Do the final state changes in `run` and `set` steps, not in tweens, so a skip lands them.
