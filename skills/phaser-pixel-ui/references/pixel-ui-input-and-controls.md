@@ -34,5 +34,23 @@ replace navigable buttons, named controls, selection state or editable text. Pre
   desktop DOM tests and simulated events do not establish those device behaviors.
 
 An `aria-live` announcement helper is not evidence of complete interactive accessibility. A one-node architecture assertion is
-too restrictive for games with semantic controls or native text entry. The bridge above is architectural guidance, not a
-validated shipped implementation.
+too restrictive for games with semantic controls or native text entry. The bounded example below verifies part of this architecture;
+it does not establish consumer adoption or all the device behaviors above.
+
+## 8. Bounded desktop bridge evidence
+
+- [tested] The [model/action example](../../../examples/web/harness/accessibility-bridge.mjs) owns control labels, enabled/selected state, field values, modal eligibility and focus identity. Its [fixture](../../../examples/web/harness/accessibility-bridge-fixture.mjs) projects Canvas controls and visually concealed native buttons/input from that model. Actual pointer and semantic keyboard routes invoke the same original action owner once. DOM dimensions never determine Canvas layout. `node --test tests/phaser-accessibility-bridge.test.mjs` covers public action, refusal and lifecycle boundaries.
+- [tested] `node examples/web/phaser-probes/phaser-pixel-ui-accessibility-bridge.mjs <host>` runs Phaser 4.2.1 with desktop Chromium and declares `CanvasRenderer`. CDP `Accessibility.getFullAXTree` supplies the native tree; only nodes with `ignored: false` satisfy required role/name/state witnesses. Concealed controls remain present while `display:none`, `hidden` and `aria-hidden` examples are absent from the unignored tree. DOM presence and successful focus alone are insufficient evidence.
+- [tested] Real pointer, Tab, Shift+Tab, Enter, Escape and text input exercise selected state, the disabled control's skipped tab position, field value updates, Canvas focus strokes, modal background inertness, contained focus and opener restoration. Ten full fixture disposal/recreation cycles release owned listeners, subscriptions, DOM and canvases; retired action owners receive no new calls. This is full fixture teardown, not a claim about arbitrary scene restart integration.
+
+The host supplies Phaser 4.2.1 and `@playwright/test`; `CHROME_CHANNEL` optionally selects another Chromium channel. The entrypoint accepts `--output <evidence>` or creates a unique temporary directory and prints its path. It runs in the runner's software lane. Browser execution remains separate from the dependency-free merge gate.
+
+```sh
+node examples/web/phaser-probes/phaser-pixel-ui-accessibility-bridge.mjs /path/to/host
+node examples/web/phaser-probes/phaser-pixel-ui-accessibility-bridge.mjs /path/to/host --mutation aria-hidden
+node examples/web/phaser-probes/phaser-pixel-ui-accessibility-bridge.mjs /path/to/host --mutation duplicate-action
+```
+
+- [tested] Each mutation exits 1 through its real witness: `aria-hidden` removes the required Music button from the unignored AX tree; `duplicate-action` makes a real keyboard activation reach the original handler twice. An escaped mutation exits 0. Inspect `report.json`, `failure.ax.json`, `failure.png` and `failure.trace.zip`, not only exit status. Reports preserve source/browser identities, original-owner receipts and failure state before cleanup; cleanup results record fixture disposal and CDP/context/browser/server release. The normal run retains AX snapshots, `positive.png` and `positive.trace.zip`.
+
+This evidence does not establish screen-reader interoperability, device IME/composition behavior, mobile keyboards, blanket compliance, authored paint or GPU acceptance. The fixture uses Canvas text to demonstrate state projection, not a strict bitmap-font rendering contract. Capture readiness and the manual-loop/externally stepped-clock experiment are separate obligations; the probe supplies no filming adapter or second clock owner.

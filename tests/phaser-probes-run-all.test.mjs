@@ -33,6 +33,7 @@ test('without --hardware a hardware-only probe is skipped with a reason, and a m
   assert.equal(by('audio-decode.mjs').action, 'skip');
   assert.equal(by('phaser-docs-errata.mjs').action, 'run');
   assert.equal(by('phaser-native-control-observation.mjs').action, 'run', 'Canvas native input needs no hardware lane');
+  assert.equal(by('phaser-pixel-ui-accessibility-bridge.mjs').action, 'run', 'desktop AX and Canvas input need no hardware lane');
 });
 
 test('--hardware runs the hardware-only probes and points the rendering and worlds probes at the platform backend; software probes keep a clean environment', () => {
