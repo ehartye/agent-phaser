@@ -17,7 +17,7 @@ Targets Phaser 4.2.1; version-sensitive claims carry the version or a probe name
 | Bind shared themed UI families, independent contexts or native mount ownership | [shared UI API](../phaser-architecture/references/shared-ui-api.md) |
 | Make the canvas pixel-exact, choose the integer footprint, handle device pixels, tile panels, fit text | [pixel-perfect and UI](references/pixel-perfect-and-ui.md): [footprint](references/pixel-perfect-footprint.md), [text and panels](references/pixel-perfect-text-and-panels.md) |
 | Clip a scrolling pane in WebGL | [clipped scrolling](references/pixel-ui-clipped-scrolling.md) |
-| Capture input while a modal is open, or keep controls accessible next to a canvas UI | [input and controls](references/pixel-ui-input-and-controls.md) |
+| Capture modal input, project accessible controls, or verify native AX membership and one action owner | [input and controls](references/pixel-ui-input-and-controls.md): shared-model bridge and bounded desktop evidence |
 
 ## Rules that earned their place
 
@@ -38,6 +38,7 @@ Targets Phaser 4.2.1; version-sensitive claims carry the version or a probe name
   on each control and test targets by clicking centres.
 - [general] **Keep accessible controls and native text entry** through the shared-model semantic bridge; a live region alone is not
   an interactive interface.
+- [tested] **AX membership and action ownership need independent witnesses.** The accessibility-bridge probe checks unignored native roles/names/states and real input, including hidden-control and duplicate-action mutations. Its desktop Canvas evidence does not establish screen-reader, mobile IME, compliance or authored-paint acceptance.
 
 ## Not covered here
 

@@ -3,7 +3,7 @@
 When to put native elements (inputs, buttons, links, long text) over the game, how `DOMElement` places them, and the input
 traps that come with it. Reproduce the tested facts with `node examples/web/phaser-probes/phaser-pixel-ui-panels.mjs <project>`
 (container, zoom, lifecycle, focus) and `phaser-input-pointer.mjs` (click-through). The semantic-bridge architecture is section 7
-of [input and controls](pixel-ui-input-and-controls.md); the Phaser skills bundled with 4.2.1 have no DOMElement page.
+of [input and controls](pixel-ui-input-and-controls.md); section 8 documents the bounded desktop AX/input probe and its device/compliance limits. The Phaser skills bundled with 4.2.1 have no DOMElement page.
 
 ## DOM or canvas
 
