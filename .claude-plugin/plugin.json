@@ -1,6 +1,6 @@
 {
   "name": "agent-phaser",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Skills for building, debugging and proving Phaser 4 games from a coding agent: project setup and the scene and fixed-step structure, the WebGL renderer and its filters, worlds bigger than the screen, physics, motion, pixel-exact UI, input, audio and architecture across games, with browser probes, install-time patch scripts and a Playwright test harness that back the claims. Pairs with agent-sprites atlases, agent-meshes models and agent-beeps sounds and music in a Phaser game. Choosing an engine and importing assets into other engines are in the agent-engine plugin.",
   "author": {
     "name": "ehartye"
