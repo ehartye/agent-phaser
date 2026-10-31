@@ -2,11 +2,11 @@
 
 ## Availability and owners
 
-- [documented] **Available in agent-sprites 0.96.1.** Producer verification is independent; each host verifies its complete released pin and adoption contract.
+- [documented] **Authenticated producer boundary: agent-sprites 0.99.0**, released source `b6ceb6f0a28b231bf416c185a69e140501a28700`. Producer verification is independent; each host verifies its complete released pin and adoption contract.
 
 | Boundary | Owner and availability | Consumer responsibility |
 | --- | --- | --- |
-| Theme, components/families, layout, interaction, Phaser mounts | Agent-sprites 0.96.1; `ui-index.mjs` and declarations | Pin released software; supply content, contexts, ports and actions |
+| Theme, components/families, layout, interaction, Phaser mounts | Agent-sprites 0.99.0; `ui-index.mjs` and declarations | Pin released software; supply content, contexts, ports and actions |
 | Font/skin art | Sprites; separate exports | Immutable art; historical receipts |
 | Playbot evidence | Tests 0.4.1; `playbot-contract.mjs` and declaration | Directors, adapters, input and observed outcomes |
 | Architecture/adoption guidance | Agent-engine | Apply native engine and project owners |
@@ -17,6 +17,7 @@
 - [documented] Producer `server/build/ui-software.mjs` exports `publishUiSoftware({output})` and `UI_SOFTWARE_FILES`: **16 payloads plus one manifest, 17 total**. `ui-runtime`, `ui-action-group`, `ui-theme`, `ui-components`, `ui-layout`, `ui-interaction`, `ui-phaser-runtime` and `ui-index` each have `.mjs` and `.d.mts`. Copy all; browsers import `ui-index.mjs`, not the Node-only publisher.
 - [documented] `ui-software-manifest.json` records format `agent-sprites/ui-software@1`, schema version `1`, producer version, bytes/SHA-256 and `sha256-ui-software-v1` identity. Identity hashes `JSON.stringify({version: manifest.producer.version, files: manifest.files})` in producer file order. Publication verifies previous bytes, rejects modified files/collisions/links and writes the manifest last.
 - [general] Acquire from a trusted producer source/release. Verify source/version, exact inventory, final byte counts/digests and aggregate identity against it. A manifest cannot authenticate its origin. Reverify delivered bytes after copying/packing. Update all files; never mix versions or patch vendor code.
+- [documented] In the authenticated producer checkout, run `node scripts/sprite.js ui-runtime-export --out <isolated-pin> --json`, then `node scripts/sprite.js ui-runtime-export --out <isolated-pin> --verify --json`. The actual verifier rebuilds expected bytes from that producer; success reports `ok: true`, `checked: 17` and empty `missing`/`differing` lists. A changed module in a separate owned copy must fail and name the differing payload; reverify that the original pin stayed unchanged. These commands authenticate software, not consumer adoption.
 - [general] Software updates neither regenerate art nor relabel its historical receipts. Preserve separate identities. Producers test publication; consumers test loading/delivered bytes.
 
 ## Actual APIs and native ports
@@ -48,6 +49,7 @@
 ## Stable chrome and content parents
 
 - [general] Give each paint owner a stable parent: chrome, then content/overlays. Context recreation may destroy/append owned Images there without preserving interleaved foreign children.
+- [general] Stable sibling parents order independent mounts. Inside a mixed composition, separately preserve the exact authored order of stock panels, portraits, cards and text; grouping all stock behind all custom objects can change that composition. The host's native composition owner must maintain that order across reconciliation and context recreation. Neither stable outer parents nor per-object depth alone proves the final mixed paint order.
 - [documented] `update` prepares/validates before publication; failure here preserves the previous mount. After publication, native reconciliation failure retires/drains that mount; further updates reject. Replace a retired mount. Retirement rethrows the original failure, aggregating any cleanup failure. Sibling mounts and game-owned parents/listeners remain outside its cleanup scope.
 - [general] If mount two fails, clean mount one and owned parents. After later native failure, cancel the composed view's input and clean every owned sibling mount/parent/listener. Preserve the original error alongside cleanup errors; attempt all cleanup, never destroy borrowed resources. Shutdown also unregisters extensions and disposes owned UI/containers/input. Consumer witnesses must cover preparation preservation, native retirement, composed cleanup and repeated disposal.
 - [general] Check initial/resized sibling order, positive content/action pixels, clipping, focus and exact-once input. Counts can remain correct beneath opaque chrome; hiding it is a causal control. Retain the consumer regression.
@@ -57,5 +59,6 @@
 - [general] Reusable behavior is independently producer-owned: generic implementation and native fixtures contain no consumer names, paths, assets or special cases. Producer verification and established packaging checks suffice to release; consumer acceptance is independent.
 - [general] Host obligations are immutable borrowed assets, accurate source/local/physical mappings, context revision changes whenever those mappings change, one normalized input/action authority, and cleanup according to ownership. Theme/content/action/save rules and custom extension implementations remain consumer-owned.
 - [general] Producer invariants stay central; consumers verify assets, paint/input, modal/text bridge, contexts, extension/cleanup and real transaction/refusal. Retire only mapped duplicates.
+- [documented] At the pinned producer revision, `tests/engine/ui-phaser-runtime.test.js` owns preparation-preserves, reconciliation-retires and cleanup-error checks. `scripts/test-ui-native.mjs` separately exercises WebGL/Canvas with night/day themes, context revision, exact pixels, input and teardown. Its SwiftShader execution is software-renderer evidence; it establishes neither hardware performance nor a consumer's mixed composition. Run these existing owners rather than adding a duplicate probe.
 
 - [documented] Sprites owns closure/receipts in `tests/cli/ui-software.test.js`, strict Phaser types in `tests/fixtures/ui-software-consumer.mts`. Engine checks docs, not sketch compilation/native adoption.
