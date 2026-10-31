@@ -18,6 +18,7 @@ const describe = (scene) => {
 
 - [documented] Useful reads: `game.scene.getScenes(true)` (active scenes), `game.renderer.type` (1 Canvas, 2 WebGL), `game.renderer.gl`, `game.loop.actualFps` (a once-a-second average), `game.textures.getTextureKeys()` (omits `__DEFAULT`, `__MISSING`, `__WHITE` and `__NORMAL`), `game.cache.audio.exists(key)`, `scene.sys.settings.status` (`src/scene/const.js`, `src/textures/TextureManager.js`).
 - [general] Add `name` to anything you will need to find. An unnamed `Rectangle` among two hundred is a coordinate guess.
+- [tested] For descriptor-guided native input, the [control observation fixture](native-control-observation.md) derives bounds and revision facts from actual receiver registration. Its probe exercises real pointer/keyboard input, rejects stale/unsupported observations and retains failure reports. Eligibility does not certify authored paint.
 
 ## What Phaser does not tell you
 

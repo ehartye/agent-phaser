@@ -11,6 +11,7 @@ A plausible-looking screenshot can hide a layer covering the terrain. Phaser 4.2
 | --- | --- |
 | Prove a change works on a real GPU | [verifying on a real GPU](references/verifying-on-a-gpu.md): [setup](references/verifying-playwright-setup.md), [assertions and harness](references/verifying-assertions-and-harness.md), [loop and waiting](references/verifying-loop-and-waiting.md) |
 | Find out what a scene drew, which object is wrong, or what a silent failure hid | [debugging a Phaser game](references/debugging-a-phaser-game.md) |
+| Locate current controls and prove real input without exporting Phaser objects | [native-control observation](references/native-control-observation.md) |
 | Make a test repeatable: step by hand, fake the clock, seed the dice, replay input, wait for the first frame | [deterministic test driving](references/deterministic-test-driving.md) |
 | Assert a colour or compare a screenshot: `snapshotPixel`, premultiplied alpha, tolerances, goldens | [pixel assertions](references/visual-and-pixel-assertions.md) |
 | Write the scene-restart leak test, or test a lost and restored WebGL context | [leaks and lifecycle tests](references/leaks-and-lifecycle-tests.md) |
