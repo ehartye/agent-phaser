@@ -22,7 +22,7 @@ Revise mappings/publication coherently when layout, scroll, density or eligibili
 
 Supported receiver kinds in this example are `phaser-pointer`, `dom-field` and `phaser-local-pager`. Pager behavior remains local to its original handler; this is not a universal pager API. The fixture supports its declared axis-aligned camera/CSS mappings and fully contained rectangles. A partially clipped control is refused rather than choosing an unverified subregion.
 
-Occlusion checks are limited to the controlled fixture's DOM cover at the dispatch center. They are not a generic oracle for overlapping Phaser objects, arbitrary DOM overlays, masks, rotation/shear, multiple cameras or transformed consumers. The renderer must report unsupported/unknown mappings as ineligible. A descriptor is not proof that authored paint reached the screen; use the separate [pixel assertions](visual-and-pixel-assertions.md) obligation for that evidence.
+Occlusion checks are limited to the controlled fixture's DOM cover at the dispatch center. They are not a generic oracle for overlapping Phaser objects, arbitrary DOM overlays, masks, rotation/shear, multiple cameras or transformed consumers. The renderer must report unsupported/unknown mappings as ineligible. A descriptor is not proof that authored paint reached the screen; use [causal pixel observation](causal-pixel-observation.md) to distinguish source authenticity, eligible geometry and final-screen contribution. [Pixel assertions](visual-and-pixel-assertions.md) retain the separate strict raw-colour obligation.
 
 ## Run and retain evidence
 

@@ -43,7 +43,7 @@ const readPixels = async (game, points) => {
 ## Tolerance and colour
 
 - [tested] On one machine, software WebGL and the platform GPU read identical values for four flat or simple cases: a flat fill, white at 37 percent over black (94), a four-corner gradient and an additive blend. Run `COMPARE_RENDERERS=1 node phaser-verification-pixels.mjs <project>` to repeat it. Filters, lights, blur and text were not compared.
-- [general] Use `+/- 1` for blends and flat fills, `+/- 6` when a tint or a lighting pass is on, and neutralise day/night multiplies and tints before you sample. Sample interiors, not edges: a one-pixel debug outline on a pixel boundary read `[144, 16, 144]`, not pure magenta.
+- [general] Tolerances such as `+/- 1` for blends or `+/- 6` for lighting are diagnostic choices requiring a declared purpose; they cannot establish source authenticity or final-screen contribution. Neutralising day/night multiplies or tints isolates an effect but proves only that modified scene. Keep strict unfiltered source-colour checks exact. Sample interiors when diagnosing colours: a one-pixel debug outline on a pixel boundary read `[144, 16, 144]`, not pure magenta.
 - [general] Phaser draws in sRGB with no gamma step, so an authored hex colour is the expected value for an unlit, untinted fill.
 - [general] Assert shares instead of exact positions when art moves: take one `snapshotArea`, draw the `Image` to a 2D canvas, and count pixels within tolerance of each palette colour.
 
@@ -58,6 +58,10 @@ const share = async (game, rect, rgb, tol = 6) => {
   return n / (rect.w * rect.h);
 };
 ```
+
+## Authentic source and final contribution
+
+- [general] Strict raw-source equality applies to the unfiltered case; a stable intentional ColorMatrix can change final RGB without making the loaded art unauthentic. [Causal pixel observation](causal-pixel-observation.md) combines independent decoded-source authentication, native dispatch, an exact mapped opacity mask and shown/hidden/restored final frames under unchanged effects. Geometry, source equality or a matching screenshot alone cannot establish who painted those pixels.
 
 ## Golden images, and when not to use them
 

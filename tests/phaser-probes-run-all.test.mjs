@@ -28,6 +28,8 @@ test('without --hardware a hardware-only probe is skipped with a reason, and a m
   const by = file => steps.find(s => s.file === file);
   assert.equal(by('scroll-mask.mjs').action, 'skip');
   assert.match(by('scroll-mask.mjs').reason, /--hardware/);
+  assert.equal(by('phaser-verification-causal-pixels.mjs').action, 'skip');
+  assert.match(by('phaser-verification-causal-pixels.mjs').reason, /--hardware/);
   assert.equal(by('audio-decode.mjs').action, 'skip');
   assert.equal(by('phaser-docs-errata.mjs').action, 'run');
   assert.equal(by('phaser-native-control-observation.mjs').action, 'run', 'Canvas native input needs no hardware lane');
@@ -37,6 +39,7 @@ test('--hardware runs the hardware-only probes and points the rendering and worl
   const steps = plan(options({ hardware: true }), { platform: 'win32', env: { PATH: 'x' } });
   const by = file => steps.find(s => s.file === file);
   assert.equal(by('source-pixels.mjs').action, 'run');
+  assert.equal(by('phaser-verification-causal-pixels.mjs').action, 'run');
   assert.deepEqual([by('phaser-rendering-filters.mjs').env.PROBE_GL, by('phaser-rendering-filters.mjs').env.ANGLE], ['hardware', 'd3d11']);
   assert.equal(by('phaser-worlds-lights.mjs').env.ANGLE, 'd3d11');
   assert.equal(by('phaser-physics-arcade.mjs').env.PROBE_GL, undefined);
