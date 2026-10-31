@@ -7,19 +7,26 @@ import {join,posix} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runInNewContext} from 'node:vm';
 import {spawnSync} from 'node:child_process';
+import {patchGamepadHeldInput} from '../skills/phaser-input/scripts/assets/phaser-gamepad-held-input-patch.mjs';
 import {patchAudioDecode} from '../skills/phaser-audio/scripts/assets/phaser-audio-decode-patch.mjs';
 
 // Execute the complete pinned native module graph, not a second input engine.
 const {modules}=JSON.parse(await readFile(new URL('./fixtures/phaser-gamepad-4.2.1.json',import.meta.url),'utf8'));
 const pluginKey='src/input/gamepad/GamepadPlugin.js',padKey='src/input/gamepad/Gamepad.js';
 const original=modules[pluginKey];
-const timestampGate=`        if (pad.timestamp < this._created)
-        {
-            return;
-        }
-`;
-assert.ok(modules[padKey].includes(timestampGate));
-const heldPad=modules[padKey].replace(timestampGate,'        // Existing held-input correction; native Button owns edges.\n');
+// Obtain the independent correction through its public installer, not an inline edit.
+const heldPad=await (async()=>{
+  const directory=await mkdtemp(join(tmpdir(),'phaser-held-native-'));
+  try{
+    await writeFile(join(directory,'package.json'),JSON.stringify({name:'phaser',version:'4.2.1'}));
+    for(const file of [padKey,'dist/phaser.esm.js','dist/phaser.js']){
+      await mkdir(join(directory,file,'..'),{recursive:true});
+      await writeFile(join(directory,file),modules[padKey]);
+    }
+    await patchGamepadHeldInput(directory);
+    return await readFile(join(directory,padKey),'utf8');
+  }finally{await rm(directory,{recursive:true,force:true});}
+})();
 const audio=(await readFile(new URL('./fixtures/phaser-audio-on-process-4.2.1.txt',import.meta.url),'utf8')).replaceAll('\r\n','\n');
 const script=new URL('../skills/phaser-input/scripts/assets/phaser-gamepad-lifecycle-patch.mjs',import.meta.url);
 const patch=existsSync(script)?(await import(script)).patchGamepadLifecycle:undefined;

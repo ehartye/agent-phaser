@@ -12,7 +12,7 @@ browsers or later Phaser versions:
   can be stale. Prefer lifecycle events to those cached properties for device loss.
 - [general] `refreshPads()` skips null slots without pruning cached pads; `total` is the sparse array length, and `pad1` to `pad4` can
   retain stale aliases. Track event-based membership by device index; do not infer active membership from aliases or `total`.
-- [general] `update` ignores snapshots whose timestamp is earlier than `_created`. The trial reproduced ignored controls at timestamp 0.
+- [tested] `update` ignores snapshots whose timestamp is earlier than `_created`; `phaser-input-gamepad.mjs` reproduces ignored controls at timestamp 0 in pristine Phaser 4.2.1.
   Test held input on initial acquisition and resume, including a valid older unchanged timestamp; do not merely make a mock's
   timestamp advance every frame and declare lifecycle parity.
 - [general] Scene plugins have independent control state. One action owner prevents duplicate dispatch; test its shutdown/restart and
@@ -24,11 +24,40 @@ stack. If direct polling is demonstrated necessary, use it as the **single** con
 consumption, and record a regression test plus removal condition. Do not patch Phaser private fields merely to make a test pass.
 
 The 2026-10-06 trial exercised native classes and plugin methods with synthetic inputs, not physical controllers or a full scene
-lifecycle. The configurable thresholds passed; the caching and timestamp defects above remain. The correction below has separate
-native Scene lifecycle evidence. Neither trial certifies Phaser 4.2.1 as free of controller bugs.
+lifecycle. The configurable thresholds passed; cached membership remains a separate limitation. The independent timestamp and queued-lifecycle
+corrections below have additional native evidence. Neither trial certifies Phaser 4.2.1 as free of controller bugs.
 
 Gamepad exposure can require a focused user gesture and a secure context (https or localhost). Test denied/unavailable access.
 Haptics are optional: feature-detect the actuator and swallow unsupported/rejected effects.
+
+### Tested held-input timestamp correction (4.2.1 only)
+
+[tested] `node --test tests/phaser-gamepad-held-input.test.mjs tests/phaser-gamepad-lifecycle.test.mjs` executes the complete pinned
+native Gamepad module graph. The pristine timestamp guard rejects snapshots at timestamp 0 after wrapper creation; the independent
+[phaser-gamepad-held-input-patch.mjs](../scripts/assets/phaser-gamepad-held-input-patch.mjs) accepts those unchanged snapshots while
+native Button retains thresholds, constructor seeding and exact-once transition edges. It removes the creation-time timestamp guard
+from `src/input/gamepad/Gamepad.js` and both unminified consumed bundles. It leaves caching and lifecycle ordering to their own policies.
+
+Copy the helper into the project's `scripts/` and run it after installation, before Phaser is optimized:
+
+```sh
+node scripts/phaser-gamepad-held-input-patch.mjs node_modules/phaser
+```
+
+The helper requires exactly `phaser@4.2.1`, validates every target before writes, rejects unknown, ambiguous or inconsistent
+source/bundle states, preserves unrelated bytes and LF/CRLF, and returns an empty changed list when already applied. It composes in
+either order with the lifecycle helper. Recreate an existing optimized dependency cache after applying a correction.
+
+[tested] `node examples/web/phaser-probes/phaser-input-gamepad.mjs <isolated-host>` compares pristine and corrected package copies twice,
+using Phaser 4.2.1's Canvas renderer and synthetic fresh browser snapshots with timestamp 0. Pristine boot, acquisition and resume
+retain stale zero values/axes and lose release/fresh-press edges. Corrected values and axes refresh; release followed by a fresh press
+emits one up/down pair, and a press during pause emits one down on resume without repeat-frame duplication. A newly acquired held
+Button seeds `pressed` without a down event; capture already-held input according to the application's acquisition policy. Source and
+bundle hashes are printed, and the supplied host remains byte-for-byte unchanged. The host must have pristine held-input fragments
+and Phaser 4.2.1 plus Playwright/Chromium installed. This proves synthetic native input behavior, not physical-controller coverage or GPU behavior.
+
+Remove this helper only after an upstream version passes these older unchanged timestamp, held-at-boot/acquisition/resume,
+release/fresh-press and repeat-frame controls without it. A new version number alone does not establish that the defect is fixed.
 
 ### Tested queued lifecycle correction (4.2.1 only)
 

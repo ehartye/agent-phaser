@@ -32,7 +32,7 @@ specific to one game.
 | `phaser-physics` | Choose and drive Phaser physics: Arcade versus Matter versus your own headless collision, bodies and colliders, tile collision, tunnelling limits, deterministic stepping, paths and platforms. Includes a tested grid sweep helper. |
 | `phaser-motion` | Time and motion in Phaser 4: tweens and chains, sprite animations, scene transitions and Timeline cutscenes, which clock drives what (and why a hand-stepped loop does not move tweens), delta smoothing, curves and followers, and motion craft for pixel games. |
 | `phaser-pixel-ui` | Pixel-exact canvas and UI: integer footprints, text and bitmap fonts, NineSlice and tiled panels, DOM overlays and forms, layout, focus and controller navigation (with a tested focus helper), clipped scrolling and the accessibility bridge. |
-| `phaser-input` | Keyboard, pointer and mouse, gamepad and touch in Phaser 4: one input owner, scene routing, captures, the gamepad API, replay in tests, and the gamepad lifecycle patch. |
+| `phaser-input` | Keyboard, pointer and mouse, gamepad and touch in Phaser 4: one input owner, scene routing, captures, the gamepad API, replay in tests, and the independent held-input and lifecycle patches. |
 | `phaser-audio` | Sound in Phaser 4: the sound manager and first-gesture unlock, markers and audio sprites, loops across scene restarts, spatial and mix, agent-beeps variants and song sections, testing audio without ears, with the decode and visibility patches. |
 | `phaser-verification` | Prove a Phaser change: debugging and silent failures, deterministic test driving, pixel assertions, scene-restart leak tests, real-GPU Playwright and CI, performance and Chrome frame-budget profiling. |
 | `phaser-architecture` | Coordinate shared contracts, themed dialogs and extensions, playbot evidence and testing and publication costs across Phaser games and owned tools. Portable guidance with explicit existing and planned boundaries; adds no shared UI, playbot runtime or cloud service. |
@@ -40,6 +40,21 @@ specific to one game.
 The [Phaser WebGL reference](skills/phaser-rendering/references/webgl-backends.md) distinguishes official WebGL 2 support from
 4.2.1's default WebGL 1 context, covers ES3 custom-shader setup and keeps Phaser AE's separate API clear. The referenced
 GL1/GL2 probe is bounded pixel and API evidence, not a full sample-scene or performance claim.
+
+## Dependency corrections
+
+The [selection reference](skills/engine-phaser/references/dependency-patches.md) maps every shipped Phaser 4.2.1 correction
+to its feature, symptom, patch ID, fixed composition order, verification command and upstream removal condition. Select IDs explicitly:
+
+```sh
+node examples/node/patch-phaser.mjs /path/to/game/node_modules/phaser --patches gamepad-held-input,gamepad-lifecycle
+node examples/node/patch-phaser.mjs /path/to/game/node_modules/phaser --patches gamepad-held-input,gamepad-lifecycle --verify
+```
+
+Apply stages and validates the full selected composition before writing installed files. Verify uses temporary copies, leaves
+the supplied dependency unchanged, and exits nonzero for uncorrected or unknown input. There is no automatic selection or download.
+Run from this checkout or use an absolute entrypoint path, retaining the shipped layout for its installer imports. Existing individual
+installers remain available. Apply after installation and before bundler optimization; recreate an existing optimized cache afterward.
 
 ## Probes and harness
 

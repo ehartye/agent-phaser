@@ -12,19 +12,35 @@
 // Expect: exit code 0 and a JSON object. This is synthetic input: it proves the mapping inside Phaser, not a physical device.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { resolve,join,dirname } from 'node:path';
+import {cp,mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {createHash} from 'node:crypto';
+import {patchGamepadHeldInput} from '../../../skills/phaser-input/scripts/assets/phaser-gamepad-held-input-patch.mjs';
 
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(resolve(project, 'package.json'));
 const pw = ['@playwright/test', 'playwright', 'playwright-core'].map((name) => { try { return require(name); } catch { return null; } }).find(Boolean);
 assert.ok(pw, 'install @playwright/test, playwright or playwright-core in the project');
-const browser = await pw.chromium.launch({ channel: process.env.CHROME_CHANNEL || undefined, timeout: 20000 });
+const installed=dirname(require.resolve('phaser/package.json'));
+const targets=['src/input/gamepad/Gamepad.js','dist/phaser.esm.js','dist/phaser.js'];
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const originals=await Promise.all(targets.map(file=>readFile(join(installed,file))));
+for(let i=0;i<targets.length;i++)assert.match(originals[i].toString(),/if \(pad.timestamp < this\._created\)/,'the comparison host must contain pristine Phaser 4.2.1 held-input fragments');
+assert.equal(JSON.parse(await readFile(join(installed,'package.json'),'utf8')).version,'4.2.1');
+const temporary=await mkdtemp(join(tmpdir(),'phaser-gamepad-browser-'));
+let browser;
 let out;
-try {
+try{
+  const baseline=join(temporary,'baseline'),corrected=join(temporary,'corrected');
+  await cp(installed,baseline,{recursive:true});await cp(installed,corrected,{recursive:true});
+  assert.equal((await patchGamepadHeldInput(corrected)).changed.length,3);
+  assert.deepEqual((await patchGamepadHeldInput(corrected)).changed,[]);
+  browser = await pw.chromium.launch({ channel: process.env.CHROME_CHANNEL || undefined, timeout: 20000 });
   const page = await (await browser.newContext({ viewport: { width: 200, height: 160 } })).newPage();
   page.setDefaultTimeout(15000);
   await page.setContent('<!doctype html><body style="margin:0"><div id="game"></div></body>');
-  await page.addScriptTag({ path: require.resolve('phaser') });
+  await page.addScriptTag({ path: join(baseline,'dist/phaser.js') });
   out = await page.evaluate(async () => {
     // A fake pad API: fresh snapshots on every call, null for empty slots.
     const slots = [null, null, null, null];
@@ -89,8 +105,60 @@ try {
     result.frameOrder = order.slice(0, 3);
     return result;
   });
+
+  out.heldInput={sourceHashes:Object.fromEntries(await Promise.all(targets.map(async(file,i)=>[file,{baseline:hash(originals[i]),corrected:hash(await readFile(join(corrected,file)))}]))),runs:[]};
+  for(const [label,directory] of [['baseline',baseline],['corrected',corrected]])for(let repeat=1;repeat<=2;repeat++){
+    const context=await browser.newContext({viewport:{width:200,height:160}});
+    try{
+      const heldPage=await context.newPage();heldPage.setDefaultTimeout(15000);
+      const pageErrors=[];heldPage.on('pageerror',error=>pageErrors.push(error.message));
+      await heldPage.setContent('<!doctype html><body><div id="held"></div></body>');
+      await heldPage.addScriptTag({path:join(directory,'dist/phaser.js')});
+      const result=await heldPage.evaluate(async()=>{
+        // Native browser snapshots have an unchanged timestamp older than Gamepad._created.
+        const sample=(index,value)=>({id:'Held '+index,index,mapping:'standard',connected:true,timestamp:0,axes:[.12,.05,0,0],buttons:Array.from({length:17},(_,i)=>({value:i===0?value:0,pressed:i===0&&value>=.5,touched:false}))});
+        const slots=[sample(0,.7),null];navigator.getGamepads=()=>slots.map(s=>s?JSON.parse(JSON.stringify(s)):null);
+        let scene;const edges=[];
+        class Held extends Phaser.Scene{
+          create(){
+            scene=this;const pad=this.input.gamepad.getPad(0);pad.buttons[0].threshold=.5;pad.setAxisThreshold(0);
+            this.input.gamepad.on('down',pad=>edges.push(['down',pad.index]));this.input.gamepad.on('up',pad=>edges.push(['up',pad.index]));
+          }
+        }
+        const game=new Phaser.Game({type:Phaser.CANVAS,width:32,height:32,parent:'held',audio:{noAudio:true},input:{gamepad:true},scene:[Held]});
+        const bounded=promise=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(new Error('held-input probe timed out')),10000))]);
+        await bounded(new Promise(resolve=>{const timer=setInterval(()=>{if(scene){clearInterval(timer);resolve();}},10);}));
+        const frames=async(n=2)=>{for(let i=0;i<n;i++)await bounded(new Promise(resolve=>game.events.once(Phaser.Core.Events.POST_RENDER,resolve)));};
+        const state=index=>{const pad=scene.input.gamepad.getPad(index);return {value:pad.buttons[0].value,pressed:pad.buttons[0].pressed,y:pad.leftStick.y};};
+        try{
+          await frames();const boot=state(0),bootEdges=edges.splice(0);
+          slots[0]=sample(0,0);await frames();slots[0]=sample(0,.6);await frames();const freshEdges=edges.splice(0),fresh=state(0);
+          // A second already-exposed pad is acquired through native polling, with no lifecycle event.
+          slots[1]=sample(1,.7);await frames(1);const acquired=scene.input.gamepad.getPad(1);acquired.buttons[0].threshold=.5;acquired.setAxisThreshold(0);await frames();
+          const acquisition=state(1),acquisitionEdges=edges.splice(0);
+          slots[0]=sample(0,0);await frames();edges.length=0;
+          scene.scene.pause();slots[0]=sample(0,.7);await frames();scene.scene.resume();await frames(3);
+          const resume=state(0),resumeEdges=edges.splice(0);await frames();const repeatedEdges=edges.splice(0);
+          return {version:Phaser.VERSION,renderer:game.renderer.constructor.name,boot,bootEdges,fresh,freshEdges,acquisition,acquisitionEdges,resume,resumeEdges,repeatedEdges};
+        }finally{game.destroy(true);}
+      });
+      assert.deepEqual(pageErrors,[]);assert.equal(result.version,'4.2.1');
+      if(label==='corrected'){
+        for(const field of ['boot','acquisition','resume'])assert.deepEqual(result[field],{value:.7,pressed:true,y:.05},field);
+        assert.deepEqual(result.bootEdges,[],'native constructor seeds held state without a down edge');
+        assert.deepEqual(result.freshEdges,[['up',0],['down',0]]);assert.deepEqual(result.fresh,{value:.6,pressed:true,y:.05});
+        assert.deepEqual(result.acquisitionEdges,[]);assert.deepEqual(result.resumeEdges,[['down',0]]);assert.deepEqual(result.repeatedEdges,[]);
+      }else{
+        for(const field of ['boot','acquisition','resume'])assert.deepEqual(result[field],{value:0,pressed:true,y:0},field+' baseline adverse');
+        assert.deepEqual(result.bootEdges,[]);assert.deepEqual(result.freshEdges,[]);assert.deepEqual(result.acquisitionEdges,[]);assert.deepEqual(result.resumeEdges,[]);assert.deepEqual(result.repeatedEdges,[]);
+      }
+      out.heldInput.runs.push({label,repeat,...result});
+    }finally{await context.close();}
+  }
 } finally {
-  await browser.close();
+  await browser?.close();
+  await rm(temporary,{recursive:true,force:true});
+  for(let i=0;i<targets.length;i++)assert.deepEqual(await readFile(join(installed,targets[i])),originals[i],'comparison host bytes remain unchanged');
 }
 console.log(JSON.stringify(out, null, 2));
 assert.deepEqual(out.pluginDown, [['plugin-down', 3, 0, 0, 1]], 'plugin down is (pad, button, value)');
