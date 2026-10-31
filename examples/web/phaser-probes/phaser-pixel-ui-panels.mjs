@@ -15,8 +15,139 @@
 //         WebGL runs on the software renderer by default, set CHROME_CHANNEL=chrome for a real GPU).
 // Expect: exit code 0 and a JSON object; the asserts pin the 4.2.1 behaviour.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { measureRgbaRegion } from '../../../skills/phaser-verification/scripts/assets/measure-rgba-regions.mjs';
+
+// Optional --scrim-mutation dither-colour|dither-alpha|translucent-budget runs a failing witness.
+// Default retains the positive and all three adverse controls, including every fade frame.
+const mutations = ['dither-colour', 'dither-alpha', 'translucent-budget'];
+const extra = process.argv.slice(3);
+const mutation = extra[0] === '--scrim-mutation' && mutations.includes(extra[1]) && extra.length === 2 ? extra[1] : null;
+assert.ok(!extra.length || mutation, 'expected --scrim-mutation dither-colour|dither-alpha|translucent-budget');
+const evidence = await mkdtemp(join(tmpdir(), 'phaser-ui-scrims-'));
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const out = { evidence, passed: false, sources: {}, scrims: [], cleanup: {}, limits: [
+  'Phaser 4.2.1 WebGL, opaque declared underlay, identity camera, device scale 1, integer grid 2 only',
+  'Indexed steady/fade samples, not a continuous tween, arbitrary backdrop or renderer parity claim',
+  'No visual preference, readability, accessibility or consumer certification',
+] };
+const save = () => writeFile(join(evidence, 'report.json'), JSON.stringify(out, null, 2));
+
+async function observeScrims(page, current) {
+  const label = current || 'positive';
+  const binding = 'retainScrim_' + label.replaceAll('-', '_');
+  const record = { label, samples: [], sources: [], failures: [] };
+  out.scrims.push(record);
+  await page.exposeFunction(binding, async capture => {
+    const { rgba, png, ...facts } = capture;
+    const name = `${label}-${facts.name}`, bytes = Buffer.from(rgba);
+    const input = { rgba: name + '.rgba', png: name + '.png', sha256: hash(bytes) };
+    await writeFile(join(evidence, input.rgba), bytes);
+    await writeFile(join(evidence, input.png), Buffer.from(png.split(',')[1], 'base64'));
+    if (facts.kind === 'source') record.sources.push({ ...facts, input });
+    else {
+      const measurement = measureRgbaRegion({ rgba: bytes, width: facts.width, height: facts.height, ...facts.declaration });
+      const chrome = measureRgbaRegion({ rgba: bytes, width: facts.width, height: facts.height, ...facts.chromeDeclaration });
+      const authoredPalette = measureRgbaRegion({ rgba: bytes, width: facts.width, height: facts.height, ...facts.declaration,
+        palette: [[255, 255, 255, 255], [255, 0, 0, 255], [0, 0, 0, 255]] });
+      const failures = [];
+      if (measurement.offPalettePixels) failures.push({ witness: facts.policy === 'dither' ? 'strict-palette' : 'translucent-budget', count: measurement.offPalettePixels });
+      if (measurement.splitCells || measurement.partialCells) failures.push({ witness: 'whole-blocks', split: measurement.splitCells, partial: measurement.partialCells });
+      if (facts.policy === 'translucent' && facts.actualAlpha > facts.alphaBudget) failures.push({ witness: 'translucent-budget', alpha: facts.actualAlpha, budget: facts.alphaBudget });
+      if (chrome.offPalettePixels || chrome.splitCells || chrome.partialCells) failures.push({ witness: 'opaque-chrome', measurement: chrome });
+      const sample = { ...facts, input, measurement, chrome, offAuthoredPalettePixels: authoredPalette.offPalettePixels, failures };
+      record.samples.push(sample);
+      record.failures.push(...failures.map(failure => ({ sample: facts.name, ...failure })));
+      await writeFile(join(evidence, name + '.json'), JSON.stringify(sample, null, 2));
+    }
+    await save(); // Lossless data and measured failures survive later assertions or browser failures.
+  });
+  try {
+    record.native = await page.evaluate(async ({ mutation, binding }) => {
+      const width = 64, height = 40;
+      const result = { version: Phaser.VERSION, cleanup: {} };
+      const host = document.createElement('div'); document.body.appendChild(host);
+      const copy = document.createElement('canvas'); copy.width = width; copy.height = height;
+      const context = copy.getContext('2d', { willReadFrequently: true });
+      let game, scene, tile, rectangle, canvas, loop, renderer;
+      const bounded = (register, description) => new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(description + ' timed out')), 5000);
+        register(value => { clearTimeout(timer); resolve(value); });
+      });
+      const frame = () => bounded(done => game.events.once(Phaser.Core.Events.POST_RENDER, done), 'scrim completed frame');
+      const densities = [0, 2, 4, 6, 8, 10, 12, 14, 15, 16];
+      // Channels are 0 or 255; n/255 alpha gives exact expected 255-n channels without colour tolerance.
+      const alphaBytes = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144];
+      const order = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+      const palette = [[255, 255, 255, 255], [255, 0, 0, 255], [0, 0, 0, 255]];
+      const region = { x: 0, y: 0, width: 64, height: 32 }, grid = { size: 2, originX: 0, originY: 0 };
+      const chromeDeclaration = { region: { x: 0, y: 32, width: 64, height: 8 }, grid, palette: [[0, 255, 0, 255]] };
+      try {
+        await bounded(done => {
+          class Scrim extends Phaser.Scene {
+            create() {
+              scene = this;
+              this.add.rectangle(0, 0, 32, 32, 0xffffff).setOrigin(0);
+              this.add.rectangle(32, 0, 32, 32, 0xff0000).setOrigin(0);
+              for (const count of densities) {
+                const texture = this.textures.createCanvas('density-' + count, 4, 4), ctx = texture.getContext();
+                ctx.clearRect(0, 0, 4, 4);
+                ctx.fillStyle = mutation === 'dither-colour' && count === 10 ? '#0000ff' : '#000000';
+                for (let i = 0; i < 16; i++) if (order[i] < count) ctx.fillRect(i % 4, Math.floor(i / 4), 1, 1);
+                texture.refresh();
+              }
+              tile = this.add.tileSprite(0, 0, 64, 32, 'density-0').setOrigin(0).setTileScale(2);
+              rectangle = this.add.rectangle(0, 0, 64, 32, 0x000000).setOrigin(0).setVisible(false);
+              this.add.rectangle(0, 32, 64, 8, 0x00ff00).setOrigin(0);
+              done();
+            }
+          }
+          game = new Phaser.Game({ type: Phaser.WEBGL, width, height, parent: host, audio: { noAudio: true }, pixelArt: true,
+            render: { preserveDrawingBuffer: true, alphaStrategy: 'keep', roundPixels: false }, scene: [Scrim] });
+        }, 'scrim boot');
+        canvas = game.canvas; loop = game.loop; renderer = game.renderer;
+        const gl = renderer.gl, debug = gl.getExtension('WEBGL_debug_renderer_info');
+        result.renderer = { type: renderer.type === Phaser.WEBGL ? 'WebGL' : 'Canvas', vendor: gl.getParameter(debug ? debug.UNMASKED_VENDOR_WEBGL : gl.VENDOR), renderer: gl.getParameter(debug ? debug.UNMASKED_RENDERER_WEBGL : gl.RENDERER) };
+        result.declaration = { width, height, region, grid, palette, underlay: ['left opaque white', 'right opaque red'], scrimColour: [0, 0, 0, 255], densities, alphaBytes, alphaBudget: 144 / 255, colourBudget: 2, order, chromeDeclaration };
+        for (const count of densities) {
+          const source = scene.textures.get('density-' + count).getSourceImage();
+          await window[binding]({ kind: 'source', name: 'density-' + count, width: 4, height: 4, rgba: Array.from(source.getContext('2d').getImageData(0, 0, 4, 4).data), png: source.toDataURL() });
+        }
+        const samples = [{ name: 'steady', index: null, density: 8, alphaByte: 128 }, ...densities.map((density, index) => ({ name: 'fade-' + index, index, density, alphaByte: alphaBytes[index] }))];
+        for (const policy of ['dither', 'translucent']) for (const sample of samples) {
+          tile.setVisible(policy === 'dither').setTexture('density-' + sample.density).setAlpha(mutation === 'dither-alpha' && sample.index === 5 ? 0.5 : 1);
+          const actualByte = mutation === 'translucent-budget' && sample.index === 5 ? 192 : sample.alphaByte;
+          rectangle.setVisible(policy === 'translucent').setFillStyle(0x000000, actualByte / 255);
+          await frame(); await frame();
+          context.clearRect(0, 0, width, height); context.drawImage(canvas, 0, 0);
+          const expected = 255 - sample.alphaByte;
+          await window[binding]({ kind: 'frame', name: policy + '-' + sample.name, policy, index: sample.index, density: sample.density,
+            alphaByte: sample.alphaByte, actualAlpha: policy === 'dither' ? tile.alpha : rectangle.fillAlpha, alphaBudget: 144 / 255, colourBudget: 2,
+            width, height, rgba: Array.from(context.getImageData(0, 0, width, height).data), png: copy.toDataURL(),
+            declaration: { region, grid, palette: policy === 'dither' ? palette : [[expected, expected, expected, 255], [expected, 0, 0, 255]] }, chromeDeclaration,
+            state: { camera: { scrollX: scene.cameras.main.scrollX, scrollY: scene.cameras.main.scrollY, zoom: scene.cameras.main.zoom, rotation: scene.cameras.main.rotation }, tileAlpha: tile.alpha, tileScale: [tile.tileScaleX, tile.tileScaleY], alphaStrategy: renderer.config.alphaStrategy, children: scene.children.length } });
+        }
+      } finally {
+        try {
+          if (game) { await bounded(done => { game.events.once(Phaser.Core.Events.DESTROY, done); game.destroy(true); }, 'scrim destroy'); }
+        } finally {
+          host.remove(); copy.width = 0; copy.height = 0;
+          result.cleanup = { canvasRemoved: !canvas?.isConnected, hostRemoved: !host.isConnected, captureReleased: copy.width === 0 && copy.height === 0,
+            loopStopped: !loop?.running, rendererReleased: renderer?.gl === null && renderer?.game === null && renderer?.canvas === null, scenesDestroyed: game?.scene.scenes.length === 0 };
+          await window.retainScrimCleanup(result);
+        }
+      }
+      return result;
+    }, { mutation: current, binding });
+    record.fixtureDeclarationSha256 = hash(JSON.stringify(record.native.declaration));
+  } finally {
+    await save();
+  }
+}
 
 const project = resolve(process.argv[2] ?? '.');
 const require = createRequire(resolve(project, 'package.json'));
@@ -26,12 +157,18 @@ const browser = await pw.chromium.launch({
   channel: process.env.CHROME_CHANNEL || undefined, timeout: 20000,
   args: process.env.CHROME_CHANNEL ? [] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
-const out = {};
 try {
   const page = await (await browser.newContext({ viewport: { width: 320, height: 240 } })).newPage();
   page.setDefaultTimeout(15000);
   await page.setContent('<!doctype html><body style="margin:0"><div id="game"></div><div id="zoomed"></div></body>');
   await page.addScriptTag({ path: require.resolve('phaser') });
+  for (const [name, path] of Object.entries({ phaser: require.resolve('phaser'), probe: new URL(import.meta.url), helper: new URL('../../../skills/phaser-verification/scripts/assets/measure-rgba-regions.mjs', import.meta.url) })) {
+    const bytes = await readFile(path); out.sources[name] = { sha256: hash(bytes), file: name + '.source.mjs' };
+    await writeFile(join(evidence, name + '.source.mjs'), bytes);
+  }
+  out.browser = browser.version();
+  await page.exposeFunction('retainScrimCleanup', async native => { out.scrims.at(-1).native = native; await save(); });
+  for (const current of mutation ? [mutation] : [null, ...mutations]) await observeScrims(page, current);
 
   out.panel = await page.evaluate(async () => {
     const scenes = {};
@@ -146,10 +283,15 @@ try {
     out.focus[label] = await page.evaluate(() => document.activeElement.id || document.activeElement.tagName);
     await page.evaluate(() => { window.focusGame.destroy(true); document.getElementById('field').remove(); document.getElementById('focusHost').remove(); });
   }
+} catch (error) {
+  out.failure = { name: error.name, message: error.message }; process.exitCode = 1;
 } finally {
   await browser.close();
+  out.cleanup.browserClosed = !browser.isConnected();
+  await save();
 }
-console.log(JSON.stringify(out, null, 2));
+try {
+if (out.failure) throw Object.assign(new Error(out.failure.message), { name: out.failure.name });
 assert.equal(out.panel.width24, 'kkRGBWRGBWRGBWRGBWRGBWkk', 'a width of left + right + 5 tiles repeats the centre exactly');
 assert.notEqual(out.panel.width22, 'kkRGBWRGBWRGBWRGBWkk', 'a width that is not a multiple stretches some texels');
 assert.ok(out.panel.width22.includes('RR'), 'a 4.5 px tile doubles a texel');
@@ -165,3 +307,29 @@ assert.equal(out.dom.zoomHalf.containerPointerEvents, 'none');
 assert.deepEqual(out.dom.lifecycle, [1, 0, 1], 'stop removes the node, start creates it again');
 assert.equal(out.focus.default, 'field', 'by default a canvas click keeps focus in the field');
 assert.equal(out.focus.optOut, 'BODY', 'preventDefaultDown: false lets the click blur the field');
+for (const current of out.scrims) {
+  assert.equal(current.native.version, '4.2.1');
+  assert.equal(current.native.renderer.type, 'WebGL');
+  assert.equal(current.samples.length, 22, 'two steady states plus ten indexed fade samples per policy');
+  assert.ok(Object.values(current.native.cleanup).every(Boolean), 'owned scrim scene, renderer and capture resources released');
+  assert.ok(current.samples.every(sample => sample.chrome.offPalettePixels === 0), 'opaque chrome remains strict');
+  assert.ok(current.samples.some(sample => sample.policy === 'translucent' && sample.index === null && sample.offAuthoredPalettePixels > 0), 'translucent steady state actually adds blended colours');
+  for (const sample of current.samples) {
+    assert.deepEqual(sample.state.camera, { scrollX: 0, scrollY: 0, zoom: 1, rotation: 0 }, 'declared camera held throughout');
+    assert.equal(sample.state.alphaStrategy, 'keep');
+    assert.deepEqual(sample.state.tileScale, [2, 2]);
+  }
+  if (!mutation && current.label !== 'positive') {
+    const expectedWitness = current.label === 'translucent-budget' ? 'translucent-budget' : 'strict-palette';
+    assert.ok(current.failures.some(failure => failure.witness === expectedWitness), current.label + ' must fail its measured witness');
+    const affected = (current.label === 'translucent-budget' ? 'translucent' : 'dither') + '-fade-5';
+    assert.ok(current.failures.every(failure => failure.witness === expectedWitness && failure.sample === affected), 'adverse controls fail only their declared sample and witness');
+  } else assert.deepEqual(current.failures, [], current.label + ': measured scrim failures');
+}
+out.passed = true;
+} catch (error) {
+  out.failure = { name: error.name, message: error.message }; process.exitCode = 1;
+} finally {
+  await save();
+  console.log(JSON.stringify(out, null, 2));
+}
