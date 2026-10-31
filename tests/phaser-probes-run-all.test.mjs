@@ -38,6 +38,8 @@ test('without --hardware a hardware-only probe is skipped with a reason, and a m
   assert.equal(by('phaser-docs-errata.mjs').action, 'run');
   assert.equal(by('phaser-native-control-observation.mjs').action, 'run', 'Canvas native input needs no hardware lane');
   assert.equal(by('phaser-pixel-ui-accessibility-bridge.mjs').action, 'run', 'desktop AX and Canvas input need no hardware lane');
+  assert.equal(by('phaser-verification-evidence-kit.mjs').action, 'run', 'declared Canvas RGBA and native BitmapText need no hardware lane');
+  assert.equal(by('phaser-verification-evidence-kit.mjs').lane, 'software');
 });
 
 test('--hardware runs the hardware-only probes and points the rendering and worlds probes at the platform backend; software probes keep a clean environment', () => {
@@ -48,6 +50,7 @@ test('--hardware runs the hardware-only probes and points the rendering and worl
   assert.deepEqual([by('phaser-rendering-filters.mjs').env.PROBE_GL, by('phaser-rendering-filters.mjs').env.ANGLE], ['hardware', 'd3d11']);
   assert.equal(by('phaser-worlds-lights.mjs').env.ANGLE, 'd3d11');
   assert.equal(by('phaser-physics-arcade.mjs').env.PROBE_GL, undefined);
+  assert.equal(by('phaser-verification-evidence-kit.mjs').env.PROBE_GL, undefined, 'hardware selection does not turn Canvas evidence into GPU evidence');
   assert.equal(by('audio-visibility.mjs').action, 'skip');
   for (const file of ['phaser-capture-ready.mjs', 'phaser-capture-clock-experiment.mjs']) assert.equal(by(file).action, 'skip');
   const software = plan(options({}), { platform: 'win32', env: {} });

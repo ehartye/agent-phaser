@@ -61,6 +61,7 @@ const share = async (game, rect, rgb, tol = 6) => {
 
 ## Authentic source and final contribution
 
+- [general] For exact declared RGBA membership, split integer cells and actual native BitmapText glyph/bounds evidence, use [visual evidence instruments](visual-evidence-instruments.md). Record byte space, alpha normalization and grid origin; these bounded measurements do not replace strict unfiltered assertions or prove paint attribution.
 - [general] Strict raw-source equality applies to the unfiltered case; a stable intentional ColorMatrix can change final RGB without making the loaded art unauthentic. [Causal pixel observation](causal-pixel-observation.md) combines independent decoded-source authentication, native dispatch, an exact mapped opacity mask and shown/hidden/restored final frames under unchanged effects. Geometry, source equality or a matching screenshot alone cannot establish who painted those pixels.
 
 ## Golden images, and when not to use them

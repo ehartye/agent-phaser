@@ -16,6 +16,7 @@ A plausible-looking screenshot can hide a layer covering the terrain. Phaser 4.2
 | Make a test repeatable: step by hand, fake the clock, seed the dice, replay input, wait for the first frame | [deterministic test driving](references/deterministic-test-driving.md) |
 | Prepare semantic readiness, seeded frames and whole-file audio for agent-vids capture | [capture-ready game](references/capture-ready-game.md) |
 | Assert a colour or compare a screenshot: `snapshotPixel`, premultiplied alpha, tolerances, goldens | [pixel assertions](references/visual-and-pixel-assertions.md) |
+| Measure declared RGBA palette/grid regions or native BitmapText glyph coverage and fit | [visual evidence instruments](references/visual-evidence-instruments.md) |
 | Write the scene-restart leak test, or test a lost and restored WebGL context | [leaks and lifecycle tests](references/leaks-and-lifecycle-tests.md) |
 | Put browser tests in a pipeline, or choose the Chromium and renderer a run uses | [CI for Phaser](references/ci-for-phaser.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
