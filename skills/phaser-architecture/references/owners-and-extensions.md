@@ -12,7 +12,7 @@
 | Architectural coordination and adoption guidance | Agent-engine | Apply the contract through the existing native engine |
 | Rules, actions, saves/session state and authored content | Each game | Keep one authoritative implementation and observable commands/results |
 
-- [documented] Tests 0.4.1 ships Playbot configuration/recording; games retain directors/input execution. Sprites UI ships in 0.96.1; each consumer independently verifies its released pin. Verify installed exports; keep game-name switches out of shared code and widget runtimes out of Engine.
+- [documented] Agent-tests 0.7.0 ships Playbot contract version 1; see [Playbot evidence](playbot-evidence.md) for pin verification and game-owned directors, actions and clocks. Sprites UI ships in 0.96.1. Consumers verify their own pins; shared code excludes game-name switches and Engine adds no widget runtime.
 - [documented] Useful donor seams include a pure UI layout with bespoke-body composition, a sim/content/game split with playbot adapters, and native hardware admission with owned origins. Recheck donor source before extracting; a session wrapper does not automatically have the independently instantiated sim semantics of a project that was built around one.
 
 ## Define the session boundary before sharing
