@@ -5,14 +5,14 @@ description: Start and structure a Phaser 4 game - pin the version, write the ga
 
 # Phaser core
 
-Start here for any Phaser game. It collects lessons from building Phaser 4 games, including undocumented Phaser bugs that cost
-hours, plus facts reproduced against 4.2.1 by the [foundations probe](../../examples/web/phaser-probes/engine-phaser-foundations.mjs).
-Read the reference that matches the work, not all of them.
+Start here for Phaser 4.2.1. The [foundations probe](../../examples/web/phaser-probes/engine-phaser-foundations.mjs) reproduces
+the core claims. Read the reference for your task.
 
 | You are about to | Read |
 | --- | --- |
 | Scan every rule on one page (evidence, examples) | [phaser reference](references/phaser-reference.md) |
 | Create a project or split a game into layers | [architecture](references/architecture.md) |
+| Select, apply or verify version-pinned dependency corrections | [dependency patches](references/dependency-patches.md) |
 | Write `new Phaser.Game(config)`, choose `pixelArt`, limit fps, wire Vite or ESM, destroy a game | [config and boot](references/config-and-boot.md) |
 | Fit, resize or fullscreen the canvas, or fix blur on a high-density screen | [scale and responsive](references/scale-and-responsive.md) |
 | Load, retry, progress-bar or release assets, or pick an atlas or compressed format | [loading assets](references/loading-assets.md), [failures](references/loading-failures.md) |

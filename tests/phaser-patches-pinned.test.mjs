@@ -6,17 +6,34 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
-const patches = ['phaser-rendering', 'phaser-audio'].flatMap(skill => {
+const patches = ['phaser-input', 'phaser-rendering', 'phaser-audio'].flatMap(skill => {
   const dir = join(root, 'skills', skill, 'scripts', 'assets');
   return readdirSync(dir).filter(name => /-patch\.mjs$/.test(name)).map(name => join(dir, name));
 });
 
 test('every install-time patch is found (a new one is covered the day it is added)', () => {
-  assert.ok(patches.length >= 5, `found ${patches.length}`);
+  assert.ok(patches.length >= 7, `found ${patches.length}`);
+});
+
+test('every shipped installer has a selection row with its boundary, verification and upstream removal condition', () => {
+  const reference = readFileSync(join(root, 'skills/engine-phaser/references/dependency-patches.md'), 'utf8');
+  for (const file of patches) {
+    const name = basename(file), id = name.replace(/^phaser-/, '').replace(/-patch\.mjs$/, '');
+    const rows = reference.split('\n').filter(line => line.startsWith('|') && line.includes(`[${name}]`));
+    assert.equal(rows.length, 1, `${name} needs one selection row`);
+    const cells = rows[0].split('|').slice(1, -1).map(cell => cell.trim());
+    assert.equal(cells.length, 6, `${name} needs all selection columns`);
+    assert.match(cells[0], /^\d+$/, `${name} has a composition order`);
+    assert.equal(cells[1], '`' + id + '`');
+    assert.ok(cells[2].length > 0, `${name} names a feature and symptom`);
+    assert.match(cells[3], /\.js`/, `${name} names the native composition boundary`);
+    assert.match(cells[4], /node --test tests\/[\w-]+\.test\.mjs/, `${name} names a verification command`);
+    assert.match(cells[5], /upstream/i, `${name} names the upstream removal condition`);
+  }
 });
 
 test('each patch header names Phaser 4.2.1 and when to remove it', () => {
