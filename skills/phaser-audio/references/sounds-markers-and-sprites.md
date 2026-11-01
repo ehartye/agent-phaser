@@ -1,59 +1,66 @@
 # Sounds, markers and audio sprites in Phaser 4
 
-Read this before you write a sound-effects layer: which call to use for a one-shot, why a volume you set once keeps changing, and how markers and audio sprites actually behave. Backed by [`phaser-audio-sounds.mjs`](../../../examples/web/phaser-probes/phaser-audio-sounds.mjs); the manager side is in [the sound manager page](sound-manager-in-4x.md).
+Evidence: [`phaser-audio-sounds.mjs`](../../../examples/web/phaser-probes/phaser-audio-sounds.mjs). For manager ownership, see [the sound manager](sound-manager-in-4x.md).
 
 ## Retained or fire-and-forget
 
-| Call | Creates | Overlaps itself | Use it when | Leaks when |
-| --- | --- | --- | --- | --- |
-| `sound.play(key, config)` | a sound that destroys itself on `complete` | yes | a one-shot you never touch again | you `stopAll()` or `stopByKey()` it |
-| `sound.add(key, config)` then `.play()` | a sound you keep | no, `play()` restarts it | music, ambience, anything you fade, stop or listen to | you add one per scene start and never reuse it |
-| `sound.playAudioSprite(key, name, config)` | a self-destroying sound per call | yes | an overlapping cue from a sprite | same as `play` |
-| `sound.addAudioSprite(key)` | a retained sprite sound | no | a bank you retune or stop | same as `add` |
+| Call | Lifetime | Overlap | Use |
+| --- | --- | --- | --- |
+| `sound.play(key, config)` | destroys on complete | yes | one-shots |
+| `sound.add(key, config).play()` | retained | restarts itself | music, fades, listeners |
+| `sound.playAudioSprite(key, name, config)` | destroys on complete | yes | overlapping cues |
+| `sound.addAudioSprite(key)` | retained | restarts itself | one cue at a time |
 
-- [documented] `BaseSoundManager.play` is `add` plus `sound.once('complete', sound.destroy)` (`src/sound/BaseSoundManager.js`). `stop()` emits `stop`, never `complete`, and a looping sound never completes.
-- [tested] Five `sound.play('tone')` calls followed by `stopAll()` left five stopped sounds registered in `sound.sounds`, each with one `complete` listener, until `removeAll()`; a self-completing cue removed itself.
-- [tested] A second `play()` on a retained sound restarted it (one playing); three `sound.play()` calls overlapped (three playing).
-- [general] To cut one-shots, call `removeByKey(key)` or `removeAll()`, not `stop`. Give each repeated cue a short minimum gap so a held button cannot stack hundreds of voices.
+- [documented] `BaseSoundManager.play` is add plus `once('complete', sound.destroy)` (`src/sound/BaseSoundManager.js`). Stop emits stop, never complete; loops never complete. Retained sounds require disposal; adding music every scene start stacks voices.
+- [tested] Five fire-and-forget plays then stopAll left five registered sounds with completion listeners; removeAll cleared them. Completion removed a self-completing cue. Two retained plays left one voice; three fire-and-forget plays overlapped.
+- [general] Dispose stopped one-shots with `removeByKey(key)` or `removeAll()`. Reuse music; space repeated cues to cap voices.
 
 ## A config you pass to play() sticks
 
-- [documented] `BaseSound.play` runs `Extend(this.currentConfig, config)`, and `currentConfig` is the sound's own `config` (or the marker's `config`), so the values are written into it (`src/sound/BaseSound.js`).
-- [tested] `sound.play({volume: 0.2})`, then `stop()`, then `sound.play()` played at 0.2 and `sound.config.volume` stayed 0.2. The same held for a marker: `play('hit', {volume: 0.5})` changed `markers.hit.config.volume` for every later `play('hit')`.
-- [general] Pass the full config on every call, or keep random per-play variation (`rate`, `detune`, `volume`) on `sound.play(key, config)` where each call has its own sound. Compose a mix as `authored * bus * duck`, written once per frame ([spatial and mix](spatial-and-mix.md)).
-- [tested] `sound.volume` reads the gain node, so it lags a render quantum behind the setter; assert `sound.currentConfig.volume` or read a frame later.
+- [documented] `BaseSound.play` extends currentConfig, which aliases the sound/marker's config (`src/sound/BaseSound.js`); per-play values persist.
+- [tested] `play({volume: 0.2}); stop(); play()` retained volume/config 0.2. A marker's volume 0.5 persisted on its next plain play. The volume getter lagged its setter by a render quantum.
+- [general] Pass full config each play. Vary rate/detune/volume on fire-and-forget calls for independent voices. Mix `authored * bus * duck` once per frame ([spatial and mix](spatial-and-mix.md)). Assert currentConfig.volume or wait a frame before reading the getter.
 
 ## Picking among variants (agent-beeps exports)
 
-- [tested] A sidecar from `beeps export --variants --manifest` lists `variants` (`file`, `weight`) and `noRepeat`, and the native sound manager runs none of that. [`scripts/assets/pick-variant.mjs`](../scripts/assets/pick-variant.mjs) is the picker, pure and with an injectable random source: `createVariantPicker(sidecar, rng).next()` returns the next `{ file, weight, index }`. It follows the beeps player's rules (weights default to 1, `noRepeat` defaults to true, one variant is always returned) and gave the same index as the player's own picker on all 18,000 draws of a comparison (six weight sets, both `noRepeat` settings, three seeds). `tests/phaser-audio-pick-variant.test.mjs` pins no immediate repeat over 5,000 picks, weights within 2 points over 20,000, zero weights and reproducible sequences.
-- [general] Pass the full config on every `sound.play(key, config)` for the picked file (the config sticks, above), and pass a seeded `rng` in tests and replays. The kit-to-audio-sprite converter is not here: it waits for the beeps sprite packer.
+- [tested] `beeps export --variants --manifest` supplies variants (file, weight) and noRepeat; Phaser does no selection. Pure [`pick-variant.mjs`](../scripts/assets/pick-variant.mjs): `createVariantPicker(sidecar, rng).next()` returns `{file, weight, index}`. Defaults: weight 1, noRepeat true; always one variant. Indices matched the producer on 18,000 draws: six weight sets, both repeat modes, three seeds.
+- [tested] `tests/phaser-audio-pick-variant.test.mjs` checks 5,000 no-repeat draws, weights within two points over 20,000 draws, zero weights and reproducibility.
+- [general] Seed rng for replay and pass full playback config. Packed PCM cues use the separate frame-map helper below.
 
 ## Song sections as markers (agent-beeps 0.35.0 or later)
 
-- [tested] A song exported with `beeps song export --manifest --sections` (or `"sections": true` on a song recipe) lists `sections: [{name, start, end, startFrame, endFrame}]` in its sidecar. [`scripts/assets/beeps-markers.mjs`](../scripts/assets/beeps-markers.mjs) turns them into `addMarker` objects: `markersFromSections(sidecar, {loopSections: ['survey']})`, then `for (const m of markers) music.addMarker(m)` and `music.play('survey')`. Times come from the frames (`startFrame / sampleRate`), the loop is set only for the named sections (`true` for all), and a section the form plays twice gets `name-2`, because a duplicate marker name is refused. A sidecar without `sections` throws and says how to export them, since an empty list would make every `play('name')` a silent no-op. `tests/phaser-audio-beeps-markers.test.mjs` runs it on a real sections sidecar (eight contiguous sections whose durations sum to the looped file); the probe plays a 1.5 s file whose three regions differ in level, and each marker played only its own region and completed after 0.50 to 0.51 s on the audio clock, with the looped one repeating.
-- [general] The sidecar is not released with agent-engine: it needs the agent-beeps version above. Lossy delivery can move the decoded length by codec padding, so compare `sound.duration` of the whole file with `frames / sampleRate` before trusting section times on an MP3 or Opus build.
+- [tested] `beeps song export --manifest --sections`, or recipe `"sections": true`, emits `sections: [{name, start, end, startFrame, endFrame}]`. [`beeps-markers.mjs`](../scripts/assets/beeps-markers.mjs) uses frame/sampleRate positions: `for (const m of markersFromSections(sidecar, {loopSections: ['survey']})) music.addMarker(m)`, then `music.play('survey')`. `loopSections: true` loops all; repeated form sections get name-2 names. Missing sections throw with export guidance instead of returning no markers.
+- [tested] `tests/phaser-audio-beeps-markers.test.mjs` uses eight contiguous sections spanning the looped file. The native probe's three level-distinct regions played their own half-second: nonloops completed at 0.50-0.51 seconds; the looped marker repeated.
+- [general] This needs agent-beeps, not an agent-engine release. Before trusting MP3/Opus section times, compare whole-file sound.duration with frames/sampleRate: codec padding can change decoded length.
 
 ## Markers
 
-- [documented] `addMarker({name, start, duration, config})` returns `false` for a missing or non-string name; a duplicate name logs `console.error` and returns `false`; `duration` defaults to `totalDuration - start`; `removeMarker(name)` sets the slot to `null` rather than deleting it (`src/sound/BaseSound.js`).
-- [tested] Duplicate add returned `false`, a removed marker read `null` and could be added again, and `play('nope')` for an unknown marker logged a warning and returned `false`. A mistyped cue name is a silent no-op in game code: check the return value of `play` in a test.
-- [documented] A marker's `config.loop` loops that region only; `sound.duration` is the marker's duration while it plays.
-- [general] Marker times are seconds in the decoded buffer, so they stay valid at any `rate` while the audible length changes. Convert frame offsets from your editor with the context rate ([decoded length](testing-audio.md)).
+- [documented] `addMarker({name, start, duration, config})` returns false for missing/non-string names or duplicates (duplicates log errors). Duration defaults to totalDuration minus start; removeMarker(name) leaves null (`src/sound/BaseSound.js`). Config.loop loops the region; playing sound.duration is its duration.
+- [tested] Duplicate add returned false; removal left null and allowed re-adding. Unknown-marker play('nope') warned and returned false. Check play's return value for cue-name mistakes.
+- [general] Times address the decoded buffer: rate changes audible duration, not offsets. Convert editor frames with the context rate ([decoded length](testing-audio.md)).
 
 ## Audio sprites
 
-- [documented] `load.audioSprite(key, jsonURL, audioURLs, audioConfig)` loads the audio into `cache.audio[key]` and the JSON into `cache.json[key]`. The JSON needs `spritemap: {name: {start, end, loop?}}` in seconds; `addAudioSprite` turns each entry into a marker with `duration = end - start` and `loop` defaulting to `false`. An optional `resources` array in the JSON can supply the audio URLs when none is passed (`src/loader/filetypes/AudioSpriteFile.js`, `src/sound/BaseSoundManager.js`).
-- [tested] A two-entry spritemap became markers `a` (0 to 0.2 s, no loop) and `b` (0.2 to 0.5 s, loop); `a` emitted `complete` at its marker end; `b` emitted `looped` while it played.
-- [general] Pack a sprite when many short cues share a request budget (one request and one decode instead of forty). Keep separate files when cues are loaded by level, because a sprite decodes whole and sits in memory whole. Leave 100 ms or more of silence between entries so a lossy codec's ringing and edge priming do not bleed into the next cue.
-- [general] A sprite is one sound: `playAudioSprite` is the call for overlapping hits, `addAudioSprite` for one at a time.
+- [documented] `load.audioSprite(key, jsonURL, audioURLs, audioConfig)` fills cache.audio[key] and cache.json[key]. JSON contains `spritemap: {name: {start, end, loop?}}` in seconds. `addAudioSprite` creates markers with duration end minus start and loop default false. JSON resources can supply omitted URLs (`src/loader/filetypes/AudioSpriteFile.js`, `src/sound/BaseSoundManager.js`).
+- [tested] Entries a (0-0.2 seconds, no loop) and b (0.2-0.5, loop) became markers; a completed at its end and b emitted loop events.
+- [general] Pack cues sharing loading needs to save requests/decodes; separate level-specific files because sprites decode and occupy memory whole. General lossy packing guidance leaves at least 100 ms silence against edge ringing/priming; the PCM contract below makes no lossy guarantee. Use playAudioSprite for overlaps, addAudioSprite for a retained voice.
+
+## Released PCM sprites (agent-beeps 0.36.0)
+
+- [tested] Pure [`beeps-spritemap.mjs`](../scripts/assets/beeps-spritemap.mjs) exports `spritemapFromMap(map, urls)`. Released beeps/audio-sprite@1 plus an explicit nonempty array of resource URL strings becomes `{resources, spritemap}`. Entries preserve loops and authoritative startFrame/sampleRate and exclusive endFrame/sampleRate. Schema, IDs, hashes, ranges, gaps and resources are validated without mutation or Phaser/DOM/filesystem/network dependencies.
+- [documented] The producer preserves canonical PCM16 WAV samples: mono/stereo, one common rate up to 192000 Hz, `ceil(sampleRate / 10)` zero frames between entries only. Limits: 1-128 entries, 16 MiB/source WAV, 64 MiB packed WAV. The helper does no packing, normalization, resampling, fetching or decoding. Metadata validation does not authenticate bytes or establish lossy timing/padding.
+- [tested] `tests/fixtures/audio-sprite/` records released producer 0.36.0 source/tag `377a95eeabbac7da2609dc4aa0862bb9b1bffeae` and source/WAV/map hashes. Run `node tests/fixtures/audio-sprite/regenerate.mjs /path/to/released-agent-beeps` to authenticate it, repeat build/check/verify and compare exact bytes.
+- [tested] Serve converted JSON/resources; call `scene.load.audioSprite('bank', jsonURL)`, then `scene.sound.addAudioSprite('bank').play('name')`. `node examples/web/phaser-probes/phaser-audio-sounds.mjs /path/to/host` proves original checks plus three half-second PCM entries (220/440/880 Hz, levels 0.2/0.5/0.9), nonloop completion within 0.46-0.57 audio-clock seconds, and looping in-range until stopped.
+- [tested] Append `--mutation sprite-range`, `--mutation sprite-source` or `--mutation sprite-loop`; each exits nonzero. Range/loop change playback after authentication and fail native signal/repetition witnesses; source changes a WAV byte and fails authentication first. `--evidence-dir /path/to/new-directory` retains identities, decoded metadata, raw windows, events, failures and cleanup. One analysis tap is used; sounds, contexts, pages, browser and server close on success/failure.
+- [general] Headless checks establish PCM timing/signal behavior, not audible quality, device latency, Safari/iOS behavior, lossy support or game adoption. Variant and section-marker helpers remain separate.
 
 ## Rate, detune and seek
 
-- [documented] `rate` changes speed and pitch together; `detune` is in cents (documented range -1200 to 1200). Both feed `totalRate`. `seek` set while stopped does nothing, and is ignored while a `delay` has not elapsed; `pause()` before a delayed start returns `false` (`src/sound/webaudio/WebAudioSound.js`).
-- [tested] At `rate: 2`, 0.2 s of audio clock advanced `sound.seek` to about 0.4 s: the getter reports position in the buffer, not wall time.
-- [general] For random pitch variation use the seeded generator (`Phaser.Math.RND.realInRange(0.95, 1.05)`) so a replay is reproducible; `Phaser.Math.Between` is not seeded ([deterministic driving](../../phaser-verification/references/deterministic-test-driving.md)).
+- [documented] Rate changes pitch/speed; detune is cents (documented -1200 to 1200); both feed totalRate. Stopped/delayed sounds ignore seek; pause before delayed start returns false (`src/sound/webaudio/WebAudioSound.js`).
+- [tested] At rate 2, 0.2 audio-clock seconds advanced seek about 0.4 seconds: seek addresses the buffer.
+- [general] Seed variation with `Phaser.Math.RND.realInRange(0.95, 1.05)`, not unseeded Phaser.Math.Between ([deterministic driving](../../phaser-verification/references/deterministic-test-driving.md)).
 
 ## Events and cleanup
 
-- [documented] A sound emits `play`, `pause`, `resume`, `stop`, `complete`, `looped`, `loop`, `mute`, `volume`, `rate`, `detune`, `seek`, `pan` and `destroy`; `destroy()` calls `removeAllListeners()`, nulls `manager` and `config`, and the manager drops it on its next update (`src/sound/BaseSound.js`).
-- [general] Use `once` for completion handlers on retained sounds, and `off` them when the owner shuts down, or a re-entered scene stacks listeners. Never call a setter on a sound after `destroy()`: its `config` is `null` ([loops and scene lifetime](loops-and-scene-lifetime.md)).
+- [documented] Events: play, pause, resume, stop, complete, looped, loop, mute, volume, rate, detune, seek, pan, destroy. Destroy removes listeners, nulls manager/config, and the manager drops the sound next update (`src/sound/BaseSound.js`).
+- [general] Use once for completion, remove retained listeners on shutdown, and never set a destroyed sound's properties: config is null ([loops and scene lifetime](loops-and-scene-lifetime.md)).

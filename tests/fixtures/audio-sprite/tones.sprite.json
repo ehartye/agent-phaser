@@ -1,0 +1,38 @@
+{
+  "schema": "beeps/audio-sprite@1",
+  "sampleRate": 48000,
+  "channels": 1,
+  "frames": 81600,
+  "gapFrames": 4800,
+  "audio": {
+    "file": "tones.wav",
+    "sha256": "97e443c0ed0531cb68815a849e03264f24f37a23f3e7d31d7836b205ed7c1280",
+    "encoding": "pcm_s16le"
+  },
+  "entries": [
+    {
+      "id": "low",
+      "startFrame": 0,
+      "endFrame": 24000,
+      "loop": false,
+      "sourceSha256": "9c82cc0a0e75c4d06f7ff0bf5834f0f8e77933acb78ee6dd56ee5974d5d23e23",
+      "sourceFrames": 24000
+    },
+    {
+      "id": "mid",
+      "startFrame": 28800,
+      "endFrame": 52800,
+      "loop": false,
+      "sourceSha256": "7678bfe0912b1de7652b815463209f4ceac03b6d7dc3d9c72be01d84e9a36337",
+      "sourceFrames": 24000
+    },
+    {
+      "id": "high",
+      "startFrame": 57600,
+      "endFrame": 81600,
+      "loop": true,
+      "sourceSha256": "7ae74e16f951c94ffcad3a220a172f581d25df7dff09df8486bd1842b7a54abc",
+      "sourceFrames": 24000
+    }
+  ]
+}

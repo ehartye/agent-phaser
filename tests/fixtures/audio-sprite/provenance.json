@@ -1,0 +1,73 @@
+{
+  "schema": "phaser/pcm-sprite-fixture@1",
+  "producer": {
+    "repository": "https://github.com/ehartye/agent-beeps",
+    "version": "0.36.0",
+    "tag": "v0.36.0",
+    "revision": "377a95eeabbac7da2609dc4aa0862bb9b1bffeae",
+    "runtime": "72f9e6f43d92d24a4c61e2a18762186ca5cd8a85"
+  },
+  "mapSchema": "beeps/audio-sprite@1",
+  "sampleRate": 48000,
+  "channels": 1,
+  "gapFrames": 4800,
+  "frames": 81600,
+  "formula": "round(sin(2 * PI * hz * frame / 48000) * amplitude * 32767)",
+  "definitions": [
+    {
+      "id": "low",
+      "hz": 220,
+      "amplitude": 0.2,
+      "frames": 24000,
+      "loop": false
+    },
+    {
+      "id": "mid",
+      "hz": 440,
+      "amplitude": 0.5,
+      "frames": 24000,
+      "loop": false
+    },
+    {
+      "id": "high",
+      "hz": 880,
+      "amplitude": 0.9,
+      "frames": 24000,
+      "loop": true
+    }
+  ],
+  "files": {
+    "low.wav": {
+      "bytes": 48044,
+      "sha256": "9c82cc0a0e75c4d06f7ff0bf5834f0f8e77933acb78ee6dd56ee5974d5d23e23"
+    },
+    "mid.wav": {
+      "bytes": 48044,
+      "sha256": "7678bfe0912b1de7652b815463209f4ceac03b6d7dc3d9c72be01d84e9a36337"
+    },
+    "high.wav": {
+      "bytes": 48044,
+      "sha256": "7ae74e16f951c94ffcad3a220a172f581d25df7dff09df8486bd1842b7a54abc"
+    },
+    "recipes.json": {
+      "bytes": 352,
+      "sha256": "8aa215e696bdfa5bcd4861ee16bce147192ec64885af848b52042c97139114a1"
+    },
+    "project.json": {
+      "bytes": 34,
+      "sha256": "3056651fdf6015391645cfb4e78daa713605a6c9cf46b22cd8258c787eadeffd"
+    },
+    "beeps.build.json": {
+      "bytes": 166,
+      "sha256": "52b15373da6d114bea11ae1f0d7f731559f8a336c60797517662d073d4158b4c"
+    },
+    "tones.wav": {
+      "bytes": 163244,
+      "sha256": "97e443c0ed0531cb68815a849e03264f24f37a23f3e7d31d7836b205ed7c1280"
+    },
+    "tones.sprite.json": {
+      "bytes": 956,
+      "sha256": "96b4e910677cafc75ae06b94a54e2b2004db15eda0659558f2d92789cb9f7f37"
+    }
+  }
+}

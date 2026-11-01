@@ -1,0 +1,23 @@
+{
+  "tones": {
+    "kind": "sprite",
+    "role": "sfx",
+    "entries": [
+      {
+        "id": "low",
+        "source": "low.wav",
+        "loop": false
+      },
+      {
+        "id": "mid",
+        "source": "mid.wav",
+        "loop": false
+      },
+      {
+        "id": "high",
+        "source": "high.wav",
+        "loop": true
+      }
+    ]
+  }
+}
