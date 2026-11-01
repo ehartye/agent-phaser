@@ -1,0 +1,9 @@
+{
+  "recipes": "recipes.json",
+  "project": "project.json",
+  "out": "out",
+  "lock": "audio.lock.json",
+  "workDir": "work",
+  "target": "wav-master",
+  "jobs": 1
+}
