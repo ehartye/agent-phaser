@@ -1,5 +1,5 @@
 {
-  "about": "Prompts for the blind-router check of the Phaser skills' descriptions. `expect` is the one skill that should be chosen; `alt` lists an acceptable second choice for a genuine overlap; `external` names the plugin that owns an expected skill outside this plugin (checked against scripts/sibling-skills.json, never against a checkout); an `alt` outside this plugin is written `plugin:skill`; `term` is a regular expression that must appear in the expected skill's description (set only where a description was edited to carry a trigger, so it cannot lose it unnoticed). Used by tests/phaser-routing-prompts.test.mjs and, by hand, to score two blind routers.",
+  "about": "Blind-routing answer key. Feed only text to a router. expect is primary; alt preserves justified overlaps. external qualifies expect with a sibling plugin. routes are exhaustive permitted ordered skill loads (one or two skills); any extra or unrelated Phaser activation fails. routeJustifications explain overlap and requiredReference conditions: a task-reference handoff passes only when that public reference is loaded before implementation. Direct core-to-domain routes are bounded to two skills. Every external near miss forbids all local Phaser skills, regardless of nearMissFor. Technology prompts intentionally name APIs; task-language prompts are uncued requirements; policy-cued-task is reported separately. Static tests validate key integrity, not live selection or usefulness.",
   "prompts": [
     {
       "id": 1,
@@ -9,7 +9,40 @@
       "alt": [
         "engine-phaser"
       ],
-      "term": "transition"
+      "term": "transition",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "Scene transition lifecycle is also covered by the core scene owner."
+        }
+      ]
     },
     {
       "id": 2,
@@ -19,28 +52,133 @@
       "alt": [
         "engine-phaser"
       ],
-      "term": "scene\\.transition"
+      "term": "scene\\.transition",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "Scene transition eligibility and scene input lifetime also fit the core scene owner."
+        }
+      ]
     },
     {
       "id": 3,
       "topic": "cutscene",
       "text": "Script a cutscene with timed dialogue, a camera pan and a sound cue, and let the player skip it.",
       "expect": "phaser-motion",
-      "term": "cutscene"
+      "term": "cutscene",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 4,
       "topic": "cutscene",
       "text": "Pause and resume a Timeline cutscene when the pause menu opens.",
       "expect": "phaser-motion",
-      "term": "timeline"
+      "term": "timeline",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 5,
       "topic": "cutscene",
       "text": "After I skip the cutscene a tween step inside it is left half way.",
       "expect": "phaser-motion",
-      "term": "cutscene"
+      "term": "cutscene",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 6,
@@ -50,50 +188,262 @@
       "alt": [
         "phaser-verification"
       ],
-      "term": "timeline"
+      "term": "timeline",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ],
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "The failed hand-stepped tween is also a deterministic-driving verification task."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 7,
       "topic": "gravity-well",
       "text": "Particles should swirl toward a black hole in the middle of the screen.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 8,
       "topic": "gravity-well",
       "text": "A gravity well I added to an emitter does nothing until I raise something; what are its defaults?",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 9,
       "topic": "gravity-well",
       "text": "Particles pulled by a well fly straight past it instead of settling.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 10,
       "topic": "color-ease",
       "text": "Fade a spark emitter from red to blue over its life with an ease curve.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 11,
       "topic": "self-shadow",
       "text": "Lit sprites with a normal map should shade their own dark crevices.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 12,
       "topic": "self-shadow",
       "text": "I called setSelfShadow on one sprite and every lit sprite changed.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 13,
       "topic": "pixel-filters",
       "text": "Posterise the whole screen to a limited retro palette.",
       "expect": "phaser-rendering",
-      "term": "Quantize"
+      "term": "Quantize",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 14,
@@ -103,21 +453,113 @@
       "alt": [
         "phaser-motion"
       ],
-      "term": "Blocky"
+      "term": "Blocky",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ],
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "The visible request is a transition, so motion can own its sequencing while consulting the renderer effect."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 15,
       "topic": "pixel-filters",
       "text": "Recolour the whole game through a brightness ramp for a palette swap.",
       "expect": "phaser-rendering",
-      "term": "GradientMap"
+      "term": "GradientMap",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 16,
       "topic": "pixel-filters",
       "text": "Does Pixelate(8) make blocks eight pixels wide?",
       "expect": "phaser-rendering",
-      "term": "Pixelate"
+      "term": "Pixelate",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 17,
@@ -128,92 +570,459 @@
         "phaser-pixel-ui",
         "engine-phaser"
       ],
-      "term": "smoothPixelArt"
+      "term": "smoothPixelArt",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ],
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "Pixel footprint and boot configuration are legitimate entry points for the stated sampling/zoom question."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "Pixel footprint and boot configuration are legitimate entry points for the stated sampling/zoom question."
+        }
+      ]
     },
     {
       "id": 18,
       "topic": "pixel-filters",
       "text": "A blur followed by a blocky filter ends up blocky, but the other order ends up blurry; which order should I use?",
       "expect": "phaser-rendering",
-      "term": "Blocky"
+      "term": "Blocky",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 19,
       "topic": "hybrid-audio",
       "text": "Share one AudioContext between Phaser's music and agent-beeps live sound effects.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 20,
       "topic": "hybrid-audio",
       "text": "My beeps live cue keeps playing when I mute the game.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 21,
       "topic": "music-reactive",
       "text": "Make the screen pulse with the music.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 22,
       "topic": "music-reactive",
       "text": "I added the analyser from Phaser's audio guide and the game got louder.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 23,
       "topic": "variant-picker",
       "text": "Pick among four exported variants of a pickup sound without repeating the last one.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 24,
       "topic": "markers",
       "text": "Loop only the bridge of a song file by playing a region of it.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 25,
       "topic": "older",
       "text": "Start a new Phaser 4 game: pin the version, write the config and set up Vite.",
-      "expect": "engine-phaser"
+      "expect": "engine-phaser",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
     },
     {
       "id": 26,
       "topic": "older",
       "text": "Every scene restart adds another listener and the memory keeps growing.",
-      "expect": "engine-phaser"
+      "expect": "engine-phaser",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
     },
     {
       "id": 27,
       "topic": "older",
       "text": "Bullets tunnel through thin walls at high speed.",
-      "expect": "phaser-physics"
+      "expect": "phaser-physics",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 28,
       "topic": "older",
       "text": "Keys stay stuck after I Alt-Tab away and back.",
-      "expect": "phaser-input"
+      "expect": "phaser-input",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 29,
       "topic": "older",
       "text": "A DOM text field fights the canvas and the menu cannot be reached from the keyboard.",
-      "expect": "phaser-pixel-ui"
+      "expect": "phaser-pixel-ui",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 30,
       "topic": "older",
       "text": "Prove in CI that restarting a level does not leak textures or listeners.",
-      "expect": "phaser-verification"
+      "expect": "phaser-verification",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 31,
       "topic": "older",
       "text": "A tile layer draws in the wrong place and paints empty cells.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 32,
@@ -222,66 +1031,276 @@
       "expect": "phaser-motion",
       "alt": [
         "phaser-verification"
+      ],
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ],
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "A game.step/tween mismatch is also a deterministic-driving verification task."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
       ]
     },
     {
       "id": 33,
       "topic": "older",
       "text": "Two of our Phaser games need the same dialog system and the same playbot.",
-      "expect": "phaser-architecture"
+      "expect": "phaser-architecture",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 34,
       "topic": "older",
       "text": "A blur on my sprite is clipped at the sprite's bounds.",
-      "expect": "phaser-rendering"
+      "expect": "phaser-rendering",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 35,
       "topic": "older",
       "text": "Sound is silent until the first click and stops when the tab is hidden.",
-      "expect": "phaser-audio"
+      "expect": "phaser-audio",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 36,
       "topic": "older",
       "text": "A flashlight cone of light that follows the player in a top-down game.",
-      "expect": "phaser-worlds"
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
     },
     {
       "id": 37,
       "topic": "near-miss",
       "text": "Which engine should an agent-built small 2D game use?",
       "expect": "engine-selection",
-      "external": "agent-engine"
+      "external": "agent-engine",
+      "routes": [
+        [
+          "agent-engine:engine-selection"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-selection"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
     },
     {
       "id": 38,
       "topic": "near-miss",
       "text": "Wire a useFrame loop beside React state in a three.js game.",
       "expect": "engine-r3f",
-      "external": "agent-engine"
+      "external": "agent-engine",
+      "routes": [
+        [
+          "agent-engine:engine-r3f"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-r3f"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
     },
     {
       "id": 39,
       "topic": "near-miss",
       "text": "A thin-instanced mesh draws at the origin in Babylon.js.",
       "expect": "engine-babylon",
-      "external": "agent-engine"
+      "external": "agent-engine",
+      "routes": [
+        [
+          "agent-engine:engine-babylon"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-babylon"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
     },
     {
       "id": 40,
       "topic": "near-miss",
       "text": "Bring an agent-sprites atlas into a Godot project and say what was verified.",
       "expect": "engine-asset-import",
-      "external": "agent-engine"
+      "external": "agent-engine",
+      "routes": [
+        [
+          "agent-engine:engine-asset-import"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-asset-import"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
     },
     {
       "id": 41,
       "topic": "near-miss",
       "text": "Add a GPU post-effect shader to our own canvas renderer.",
       "expect": "engine-custom-shaders",
-      "external": "agent-engine"
+      "external": "agent-engine",
+      "routes": [
+        [
+          "agent-engine:engine-custom-shaders"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-custom-shaders"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
     },
     {
       "id": 42,
@@ -291,14 +1310,2825 @@
       "alt": [
         "agent-engine:engine-asset-import"
       ],
-      "term": "normal-mapped"
+      "term": "normal-mapped",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ],
+        [
+          "agent-engine:engine-asset-import"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "agent-engine:engine-asset-import"
+          ],
+          "reason": "The preserved asset-import alternate owns the producer-to-game atlas integration boundary."
+        }
+      ]
     },
     {
       "id": 43,
       "topic": "normal-atlas",
       "text": "My lit sprite is bright on the bottom when the light is above it; is the normal map flipped?",
       "expect": "phaser-worlds",
-      "term": "normal-mapped"
+      "term": "normal-mapped",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "topic": "game-architecture",
+      "text": "Structure a Phaser game with scenes and BasePlugin; decide whether a separate simulation is needed.",
+      "expect": "engine-phaser",
+      "family": "game-architecture",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "topic": "boot-config",
+      "text": "Boot a Phaser.Game with WebGL and pixelArt in an ESM project and verify its canvas parent.",
+      "expect": "engine-phaser",
+      "family": "boot-config",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "topic": "scale-responsive",
+      "text": "Use Phaser ScaleManager FIT or RESIZE for a resizable canvas and explain device pixel ratio handling.",
+      "expect": "engine-phaser",
+      "family": "scale-responsive",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "topic": "loader-cache",
+      "text": "Load a Phaser atlas and bitmapFont, show progress, detect decode failures and release unused cached assets.",
+      "expect": "engine-phaser",
+      "family": "loader-cache",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "topic": "scenes-plugins-loop",
+      "text": "Use Phaser ScenePlugin launch versus start and a BasePlugin while keeping restart cleanup correct.",
+      "expect": "engine-phaser",
+      "family": "scenes-plugins-loop",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "topic": "events-data",
+      "text": "Use Phaser registry and DataManager for cross-scene settings without duplicating listeners after restart.",
+      "expect": "engine-phaser",
+      "family": "events-data",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "topic": "grouping-pooling",
+      "text": "Choose Phaser Container, Layer or Group for pooled objects with correct transforms and draw order.",
+      "expect": "engine-phaser",
+      "family": "grouping-pooling",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "topic": "version-migration",
+      "text": "Port a Phaser 3 game to Phaser 4.2.1 without using removed pipeline or tint APIs.",
+      "expect": "engine-phaser",
+      "family": "version-migration",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "topic": "dependency-corrections",
+      "text": "Select and verify the Phaser 4.2.1 dependency corrections for gamepad and WebAudio features.",
+      "expect": "engine-phaser",
+      "family": "dependency-corrections",
+      "kind": "technology",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "topic": "contract-ownership",
+      "text": "Two Phaser games share themed dialogs; define native owners, UI context boundaries and local extension ports.",
+      "expect": "phaser-architecture",
+      "family": "contract-ownership",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "topic": "shared-ui",
+      "text": "Mount released shared UI into Phaser Containers with independent contexts and stable chrome parents.",
+      "expect": "phaser-architecture",
+      "family": "shared-ui",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ],
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ],
+        [
+          "phaser-pixel-ui",
+          "phaser-architecture"
+        ]
+      ],
+      "alt": [
+        "phaser-pixel-ui"
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "The pixel-UI routing table explicitly points shared families/contexts/mount ownership to this architecture reference.",
+          "requiredReference": "skills/phaser-architecture/references/shared-ui-api.md"
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner.",
+          "requiredReference": "skills/phaser-architecture/references/shared-ui-api.md"
+        },
+        {
+          "route": [
+            "phaser-pixel-ui",
+            "phaser-architecture"
+          ],
+          "reason": "The pixel-UI routing table explicitly points shared families/contexts/mount ownership to this architecture reference.",
+          "requiredReference": "skills/phaser-architecture/references/shared-ui-api.md"
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "topic": "playbot-contracts",
+      "text": "Bind a playbot to a Phaser game using authenticated producer contracts and native action observations.",
+      "expect": "phaser-architecture",
+      "family": "playbot-contracts",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "topic": "resource-validation",
+      "text": "Reduce repeated Phaser browser validation across games without confusing observer checks with acceptance.",
+      "expect": "phaser-architecture",
+      "family": "resource-validation",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "topic": "tweens-chains",
+      "text": "Use Phaser TweenChain and number tweens for a sequence with pause and cleanup.",
+      "expect": "phaser-motion",
+      "family": "tweens-chains",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "topic": "animation-playback",
+      "text": "Play Aseprite tags with Phaser AnimationManager and preserve uneven per-frame durations.",
+      "expect": "phaser-motion",
+      "family": "animation-playback",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "topic": "clocks-timers",
+      "text": "Use Phaser Clock and TimerEvent for a pausable countdown and slow motion.",
+      "expect": "phaser-motion",
+      "family": "clocks-timers",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "topic": "curves-followers",
+      "text": "Move a Phaser PathFollower along a Bezier path and pause it without replacing the path system.",
+      "expect": "phaser-motion",
+      "family": "curves-followers",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "topic": "timeline-cutscenes",
+      "text": "Build a Phaser Timeline cutscene with dialogue, camera and sound cues that can pause and skip.",
+      "expect": "phaser-motion",
+      "family": "timeline-cutscenes",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "topic": "scene-transitions",
+      "text": "Use Phaser scene.transition with moveBelow and onStart for a sleeping target scene.",
+      "expect": "phaser-motion",
+      "family": "scene-transitions",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "topic": "pixel-motion-policy",
+      "text": "Choose Phaser tweens, sprite animation or Timeline for a whole-pixel hit reaction with reduced motion.",
+      "expect": "phaser-motion",
+      "family": "pixel-motion-policy",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "topic": "motion-verification",
+      "text": "Test Phaser tween poses deterministically when game.step alone does not advance the TweenManager.",
+      "expect": "phaser-motion",
+      "family": "motion-verification",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "topic": "physics-selection",
+      "text": "Choose Phaser Arcade, Matter or a custom simulation for exact Node-only fixed-point lockstep.",
+      "expect": "phaser-physics",
+      "family": "physics-selection",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "topic": "arcade-collision",
+      "text": "Configure Phaser Arcade bodies, colliders and overlaps for fast pooled projectiles.",
+      "expect": "phaser-physics",
+      "family": "arcade-collision",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 67,
+      "topic": "matter-collision",
+      "text": "Create Phaser Matter bodies with constraints and sensors and configure their step rate.",
+      "expect": "phaser-physics",
+      "family": "matter-collision",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "topic": "tile-collision",
+      "text": "Add Phaser Arcade tilemap collision with one-way platforms and editable tiles.",
+      "expect": "phaser-physics",
+      "family": "tile-collision",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "topic": "physics-followers",
+      "text": "Move an Arcade platform along a Phaser Path and keep its rider behavior correct.",
+      "expect": "phaser-physics",
+      "family": "physics-followers",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "topic": "physics-verification",
+      "text": "Test Phaser Arcade with fixed steps and restore position and velocity before comparing a replay.",
+      "expect": "phaser-physics",
+      "family": "physics-verification",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "topic": "world-cameras",
+      "text": "Configure Phaser cameras for follow, zoom, minimap and HUD while accounting for worldView timing.",
+      "expect": "phaser-worlds",
+      "family": "world-cameras",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "topic": "dynamic-lighting",
+      "text": "Add Phaser cone lights and setSelfShadow to normal-mapped sprites without leaking shared state.",
+      "expect": "phaser-worlds",
+      "family": "dynamic-lighting",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "topic": "normal-atlas",
+      "text": "Load a paired normal atlas into Phaser and verify frame alignment and light direction.",
+      "expect": "phaser-worlds",
+      "family": "normal-atlas",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "topic": "particle-emitters",
+      "text": "Use Phaser ParticleEmitter zones and processors for wind-driven rain that stops under roofs.",
+      "expect": "phaser-worlds",
+      "family": "particle-emitters",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "topic": "particle-processors",
+      "text": "Apply Phaser GravityWell and colorEase to sparks without writing a new particle simulation.",
+      "expect": "phaser-worlds",
+      "family": "particle-processors",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "topic": "tilemap-data",
+      "text": "Load a Tiled map in Phaser and choose TilemapLayer or TilemapGPULayer for sparse animated tiles.",
+      "expect": "phaser-worlds",
+      "family": "tilemap-data",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "topic": "world-streaming",
+      "text": "Stream a Phaser tile world with reusable chunk layers and separate HUD and world cameras.",
+      "expect": "phaser-worlds",
+      "family": "world-streaming",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "topic": "ambient-motion",
+      "text": "Choose Phaser TileSprite, ParticleEmitter or SpriteGPULayer for whole-pixel cloud shadows and wind.",
+      "expect": "phaser-worlds",
+      "family": "ambient-motion",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "topic": "atmosphere-lightmaps",
+      "text": "Combine Phaser native lighting and camera ColorMatrix for day/night; assess a pixel-banded occlusion map.",
+      "expect": "phaser-worlds",
+      "family": "atmosphere-lightmaps",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "topic": "input-actions",
+      "text": "Build one Phaser InputPlugin action owner with contexts, rebinding and replay commands.",
+      "expect": "phaser-input",
+      "family": "input-actions",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 81,
+      "topic": "keyboard",
+      "text": "Use Phaser KeyboardPlugin captures with a text field and clear held keys on blur.",
+      "expect": "phaser-input",
+      "family": "keyboard",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "topic": "pointer-mouse",
+      "text": "Fix Phaser Pointer world coordinates and hit areas for overlapping scenes and a zoomed camera.",
+      "expect": "phaser-input",
+      "family": "pointer-mouse",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 83,
+      "topic": "gamepad",
+      "text": "Use Phaser GamepadPlugin for held axes, connection events and scene restarts.",
+      "expect": "phaser-input",
+      "family": "gamepad",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 84,
+      "topic": "touch-mobile",
+      "text": "Configure Phaser touch pointers for tap-to-move and a multitouch control without browser gesture interference.",
+      "expect": "phaser-input",
+      "family": "touch-mobile",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 85,
+      "topic": "pixel-footprint",
+      "text": "Keep Phaser BitmapText and panels crisp with mixed source densities and device pixel ratio.",
+      "expect": "phaser-pixel-ui",
+      "family": "pixel-footprint",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 86,
+      "topic": "bitmap-fonts",
+      "text": "Choose Phaser Text or BitmapText, load a bitmap font and measure missing glyphs and wrapping.",
+      "expect": "phaser-pixel-ui",
+      "family": "bitmap-fonts",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 87,
+      "topic": "panels-shapes",
+      "text": "Build a Phaser NineSlice dialog panel and choose a modal backdrop that preserves the required pixels.",
+      "expect": "phaser-pixel-ui",
+      "family": "panels-shapes",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 88,
+      "topic": "dom-forms",
+      "text": "Place an accessible form over Phaser with DOMElement and prevent keyboard capture conflicts.",
+      "expect": "phaser-pixel-ui",
+      "family": "dom-forms",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "topic": "ui-focus",
+      "text": "Add keyboard/controller focus to Phaser BitmapText controls using native hit rectangles.",
+      "expect": "phaser-pixel-ui",
+      "family": "ui-focus",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "topic": "ui-clipping",
+      "text": "Clip a scrolling Phaser inventory with Stencil while keeping offscreen controls unclickable.",
+      "expect": "phaser-pixel-ui",
+      "family": "ui-clipping",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 91,
+      "topic": "render-nodes",
+      "text": "Inspect Phaser RenderNodeManager batching and add a custom render node only for an unsupported object.",
+      "expect": "phaser-rendering",
+      "family": "render-nodes",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 92,
+      "topic": "render-filters",
+      "text": "Apply Phaser Blur and Glow with correct filter padding and internal/external order.",
+      "expect": "phaser-rendering",
+      "family": "render-filters",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 93,
+      "topic": "pixel-filters",
+      "text": "Choose Phaser Blocky, Pixelate, Quantize or GradientMap for a retro palette transition.",
+      "expect": "phaser-rendering",
+      "family": "pixel-filters",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 94,
+      "topic": "shader-extension",
+      "text": "Add a custom GLSL effect in Phaser using Shader or a filter extension with correct alpha handling.",
+      "expect": "phaser-rendering",
+      "family": "shader-extension",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 95,
+      "topic": "render-targets",
+      "text": "Use Phaser DynamicTexture and RenderTexture and select TintModes and BlendModes without leaking textures.",
+      "expect": "phaser-rendering",
+      "family": "render-targets",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 96,
+      "topic": "gpu-sprites",
+      "text": "Render many Phaser decorations with SpriteGPULayer or Blitter and measure rebuild cost.",
+      "expect": "phaser-rendering",
+      "family": "gpu-sprites",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 97,
+      "topic": "mesh2d",
+      "text": "Draw deformable 2D geometry with Phaser Mesh2D and preserve sprite batching where possible.",
+      "expect": "phaser-rendering",
+      "family": "mesh2d",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 98,
+      "topic": "stencil-context",
+      "text": "Use Phaser StencilReference and CustomContext to make a clipped window with correct alpha.",
+      "expect": "phaser-rendering",
+      "family": "stencil-context",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 99,
+      "topic": "webgl-backends",
+      "text": "Use a supplied WebGL2 context in Phaser 4.2.1 and check custom GLSL stage compatibility.",
+      "expect": "phaser-rendering",
+      "family": "webgl-backends",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 100,
+      "topic": "renderer-lifecycle",
+      "text": "Restore a Phaser WebGL context and destroy the game without leaking framebuffer or sampler resources.",
+      "expect": "phaser-rendering",
+      "family": "renderer-lifecycle",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "topic": "renderer-version-traps",
+      "text": "Audit Phaser 4.2.1 rendering code for removed setTintFill and emitter setFrequency misuse.",
+      "expect": "phaser-rendering",
+      "family": "renderer-version-traps",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "topic": "sound-manager",
+      "text": "Unlock Phaser WebAudioSoundManager on a real gesture and handle failed decoding and visibility changes.",
+      "expect": "phaser-audio",
+      "family": "sound-manager",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "topic": "markers-audio-sprites",
+      "text": "Play a Phaser audio sprite from a released PCM frame map and verify marker bounds and loop behavior.",
+      "expect": "phaser-audio",
+      "family": "markers-audio-sprites",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "topic": "sound-lifetime",
+      "text": "Keep a Phaser WebAudioSound loop alive across scene restarts and pause it with a menu.",
+      "expect": "phaser-audio",
+      "family": "sound-lifetime",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "topic": "audio-mixing",
+      "text": "Add Phaser spatialSource distance behavior and duck music under dialogue.",
+      "expect": "phaser-audio",
+      "family": "audio-mixing",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "topic": "hybrid-audio",
+      "text": "Share one AudioContext between Phaser recordings and live cues without bypassing global mute.",
+      "expect": "phaser-audio",
+      "family": "hybrid-audio",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "topic": "audio-reactive",
+      "text": "Tap Phaser masterVolumeNode with an AnalyserNode to animate visuals without doubling audio output.",
+      "expect": "phaser-audio",
+      "family": "audio-reactive",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "topic": "audio-policy",
+      "text": "Build a Phaser music director with hysteresis and exhaustive cue decisions above native sound playback.",
+      "expect": "phaser-audio",
+      "family": "audio-policy",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "topic": "audio-verification",
+      "text": "Test Phaser WebAudio completion and looping from recorded PCM windows without relying on hearing.",
+      "expect": "phaser-audio",
+      "family": "audio-verification",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ],
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ],
+        [
+          "phaser-verification",
+          "phaser-audio"
+        ]
+      ],
+      "alt": [
+        "phaser-verification"
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "The verification routing table explicitly points audio tests to the audio testing reference.",
+          "requiredReference": "skills/phaser-audio/references/testing-audio.md"
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner.",
+          "requiredReference": "skills/phaser-audio/references/testing-audio.md"
+        },
+        {
+          "route": [
+            "phaser-verification",
+            "phaser-audio"
+          ],
+          "reason": "The verification routing table explicitly points audio tests to the audio testing reference.",
+          "requiredReference": "skills/phaser-audio/references/testing-audio.md"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "topic": "deterministic-driving",
+      "text": "Drive Phaser game.step with page.clock and seeded RNG for repeatable native input and tween tests.",
+      "expect": "phaser-verification",
+      "family": "deterministic-driving",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "topic": "pixel-assertions",
+      "text": "Assert Phaser snapshotPixel colors and alpha without issuing two competing reads in one frame.",
+      "expect": "phaser-verification",
+      "family": "pixel-assertions",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "topic": "native-observation",
+      "text": "Prove a Phaser native control receives input and its authenticated art contributes final-screen pixels.",
+      "expect": "phaser-verification",
+      "family": "native-observation",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 113,
+      "topic": "visual-instruments",
+      "text": "Measure Phaser BitmapText glyph coverage and integer pixel cells in a retained RGBA frame.",
+      "expect": "phaser-verification",
+      "family": "visual-instruments",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 114,
+      "topic": "lifecycle-verification",
+      "text": "Prove repeated Phaser scene restarts and WebGL context loss do not grow resources or listeners.",
+      "expect": "phaser-verification",
+      "family": "lifecycle-verification",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 115,
+      "topic": "gpu-ci",
+      "text": "Set up Phaser Playwright acceptance and distinguish hardware GPU results from software WebGL in CI.",
+      "expect": "phaser-verification",
+      "family": "gpu-ci",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 116,
+      "topic": "debugging",
+      "text": "Debug a Phaser scene with missing textures and inspect native display-list state and pixels.",
+      "expect": "phaser-verification",
+      "family": "debugging",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 117,
+      "topic": "profiling",
+      "text": "Profile a Phaser game against a 120 fps frame budget using draw calls and controlled ablations.",
+      "expect": "phaser-verification",
+      "family": "profiling",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ],
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ],
+        [
+          "phaser-architecture",
+          "phaser-verification"
+        ]
+      ],
+      "alt": [
+        "phaser-architecture"
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "The architecture routing table explicitly points cross-game frame-budget work to the verification profiling reference.",
+          "requiredReference": "skills/phaser-verification/references/profiling-method.md"
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner.",
+          "requiredReference": "skills/phaser-verification/references/profiling-method.md"
+        },
+        {
+          "route": [
+            "phaser-architecture",
+            "phaser-verification"
+          ],
+          "reason": "The architecture routing table explicitly points cross-game frame-budget work to the verification profiling reference.",
+          "requiredReference": "skills/phaser-verification/references/profiling-method.md"
+        }
+      ]
+    },
+    {
+      "id": 118,
+      "topic": "capture-readiness",
+      "text": "Prepare a Phaser scene for reproducible video capture with seeded frames and explicit audio bounds.",
+      "expect": "phaser-verification",
+      "family": "capture-readiness",
+      "kind": "technology",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ]
+    },
+    {
+      "id": 119,
+      "topic": "near-miss",
+      "text": "Choose a 2D engine for a new game; compare Phaser and Godot before writing code.",
+      "expect": "engine-selection",
+      "external": "agent-engine",
+      "nearMissFor": "engine-phaser",
+      "routes": [
+        [
+          "agent-engine:engine-selection"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-selection"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 120,
+      "topic": "near-miss",
+      "text": "Choose between engines for two future games before defining shared game contracts.",
+      "expect": "engine-selection",
+      "external": "agent-engine",
+      "nearMissFor": "phaser-architecture",
+      "routes": [
+        [
+          "agent-engine:engine-selection"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-selection"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 121,
+      "topic": "near-miss",
+      "text": "Edit uneven frame holds inside an agent-sprites pixel animation project before export.",
+      "expect": "sprite-motion",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-motion",
+      "routes": [
+        [
+          "agent-sprites:sprite-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 122,
+      "topic": "near-miss",
+      "text": "Configure rigid-body collision shapes for a native Unreal Engine character.",
+      "expect": "unreal-gameplay",
+      "external": "agent-unreal",
+      "nearMissFor": "phaser-physics",
+      "routes": [
+        [
+          "agent-unreal:unreal-gameplay"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-unreal:unreal-gameplay"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 123,
+      "topic": "near-miss",
+      "text": "Draw and export a paired normal atlas in agent-sprites before any game integration.",
+      "expect": "sprite-export",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-worlds",
+      "routes": [
+        [
+          "agent-sprites:sprite-export"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-export"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 124,
+      "topic": "near-miss",
+      "text": "Handle pointer input in a React Three Fiber useFrame game.",
+      "expect": "engine-r3f",
+      "external": "agent-engine",
+      "nearMissFor": "phaser-input",
+      "routes": [
+        [
+          "agent-engine:engine-r3f"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-r3f"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 125,
+      "topic": "near-miss",
+      "text": "Export an agent-sprites UI font atlas and panel sprite sheet for multiple engines.",
+      "expect": "sprite-export",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-pixel-ui",
+      "routes": [
+        [
+          "agent-sprites:sprite-export"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-export"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 126,
+      "topic": "near-miss",
+      "text": "Write a GLSL post effect for a standalone WebGL canvas that does not use Phaser.",
+      "expect": "engine-custom-shaders",
+      "external": "agent-engine",
+      "nearMissFor": "phaser-rendering",
+      "routes": [
+        [
+          "agent-engine:engine-custom-shaders"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-engine:engine-custom-shaders"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 127,
+      "topic": "near-miss",
+      "text": "Compose and export a new musical cue with agent-beeps before choosing a game playback engine.",
+      "expect": "beeps-compose",
+      "external": "agent-beeps",
+      "nearMissFor": "phaser-audio",
+      "routes": [
+        [
+          "agent-beeps:beeps-compose"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-beeps:beeps-compose"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 128,
+      "topic": "near-miss",
+      "text": "Review exported sprite frames for bleed and pivot alignment before importing them into any engine.",
+      "expect": "sprite-verification",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-verification",
+      "routes": [
+        [
+          "agent-sprites:sprite-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true
+    },
+    {
+      "id": 129,
+      "topic": "game-architecture",
+      "family": "game-architecture",
+      "kind": "task-language",
+      "text": "My Phaser game needs saved progress and restart-safe state. After returning to the title screen, loading a save should restore the same level, player position and collected items.",
+      "expect": "engine-phaser",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 130,
+      "topic": "physics-selection",
+      "family": "physics-selection",
+      "kind": "policy-cued-task",
+      "text": "My Phaser game needs replay on one pinned browser runtime. Does that alone mean replacing Arcade collision?",
+      "expect": "phaser-physics",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "The user explicitly questions replacing Arcade; score separately from uncued task-language cases."
+    },
+    {
+      "id": 131,
+      "topic": "particle-emitters",
+      "family": "particle-emitters",
+      "kind": "task-language",
+      "text": "Rain in my Phaser world should blow sideways when the wind changes and disappear when it enters a roofed area.",
+      "expect": "phaser-worlds",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 132,
+      "topic": "curves-followers",
+      "family": "curves-followers",
+      "kind": "task-language",
+      "text": "A patrol in my Phaser game follows a curved route, pauses at checkpoints and resumes from the same place after the pause menu closes.",
+      "expect": "phaser-motion",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
     }
-  ]
+  ],
+  "nearMissPhaserPolicy": "forbid-all-local-skills"
 }

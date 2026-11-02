@@ -1,0 +1,4387 @@
+{
+  "about": "Inventory of represented feature families in Phaser 4.2.1. aliases are search vocabulary, not a list of SDK exports. nativeFacility lists only the native-api source claims; native-boundary anchors explain implementation limits and do not recommend calling private methods. Workflow rows have no nativeFacility: their SDK anchors identify boundaries used by application/tool workflows. pluginFacilities and platformFacilities have separate ownership. Extension/custom-work decisions are requirements judgments, not promises made by the SDK. Source/reference inspection is distinct from native execution, full reference-contract review and live routing.",
+  "phaserVersion": "4.2.1",
+  "families": [
+    {
+      "id": "game-architecture",
+      "classification": "native",
+      "aliases": [
+        "BasePlugin",
+        "Scene",
+        "HEADLESS"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/architecture.md",
+          "section": "Phaser architecture that scales"
+        },
+        {
+          "path": "skills/engine-phaser/references/phaser-reference.md",
+          "section": "Phaser best-practices reference"
+        }
+      ],
+      "nativeFacility": "Scene, BasePlugin, Game.registry",
+      "extensionSeam": "Compose native scenes and a global plugin around game rules.",
+      "customWorkConditions": "A separate simulation is justified by concrete portability or exact simulation requirements, not by every save or restart.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Scene.js#L21",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Scene",
+          "claim": "Scene supplies the scene-owned systems and lifecycle entry point."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/plugins/BasePlugin.js#L19",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BasePlugin",
+          "claim": "Global plugins can own services across scene lifetimes."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L189",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Game.registry",
+          "claim": "Game registry is a shared DataManager, distinct from per-scene data."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/const.js#L83",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "HEADLESS",
+          "claim": "HEADLESS is a renderer selection constant, not a simulation architecture."
+        }
+      ],
+      "evaluationCaseIds": [
+        44,
+        129
+      ],
+      "versionLimits": "Scene and registry ownership can support restartable games; HEADLESS disables rendering, and does not make browser-dependent subsystems into a Node-only deterministic simulation.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "save serialization",
+        "simulation ownership"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "boot-config",
+      "classification": "native",
+      "aliases": [
+        "Phaser.Game",
+        "WEBGL",
+        "pixelArt",
+        "smoothPixelArt",
+        "fps"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/config-and-boot.md",
+          "section": "Game config, boot and bundling (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Game, Config.pixelArt, Config.smoothPixelArt",
+      "extensionSeam": "Use GameConfig and boot callbacks.",
+      "customWorkConditions": "Custom boot integration must address an embedding requirement outside GameConfig.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L61",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Game",
+          "claim": "Game accepts the configuration and owns boot."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Config.js#L397",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Config.pixelArt",
+          "claim": "pixelArt config selects pixel rendering behavior."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Config.js#L409",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Config.smoothPixelArt",
+          "claim": "smoothPixelArt is independently configured."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L703",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.init",
+          "claim": "An explicit context is used before default webgl context creation."
+        }
+      ],
+      "evaluationCaseIds": [
+        45
+      ],
+      "versionLimits": "The renderer selection, pixelArt and smoothPixelArt are separate config options; WebGL renderer selection does not select WebGL 2.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "scale-responsive",
+      "classification": "native",
+      "aliases": [
+        "ScaleManager",
+        "FIT",
+        "NONE",
+        "RESIZE",
+        "EXPAND",
+        "fullscreen"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/scale-and-responsive.md",
+          "section": "Scale, resize and device pixels (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "ScaleManager.setGameSize, ScaleManager.startFullscreen, ScaleModes",
+      "extensionSeam": "Bind resize events and camera viewports to the chosen scale mode.",
+      "customWorkConditions": "Custom sizing is justified by a declared device-pixel policy unsupported by native scale modes alone.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scale/ScaleManager.js#L767",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScaleManager.setGameSize",
+          "claim": "Set logical game size through the scale manager."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scale/ScaleManager.js#L1323",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScaleManager.startFullscreen",
+          "claim": "Use the native fullscreen request and its browser constraints."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scale/const/SCALE_MODE_CONST.js#L69",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScaleModes",
+          "claim": "FIT is one of the declared native scale modes."
+        }
+      ],
+      "evaluationCaseIds": [
+        46
+      ],
+      "versionLimits": "Scale modes operate on game/display sizes; a physical pixel density policy and camera layout remain application responsibilities.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "loader-cache",
+      "classification": "native",
+      "aliases": [
+        "LoaderPlugin",
+        "atlas",
+        "aseprite",
+        "bitmapFont",
+        "multiatlas",
+        "atlasPCT",
+        "texture"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/loading-assets.md",
+          "section": "Loading assets (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/engine-phaser/references/loading-failures.md",
+          "section": "Loading assets: failure, retry and progress (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/engine-phaser/references/asset-wiring.md",
+          "section": "Wiring agent-sprites and agent-beeps into Phaser"
+        }
+      ],
+      "nativeFacility": "LoaderPlugin.start, LoaderPlugin.atlas, LoaderPlugin.bitmapFont",
+      "extensionSeam": "Use loader events, cache checks and declared producer formats.",
+      "customWorkConditions": "Adapters may translate a released producer contract; do not replace the loader or silently accept malformed assets.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/LoaderPlugin.js#L914",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LoaderPlugin.start",
+          "claim": "The native loader starts queued files and emits progress/completion."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AtlasJSONFile.js#L223",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LoaderPlugin.atlas",
+          "claim": "The atlas loader accepts atlas data and paired normal-map input."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/BitmapFontFile.js#L213",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LoaderPlugin.bitmapFont",
+          "claim": "Bitmap fonts have a native loader registration."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AudioFile.js#L87",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "AudioFile.onProcess",
+          "claim": "Native audio decoding follows a processing path separate from HTTP failures."
+        }
+      ],
+      "evaluationCaseIds": [
+        47
+      ],
+      "versionLimits": "Loading completion alone is not proof that decoded assets entered caches; format adaptation and byte authentication remain producer/consumer work.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "scenes-plugins-loop",
+      "classification": "native",
+      "aliases": [
+        "ScenePlugin",
+        "SceneManager",
+        "BasePlugin",
+        "TimeStep",
+        "SHUTDOWN"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/scenes-loop-and-plugins.md",
+          "section": "Scenes, plugins and the fixed-step loop (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/engine-phaser/references/phaser-4-scene-lifecycle-gotchas.md",
+          "section": "Phaser 4.2.1 scene lifecycle and input gotchas"
+        }
+      ],
+      "nativeFacility": "ScenePlugin.start, ScenePlugin.launch, BasePlugin.destroy",
+      "extensionSeam": "Use Scene lifecycle and plugin mappings with owned shutdown listeners.",
+      "customWorkConditions": "A custom clock requires simulation constraints the native clocks cannot meet.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/ScenePlugin.js#L212",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScenePlugin.start",
+          "claim": "Starting a target stops this scene; launch is a separate operation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/ScenePlugin.js#L481",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScenePlugin.launch",
+          "claim": "Launch queues another scene without stopping the caller."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/plugins/BasePlugin.js#L121",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BasePlugin.destroy",
+          "claim": "A plugin has a destroy lifecycle for its owned state."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Systems.js#L772",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Systems.shutdown",
+          "claim": "Scene shutdown emits SHUTDOWN and deactivates systems; it is not full destruction."
+        }
+      ],
+      "evaluationCaseIds": [
+        48
+      ],
+      "versionLimits": "Shutdown and destroy are different lifetimes; Scene instances can be reused, and game-owned listeners require explicit cleanup.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "events-data",
+      "classification": "native",
+      "aliases": [
+        "EventEmitter",
+        "DataManager",
+        "registry",
+        "scene.data"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/events-and-data.md",
+          "section": "Events, data and what survives a scene (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "DataManager.set, Game.registry, Scene.data",
+      "extensionSeam": "Use native emitters/data and unsubscribe at the owning lifetime.",
+      "customWorkConditions": "Typed domain events or serialization may wrap native state; require an explicit ownership boundary.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/data/DataManager.js#L269",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DataManager.set",
+          "claim": "Set native data values with associated change events."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L189",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Game.registry",
+          "claim": "Use the game registry for shared values."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Scene.js#L193",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Scene.data",
+          "claim": "Scene data has a separate scene-owned manager."
+        }
+      ],
+      "evaluationCaseIds": [
+        49
+      ],
+      "versionLimits": "DataManager is runtime state and event propagation, not a save format; serialization and lifetime-scoped subscriptions are application policy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "grouping-pooling",
+      "classification": "native",
+      "aliases": [
+        "Container",
+        "Layer",
+        "Group",
+        "DisplayList"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/game-objects-and-containers.md",
+          "section": "Game objects, containers, groups and destroy (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Group.get, Container.add, List.add (inherited by Layer)",
+      "extensionSeam": "Compose native groups and explicit member revival with Container or Layer ordering.",
+      "customWorkConditions": "A bespoke pool needs measured constraints beyond Group lifecycle and allocation behavior.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/group/Group.js#L1041",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Group.get",
+          "claim": "Group.get reuses or creates a member under the group limit."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/container/Container.js#L543",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Container.add",
+          "claim": "Container.add establishes child ownership/transform membership."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/layer/Layer.js#L236",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Layer.addChildCallback",
+          "claim": "Layer maintains display membership and depth ordering without Container transforms."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/structs/List.js#L116",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "List.add (inherited by Layer)",
+          "claim": "Add display members through the list API inherited by Layer."
+        }
+      ],
+      "evaluationCaseIds": [
+        50
+      ],
+      "versionLimits": "A Group is a member collection/pool, a Container applies transforms, and a Layer orders renderable children; member revival and reset remain game policy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "version-migration",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser 3",
+        "Phaser 4.2.1",
+        "render nodes",
+        "TintModes"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/v3-to-v4-migration.md",
+          "section": "Phaser 3 to 4: what breaks, what to ignore (4.2.1)"
+        },
+        {
+          "path": "skills/engine-phaser/references/phaser-docs-errata-names.md",
+          "section": "Errata for Phaser's own documents: names, signatures and links (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/engine-phaser/references/phaser-docs-errata-behaviour.md",
+          "section": "Errata for Phaser's own documents: behaviour (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Port against pinned declarations and source, preserving observed exceptions.",
+      "customWorkConditions": "Compatibility glue must protect an identified consumer obligation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/renderNodes/RenderNodeManager.js#L306",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "RenderNodeManager.addNode",
+          "claim": "4.2.1 exposes render node registration."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Tint.js#L260",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tint.setTintMode",
+          "claim": "Tint mode selection is the current component boundary."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Mask.js#L57",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Mask.setMask",
+          "claim": "Legacy component masks warn and do nothing in WebGL."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Tint.js#L276",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tint.setTintFill",
+          "claim": "The legacy method remains as a deprecated error-logging no-op; set tint color and mode separately."
+        }
+      ],
+      "evaluationCaseIds": [
+        51
+      ],
+      "versionLimits": "Phaser 3 pipeline/mask recipes cannot be assumed valid in 4.2.1; migration is a workflow, not a native API.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "version migration",
+        "compatibility obligations"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "dependency-corrections",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser 4.2.1",
+        "dependency patches"
+      ],
+      "primarySkill": "engine-phaser",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/engine-phaser/references/dependency-patches.md",
+          "section": "Select and verify Phaser dependency corrections"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Apply only the version-pinned correction whose affected feature is used.",
+      "customWorkConditions": "A patch requires a reproduced native defect and a bounded removal condition.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/gamepad/Gamepad.js#L433",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Gamepad.update",
+          "claim": "The native update boundary contains the creation-time timestamp gate."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AudioFile.js#L87",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "AudioFile.onProcess",
+          "claim": "The decode Promise boundary is in AudioFile."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L118",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "WebAudioSoundManager.onGameVisible",
+          "claim": "Visibility recovery captures a context in a delayed callback."
+        }
+      ],
+      "evaluationCaseIds": [
+        52
+      ],
+      "versionLimits": "Install-time patch helpers belong to this plugin and require exact known 4.2.1 fragments; they are not Phaser exports or blanket upgrade fixes.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "install-time dependency correction",
+        "reproduction and removal condition"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "contract-ownership",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser Scene",
+        "UI contexts",
+        "extension ports"
+      ],
+      "primarySkill": "phaser-architecture",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-architecture/references/owners-and-extensions.md",
+          "section": "Contract owners, themed families and local extensions"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Bind producer contracts through game-owned native adapters.",
+      "customWorkConditions": "Local panels and game rules may extend declared ports without forking the shared framework.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Systems.js#L772",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Systems.shutdown",
+          "claim": "Scene shutdown provides a cleanup boundary for consumer bindings."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/container/Container.js#L543",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Container.add",
+          "claim": "Container parents host native objects supplied by a UI binding."
+        }
+      ],
+      "evaluationCaseIds": [
+        53
+      ],
+      "versionLimits": "Released UI producer ports and context contracts are not Phaser SDK APIs; native scene/container lifetimes only host the bindings.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "UI contexts",
+        "extension ports",
+        "producer/consumer ownership"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "shared-ui",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser Container",
+        "Layer",
+        "shared UI mount"
+      ],
+      "primarySkill": "phaser-architecture",
+      "secondarySkills": [
+        "phaser-pixel-ui"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-architecture/references/shared-ui-api.md",
+          "section": "Shared Phaser UI: exports and native ownership"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Use released producer ports and stable native parent containers.",
+      "customWorkConditions": "A local extension is justified by behavior outside shared family contracts.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/container/Container.js#L543",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Container.add",
+          "claim": "Mount native children under a stable container."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/container/Container.js#L894",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Container.remove",
+          "claim": "Unmount children with explicit destroy ownership."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/layer/Layer.js#L236",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Layer.addChildCallback",
+          "claim": "Layer display membership is distinct from container transformation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/structs/List.js#L116",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "List.add (inherited by Layer)",
+          "claim": "Add display members through the list API inherited by Layer."
+        }
+      ],
+      "evaluationCaseIds": [
+        54
+      ],
+      "versionLimits": "Shared UI mount/context protocols belong to their released producer; Phaser supplies containers/layers, not the shared UI protocol.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "shared UI mount",
+        "released producer contracts"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "phaser-pixel-ui",
+          "kind": "task-reference-handoff",
+          "reference": "skills/phaser-architecture/references/shared-ui-api.md",
+          "rationale": "The pixel-UI routing table explicitly points shared families/contexts/mount ownership to this architecture reference."
+        }
+      ]
+    },
+    {
+      "id": "playbot-contracts",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser playbot",
+        "observation adapter",
+        "action adapter"
+      ],
+      "primarySkill": "phaser-architecture",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-architecture/references/playbot-evidence.md",
+          "section": "Playbot contracts and honest evidence"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Expose serializable game-owned observations and native action dispatch.",
+      "customWorkConditions": "An adapter may bridge game semantics; do not replace producer transport without evidence.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L1021",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "InputPlugin.processDownEvents",
+          "claim": "Actual native pointer dispatch can be observed at the input boundary."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Systems.js#L772",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Systems.shutdown",
+          "claim": "Scene-owned observation/action adapters must retire on shutdown."
+        }
+      ],
+      "evaluationCaseIds": [
+        55
+      ],
+      "versionLimits": "Observation/action schemas, transports and producer authentication are external contracts; native input and scene lifecycle are adapter boundaries only.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "observation adapter",
+        "action adapter",
+        "transport authentication"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "resource-validation",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser validation",
+        "shared browser host",
+        "publication gates"
+      ],
+      "primarySkill": "phaser-architecture",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-architecture/references/resources-and-validation.md",
+          "section": "Owned resources, change-based validation and publication"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Reuse immutable host/build identity while isolating mutable scenarios.",
+      "customWorkConditions": "Custom orchestration must solve an observed duplication or ownership gap.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L712",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Game.destroy",
+          "claim": "Request destruction through the native game owner."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L729",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Game.runDestroy",
+          "claim": "Native teardown releases game managers and renderer."
+        }
+      ],
+      "evaluationCaseIds": [
+        56
+      ],
+      "versionLimits": "The SDK supplies game lifecycle, not publication gates or validation orchestration; immutable builds may be reused while mutable scenarios remain isolated.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "shared browser host",
+        "publication gates",
+        "validation reuse"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "tweens-chains",
+      "classification": "native",
+      "aliases": [
+        "TweenManager",
+        "TweenChain",
+        "counter tween"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/tweens-and-chains.md",
+          "section": "Tweens, chains and number tweens (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "TweenManager.chain, TweenManager.addCounter",
+      "extensionSeam": "Use tween configuration, callbacks and chains.",
+      "customWorkConditions": "Custom interpolation needs a concrete behavior unsupported by native tween timing or values.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L436",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TweenManager.chain",
+          "claim": "Build a native TweenChain from tween configs."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L524",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TweenManager.addCounter",
+          "claim": "Create a native numeric counter tween."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L649",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TweenManager.getDelta",
+          "claim": "The tween manager derives elapsed time from Date.now."
+        }
+      ],
+      "evaluationCaseIds": [
+        57
+      ],
+      "versionLimits": "Tween timing reads wall time in 4.2.1; stepping Game alone does not advance it. Counter tweens are Tween instances, not a NumberTween export.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [
+        {
+          "symbol": "NumberTween as a class",
+          "reason": "addCounter returns Phaser.Tweens.Tween; NumberTween is not the exported return type.",
+          "sourceSymbols": [
+            "TweenManager.addCounter"
+          ]
+        }
+      ],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "animation-playback",
+      "classification": "native",
+      "aliases": [
+        "AnimationManager",
+        "AnimationState",
+        "createFromAseprite"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/sprite-animations.md",
+          "section": "Sprite animations in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "AnimationManager.createFromAseprite, AnimationState.play, AnimationFrame.duration",
+      "extensionSeam": "Use native frame definitions, tags and playback events.",
+      "customWorkConditions": "A custom animation controller may select native animations for game state, not replace frame playback without a gap.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/animations/AnimationManager.js#L406",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "AnimationManager.createFromAseprite",
+          "claim": "Generate animation configs/registrations from cached Aseprite tags."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/animations/AnimationState.js#L859",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "AnimationState.play",
+          "claim": "Sprite animation state owns playback."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/animations/AnimationFrame.js#L123",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "AnimationFrame.duration",
+          "claim": "Frames can contribute individual extra duration."
+        }
+      ],
+      "evaluationCaseIds": [
+        58
+      ],
+      "versionLimits": "Without an explicit target, Aseprite tags register global animation keys; the optional target creates local sprite animations. Per-frame duration belongs to native AnimationFrame data; choosing animations from game state is policy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "clocks-timers",
+      "classification": "native",
+      "aliases": [
+        "Clock",
+        "TimerEvent",
+        "delta",
+        "timeScale",
+        "TimeStep"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/clocks-timers-and-delta.md",
+          "section": "Clocks, timers and delta time (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Clock.addEvent, Clock.update",
+      "extensionSeam": "Use scene timers and explicitly coordinate clock-specific pause/scale.",
+      "customWorkConditions": "A separate clock requires an authoritative simulation or external-time requirement.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Clock.js#L200",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Clock.addEvent",
+          "claim": "Schedule TimerEvent objects through the scene Clock."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Clock.js#L368",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Clock.update",
+          "claim": "Clock pause and timeScale control timer updates."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/TimeStep.js#L718",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TimeStep.step",
+          "claim": "The game loop has its own delta smoothing and frame scheduling."
+        }
+      ],
+      "evaluationCaseIds": [
+        59
+      ],
+      "versionLimits": "Scene Clock scaling/pause does not automatically synchronize TweenManager, sound or the game loop.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "curves-followers",
+      "classification": "native",
+      "aliases": [
+        "Curves.Path",
+        "PathFollower",
+        "Bezier",
+        "Spline"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/curves-paths-and-followers.md",
+          "section": "Curves, paths and path followers (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Path.getPoint, PathFollower.startFollow, PathFollower.pauseFollow",
+      "extensionSeam": "Compose curves and native follower/tween settings.",
+      "customWorkConditions": "Custom movement is justified by unsupported collision/authority constraints, not a blanket decorative-only restriction.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/curves/path/Path.js#L584",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Path.getPoint",
+          "claim": "Sample across path curves by length; guard empty/out-of-range results."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/PathFollower.js#L197",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "PathFollower.startFollow",
+          "claim": "Configure a native counter tween for path progress."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/PathFollower.js#L296",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "PathFollower.pauseFollow",
+          "claim": "Native following can pause without replacing the path system."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L649",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TweenManager.getDelta",
+          "claim": "Native follower tween progress follows the manager wall clock."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/PathFollower.js#L256",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "PathFollower persistent tween",
+          "claim": "startFollow makes its counter tween persistent; remove owned completed tweens during restart/teardown."
+        }
+      ],
+      "evaluationCaseIds": [
+        60,
+        132
+      ],
+      "versionLimits": "PathFollower uses a persistent counter tween and wall time; coordinate the clock and remove owned pathTween instances. Native following is not inherently decoration-only or incapable of checkpoints.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "timeline-cutscenes",
+      "classification": "native",
+      "aliases": [
+        "Timeline",
+        "add.timeline",
+        "repeat",
+        "skip"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/cutscenes.md",
+          "section": "Cutscenes with `add.timeline` (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Timeline.add, Timeline.pause, Timeline.destroy, Timeline.clear",
+      "extensionSeam": "Use native Timeline events and explicit end-state/owned-tween cleanup.",
+      "customWorkConditions": "Custom scheduling requires a concrete Timeline limitation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Timeline.js#L644",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Timeline.add",
+          "claim": "Add timed native Timeline events."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Timeline.js#L472",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Timeline.pause",
+          "claim": "Pause the Timeline scheduler."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Timeline.js#L792",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Timeline.destroy",
+          "claim": "Destroy the Timeline and its owned event state."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/time/Timeline.js#L717",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Timeline.clear",
+          "claim": "Clear native events and stop Timeline-owned tween instances."
+        }
+      ],
+      "evaluationCaseIds": [
+        61
+      ],
+      "versionLimits": "Timeline is a scene-clock sequencer. Native pause/clear/destroy manage its stored tweenInstance values; skip-to-final-state and independently started audio/effects still need explicit game policy. There is no native skip-to-final-state method.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "scene-transitions",
+      "classification": "native",
+      "aliases": [
+        "scene.transition",
+        "onStart",
+        "moveBelow",
+        "transitionwake"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [
+        "engine-phaser"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/scene-transitions.md",
+          "section": "Scene transitions (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "ScenePlugin.transition",
+      "extensionSeam": "Use transition configuration and target lifecycle data.",
+      "customWorkConditions": "Custom transitions need a visual or lifecycle requirement absent from the native transition protocol.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/ScenePlugin.js#L284",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ScenePlugin.transition",
+          "claim": "Start a configured native scene transition."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/ScenePlugin.js#L414",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "ScenePlugin.transitionComplete",
+          "claim": "Complete the transition according to remove/sleep/stop configuration."
+        }
+      ],
+      "evaluationCaseIds": [
+        62
+      ],
+      "versionLimits": "Transition eligibility and lifecycle differ from plain scene start; transition callbacks/data do not imply automatic coordination of every scene-owned effect.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "engine-phaser",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            1,
+            2
+          ],
+          "reference": "skills/engine-phaser/references/scenes-loop-and-plugins.md",
+          "rationale": "The original transition cases accept core scene-lifecycle handling; preserve that overlap without changing the technology case key."
+        }
+      ]
+    },
+    {
+      "id": "pixel-motion-policy",
+      "classification": "workflow",
+      "aliases": [
+        "roundPixels",
+        "Timeline",
+        "tweens",
+        "animations"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/pixel-motion-craft.md",
+          "section": "Motion craft for pixel games (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Select native motion facilities and quantize only the required output.",
+      "customWorkConditions": "Custom rounding or reduced-motion policy is game presentation glue.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js#L140",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Camera.roundPixels",
+          "claim": "Camera pixel rounding is a native paint boundary."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L333",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TweenManager.add",
+          "claim": "Tween values remain available beneath a presentation policy."
+        }
+      ],
+      "evaluationCaseIds": [
+        63
+      ],
+      "versionLimits": "Quantization and reduced-motion choice are presentation policy; float model coordinates and render rounding need not be the same.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "physical paint quantization",
+        "reduced-motion policy"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "motion-verification",
+      "classification": "workflow",
+      "aliases": [
+        "TweenManager",
+        "game.step",
+        "page.clock"
+      ],
+      "primarySkill": "phaser-motion",
+      "secondarySkills": [
+        "phaser-verification"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-motion/references/verifying-motion.md",
+          "section": "Verifying motion deterministically (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Drive native clocks with a controlled browser clock and inspect actual poses.",
+      "customWorkConditions": "A test driver may expose bounded state; do not substitute a fake animation engine.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L649",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TweenManager.getDelta",
+          "claim": "Tween delta reads Date.now."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L454",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Game.step",
+          "claim": "Game.step drives native scene update/render but does not supply TweenManager wall time."
+        }
+      ],
+      "evaluationCaseIds": [
+        64
+      ],
+      "versionLimits": "Browser clock control is a test-tool capability, not a Phaser API; Game.step alone is insufficient for wall-clock tweens.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "deterministic pose checks",
+        "controlled browser clock"
+      ],
+      "platformFacilities": [
+        "Playwright page.clock"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "phaser-verification",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            6,
+            32
+          ],
+          "reference": "skills/phaser-verification/references/deterministic-test-driving.md",
+          "rationale": "The original tween-clock failures accept verification as well as motion; this applies to those testing requests."
+        }
+      ]
+    },
+    {
+      "id": "physics-selection",
+      "classification": "workflow",
+      "aliases": [
+        "Arcade",
+        "Matter",
+        "fixed-step",
+        "lockstep"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/choosing-physics.md",
+          "section": "Choosing physics for a Phaser 4 game"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Choose native Arcade or Matter before designing a replacement simulation.",
+      "customWorkConditions": "Node-only exact fixed-point lockstep or demonstrated native constraints may justify custom simulation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L1019",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Arcade.World.step",
+          "claim": "Arcade exposes an explicit physics step."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/matter-js/World.js#L1294",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Matter.World.step",
+          "claim": "Matter also exposes manual stepping; selecting a solver remains a requirements decision."
+        }
+      ],
+      "evaluationCaseIds": [
+        65,
+        130
+      ],
+      "versionLimits": "Arcade/Matter provide native simulation but do not promise exact cross-runtime fixed-point lockstep. Replay on one pinned runtime alone does not require a replacement solver.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "fixed-point lockstep",
+        "solver selection"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "arcade-collision",
+      "classification": "native",
+      "aliases": [
+        "Arcade.Body",
+        "Collider",
+        "overlap",
+        "physics.world"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/arcade-bodies-and-colliders.md",
+          "section": "Arcade bodies, colliders and the step (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Arcade.World.addCollider, Arcade.World.addOverlap, Arcade.Body.setCircle",
+      "extensionSeam": "Use colliders, process callbacks, overlap and explicit native stepping.",
+      "customWorkConditions": "Continuous collision or unsupported geometry needs a measured limitation and bounded extension.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L827",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.World.addCollider",
+          "claim": "Register a collider with collision and process callbacks."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L862",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.World.addOverlap",
+          "claim": "Register overlap without separation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/Body.js#L1540",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.Body.setCircle",
+          "claim": "Arcade supports circles as well as rectangular bodies."
+        }
+      ],
+      "evaluationCaseIds": [
+        66
+      ],
+      "versionLimits": "Arcade bodies use axis-aligned rectangles/circles and discrete steps; process callbacks may gate collision, while fast movement needs a measured tunneling strategy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "matter-collision",
+      "classification": "native",
+      "aliases": [
+        "Matter.World",
+        "Matter.Body",
+        "constraints",
+        "sensors"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/matter-physics.md",
+          "section": "Matter physics in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "Matter.Factory.constraint, Matter.Sensor.setSensor, Matter.World.step",
+      "extensionSeam": "Use Matter bodies, constraints, sensors and collision callbacks.",
+      "customWorkConditions": "Custom integration must address a native limitation rather than merely needing rotation or constraints.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/matter-js/Factory.js#L674",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Matter.Factory.constraint",
+          "claim": "Create a constraint between Matter bodies."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/matter-js/components/Sensor.js#L30",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Matter.Sensor.setSensor",
+          "claim": "Configure a body as a sensor."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/matter-js/World.js#L1294",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Matter.World.step",
+          "claim": "Step the native Matter world explicitly."
+        }
+      ],
+      "evaluationCaseIds": [
+        67
+      ],
+      "versionLimits": "Matter sensors report contact without physical collision response; constraints and rotation are native capabilities, not reasons to replace the solver.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "tile-collision",
+      "classification": "native",
+      "aliases": [
+        "setCollisionByProperty",
+        "TilemapLayer",
+        "processCallback"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/tilemap-collision.md",
+          "section": "Tilemap collision in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "TilemapLayer.setCollisionByProperty, TilemapLayer.setTileIndexCallback, Arcade.World.addCollider",
+      "extensionSeam": "Use tile collision flags, callbacks and native layer coordinates.",
+      "customWorkConditions": "Custom tile solvers require an identified unsupported shape or deterministic simulation obligation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/TilemapLayerBase.js#L853",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TilemapLayer.setCollisionByProperty",
+          "claim": "Mark tiles collidable from their properties."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/TilemapLayerBase.js#L917",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TilemapLayer.setTileIndexCallback",
+          "claim": "Gate selected tile-index collisions through callbacks."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L827",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.World.addCollider",
+          "claim": "The public collider accepts the processCallback used to gate collisions."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L2270",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Arcade.World.collideSpriteVsTilemapLayer",
+          "claim": "Tile collision resolves against layer position/scale and selected tile bounds."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/TilemapLayer.js#L30",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TilemapLayer container boundary",
+          "claim": "Layer physics ignores a containing Container transform."
+        }
+      ],
+      "evaluationCaseIds": [
+        68
+      ],
+      "versionLimits": "Tile collision uses native layer coordinates and collision faces; one-way rules use callbacks/checkCollision. Parent render transforms are not a substitute for physics coordinate ownership.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "physics-followers",
+      "classification": "native",
+      "aliases": [
+        "PathFollower",
+        "Arcade moving platform",
+        "rideable"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/paths-and-followers.md",
+          "section": "Moving platforms, patrols and followers in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "Arcade.Body.setDirectControl, Arcade.Body.friction, Path.getPoint",
+      "extensionSeam": "Connect native path movement to the chosen body driver and update ownership.",
+      "customWorkConditions": "Custom steering may choose targets; replace native following only for an unmet physical constraint.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/Body.js#L1950",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.Body.setDirectControl",
+          "claim": "Derive velocity from externally controlled movement, including a tween or path."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/Body.js#L524",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Arcade.Body.friction",
+          "claim": "Immovable platform friction controls transfer of movement to riders."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/curves/path/Path.js#L584",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Path.getPoint",
+          "claim": "A game-clock driver may sample a native Path instead of replacing curve arithmetic."
+        }
+      ],
+      "evaluationCaseIds": [
+        69
+      ],
+      "versionLimits": "Directly positioned bodies can derive velocity using directControl; rider/collision semantics and the chosen clock need validation rather than a blanket ban on followers.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "physics-verification",
+      "classification": "workflow",
+      "aliases": [
+        "World.step",
+        "World.update",
+        "grid-sweep",
+        "snapshot"
+      ],
+      "primarySkill": "phaser-physics",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-physics/references/testing-physics.md",
+          "section": "Testing physics: stepping, snapshots and a symptom checklist"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Exercise native stepping and explicit snapshot state at the real boundary.",
+      "customWorkConditions": "A pure solver is admissible only when the chosen simulation contract requires it.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L1019",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Arcade.World.step",
+          "claim": "Drive the real native solver with declared fixed deltas."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/Body.js#L1581",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Arcade.Body.reset",
+          "claim": "Reset body position and motion before comparison."
+        }
+      ],
+      "evaluationCaseIds": [
+        70
+      ],
+      "versionLimits": "Snapshots must restore all relevant game/body state; native stepping is not a built-in replay or snapshot protocol.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "grid-sweep",
+        "snapshot",
+        "replay comparison"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "world-cameras",
+      "classification": "native",
+      "aliases": [
+        "Camera",
+        "worldView",
+        "startFollow",
+        "pan",
+        "shake",
+        "zoom"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/cameras.md",
+          "section": "Cameras in a scrolling Phaser 4 world"
+        }
+      ],
+      "nativeFacility": "Camera.startFollow, Camera.preRender, BaseCamera.ignore",
+      "extensionSeam": "Use native cameras, bounds, effects and ignore lists.",
+      "customWorkConditions": "Custom camera policy may calculate targets; retain native projection unless an unmet requirement demands otherwise.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/Camera.js#L841",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Camera.startFollow",
+          "claim": "Use native target following and lerp/deadzone configuration."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/Camera.js#L522",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Camera.preRender",
+          "claim": "Camera transforms/worldView update at the native preRender boundary."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js#L927",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseCamera.ignore",
+          "claim": "Exclude objects from a camera explicitly."
+        }
+      ],
+      "evaluationCaseIds": [
+        71
+      ],
+      "versionLimits": "Camera.worldView is refreshed during preRender, and multiple cameras have independent draw order and exclusions.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "dynamic-lighting",
+      "classification": "native",
+      "aliases": [
+        "Light",
+        "ConeLight",
+        "setLighting",
+        "setSelfShadow"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/dynamic-lights.md",
+          "section": "Dynamic lights and cone lights in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "LightsManager.addLight, LightsManager.addConeLight, Lighting.setLighting, Lighting.setSelfShadow",
+      "extensionSeam": "Use native light configuration and preserve shared shader-state ownership.",
+      "customWorkConditions": "Custom occlusion or banded lighting requires a demonstrated native limitation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/lights/LightsManager.js#L319",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LightsManager.addLight",
+          "claim": "Create native point lights."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/lights/LightsManager.js#L359",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LightsManager.addConeLight",
+          "claim": "Create native cone lights."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Lighting.js#L74",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Lighting.setLighting",
+          "claim": "Enable the lighting path for a renderable object."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Lighting.js#L97",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Lighting.setSelfShadow",
+          "claim": "Configure the shared lighting self-shadow settings."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Lighting.js#L56",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Lighting.selfShadow",
+          "claim": "The component defines a shared selfShadow object which its setter mutates."
+        }
+      ],
+      "evaluationCaseIds": [
+        72
+      ],
+      "versionLimits": "Lighting requires the native WebGL lighting path and normal data; self-shadow controls are a shared component object in the unmodified 4.2.1 mixin, not per-object occlusion geometry.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "normal-atlas",
+      "classification": "native",
+      "aliases": [
+        "normalMap",
+        "atlas",
+        "setLighting",
+        "Aseprite"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [
+        "agent-engine:engine-asset-import"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/normal-mapped-sprites.md",
+          "section": "Normal-mapped sprites from a paired atlas (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "LoaderPlugin.atlas, Lighting.setLighting",
+      "extensionSeam": "Load authenticated paired color/normal atlases and use native lighting.",
+      "customWorkConditions": "Producer-format conversion belongs to a validated adapter, not guessed frame reconstruction.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AtlasJSONFile.js#L223",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LoaderPlugin.atlas",
+          "claim": "Load atlas metadata/color plus a normal map."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Lighting.js#L74",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Lighting.setLighting",
+          "claim": "Enable native lighting on loaded sprites."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AtlasJSONFile.js#L59",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "AtlasJSONFile normalMap",
+          "claim": "An object loader config accepts the normal map explicitly."
+        }
+      ],
+      "evaluationCaseIds": [
+        73
+      ],
+      "versionLimits": "Paired image alignment and normal orientation are producer obligations; the loader accepts normalMap input but cannot authenticate the intended art.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "agent-engine:engine-asset-import",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            42
+          ],
+          "reference": "skills/phaser-worlds/references/normal-mapped-sprites.md",
+          "rationale": "The original producer-to-game atlas request accepts the external asset-import owner; this is not permission to replace Phaser-world lighting guidance."
+        }
+      ]
+    },
+    {
+      "id": "particle-emitters",
+      "classification": "native",
+      "aliases": [
+        "ParticleEmitter",
+        "emitZone",
+        "deathZone",
+        "ParticleProcessor"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/particles.md",
+          "section": "Particles in a Phaser 4.2.1 world: emitters, weather, cost"
+        }
+      ],
+      "nativeFacility": "ParticleEmitter.addEmitZone, ParticleEmitter.addDeathZone, ParticleEmitter.addParticleProcessor",
+      "extensionSeam": "Use emission/death zones, processors and callbacks for bounded interaction.",
+      "customWorkConditions": "A pool needs concrete pixel, authority or performance requirements the emitter cannot meet.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L1858",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.addEmitZone",
+          "claim": "Use a native emission zone for authored spawn geometry."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L1762",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.addDeathZone",
+          "claim": "Remove particles through native death-zone tests."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L2084",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.addParticleProcessor",
+          "claim": "Attach a processor for game-specific forces such as wind."
+        }
+      ],
+      "evaluationCaseIds": [
+        74,
+        131
+      ],
+      "versionLimits": "Emission zones choose spawn locations, death zones remove particles, and processors update particles; roof/wind rules can extend these seams without replacing the emitter.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "particle-processors",
+      "classification": "native",
+      "aliases": [
+        "GravityWell",
+        "colorEase",
+        "ParticleProcessor"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/particle-processors.md",
+          "section": "Particle processors and colour over life (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "ParticleEmitter.createGravityWell, GravityWell.update, ParticleEmitter.colorEase",
+      "extensionSeam": "Use native processors and color-over-life configuration.",
+      "customWorkConditions": "Custom processors may implement forces not supplied by native processors.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L2152",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.createGravityWell",
+          "claim": "Create and register a native gravity-well processor."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/GravityWell.js#L108",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "GravityWell.update",
+          "claim": "The native well adds attraction velocity; custom damping may extend a processor."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L3480",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.colorEase",
+          "claim": "Configure color-over-life easing for an emitter color list."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/GravityWell.js#L47",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "GravityWell.power",
+          "claim": "GravityWell power defaults to zero."
+        }
+      ],
+      "evaluationCaseIds": [
+        75
+      ],
+      "versionLimits": "GravityWell power defaults to zero and does not provide damping; colorEase only has an effect when a color list is configured.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "tilemap-data",
+      "classification": "native",
+      "aliases": [
+        "Tilemap",
+        "TilemapLayer",
+        "TilemapGPULayer",
+        "Tiled",
+        "CSV",
+        "isometric",
+        "hexagonal"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/tilemap-data-and-formats.md",
+          "section": "Tilemap data, formats and GPU-versus-CPU layers (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/phaser-worlds/references/phaser-4-tilemap-gotchas.md",
+          "section": "Phaser 4.2.1 tilemap gotchas"
+        }
+      ],
+      "nativeFacility": "Tilemap.createLayer, Tilemap.createLayer(gpu=true)",
+      "extensionSeam": "Load supported formats and choose layers against measured orientation/editing limits.",
+      "customWorkConditions": "Custom parsing or drawing requires an unsupported format/orientation and an explicit boundary.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/Tilemap.js#L594",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Tilemap.createLayer",
+          "claim": "Create the CPU tile layer for supported map data."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/Tilemap.js#L590",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Tilemap.createLayer(gpu=true)",
+          "claim": "Create a GPU tile layer with its explicit constraints."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/TilemapGPULayer.js#L176",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TilemapGPULayer.generateLayerDataTexture",
+          "claim": "GPU layer data packing constrains empty cells and updates."
+        }
+      ],
+      "evaluationCaseIds": [
+        76
+      ],
+      "versionLimits": "GPU layers are orthogonal-only. CPU orientation conversion does not by itself prove rendered/collision parity; sparse GPU cells and animation maps require the documented 4.2.1 checks.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "world-streaming",
+      "classification": "workflow",
+      "aliases": [
+        "Layer",
+        "Container",
+        "TilemapGPULayer",
+        "chunk streaming",
+        "parallax"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/world-streaming-and-layers.md",
+          "section": "World structure in Phaser 4.2.1: Layer, Container, z-order, parallax, streaming and HUD"
+        },
+        {
+          "path": "skills/phaser-worlds/references/tilemaps-and-terrain.md",
+          "section": "Tilemaps and procedural terrain in Phaser 4"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Compose native layers and reuse tilemap views around camera bounds.",
+      "customWorkConditions": "World generation and streaming policy are game-specific; native rendering remains reusable.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/Tilemap.js#L594",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tilemap.createLayer",
+          "claim": "Reuse native CPU tile layers as chunk views."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tilemaps/Tilemap.js#L590",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tilemap.createLayer(gpu=true)",
+          "claim": "GPU chunk views retain GPU-layer restrictions."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js#L177",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "BaseCamera.worldView",
+          "claim": "Camera world bounds can inform chunk selection."
+        }
+      ],
+      "evaluationCaseIds": [
+        77
+      ],
+      "versionLimits": "Chunk loading/eviction and generation are application policy; native layers and camera bounds supply reusable views, not a built-in streaming service.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "chunk streaming",
+        "generation",
+        "eviction policy"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "ambient-motion",
+      "classification": "native",
+      "aliases": [
+        "TileSprite",
+        "ParticleEmitter",
+        "SpriteGPULayer",
+        "wind"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/ambient-motion.md",
+          "section": "Ambient motion in a strict pixel game (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "TileSprite.setTilePosition, ParticleEmitter.addParticleProcessor, SpriteGPULayer.addMember",
+      "extensionSeam": "Prefer native TileSprite, emitter or GPU layer according to update and pixel requirements.",
+      "customWorkConditions": "Custom pools require strict output/interaction constraints beyond native options.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/tilesprite/TileSprite.js#L390",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TileSprite.setTilePosition",
+          "claim": "Scroll a tiled texture through native TileSprite coordinates."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L2084",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.addParticleProcessor",
+          "claim": "Extend native particle behavior for ambient forces."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/spritegpulayer/SpriteGPULayer.js#L793",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "SpriteGPULayer.addMember",
+          "claim": "Batch decorations through the native GPU sprite layer."
+        }
+      ],
+      "evaluationCaseIds": [
+        78
+      ],
+      "versionLimits": "Whole-pixel placement and weather decisions are policy; choose repeated texture scrolling, emitter behavior or GPU batching against measured constraints.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "atmosphere-lightmaps",
+      "classification": "native",
+      "aliases": [
+        "DynamicTexture",
+        "ColorMatrix",
+        "setLighting",
+        "light map"
+      ],
+      "primarySkill": "phaser-worlds",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-worlds/references/lighting-and-atmosphere.md",
+          "section": "Light, time of day and weather in a pixel-exact Phaser 4 game"
+        }
+      ],
+      "nativeFacility": "DynamicTexture.draw, FilterList.addColorMatrix, Lighting.setLighting",
+      "extensionSeam": "Compose native lights, render targets and camera filters.",
+      "customWorkConditions": "Custom line-of-sight or banded maps require explicit occlusion/palette requirements.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/textures/DynamicTexture.js#L793",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DynamicTexture.draw",
+          "claim": "Draw authored atmosphere/occlusion content into a native texture."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L364",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addColorMatrix",
+          "claim": "Apply native color transformation for atmosphere."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Lighting.js#L74",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Lighting.setLighting",
+          "claim": "Compose with native object lighting."
+        }
+      ],
+      "evaluationCaseIds": [
+        79
+      ],
+      "versionLimits": "Native lights/filter composition does not supply game-specific line-of-sight or pixel-banded occlusion; such maps may be drawn into native targets.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "input-actions",
+      "classification": "workflow",
+      "aliases": [
+        "InputPlugin",
+        "actions",
+        "replay",
+        "rebinding"
+      ],
+      "primarySkill": "phaser-input",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-input/references/input-architecture.md",
+          "section": "Input architecture for a Phaser 4.2.1 game: one owner, actions, the fixed step, replay"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Map native input events to game actions and scope ownership to lifetimes.",
+      "customWorkConditions": "Game-specific action/rebinding policy may wrap native input without introducing a second device poller.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L1021",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "InputPlugin.processDownEvents",
+          "claim": "Native pointer dispatch supplies input to the action adapter."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L3107",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "InputPlugin.shutdown",
+          "claim": "Input lifecycle gives a cleanup boundary for action subscriptions."
+        }
+      ],
+      "evaluationCaseIds": [
+        80
+      ],
+      "versionLimits": "Actions, contexts, replay and rebinding are application policy above native input; do not add a competing device poller without a demonstrated gap.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "actions",
+        "replay",
+        "rebinding",
+        "contexts"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "keyboard",
+      "classification": "native",
+      "aliases": [
+        "KeyboardPlugin",
+        "Key",
+        "JustDown",
+        "addCapture"
+      ],
+      "primarySkill": "phaser-input",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-input/references/keyboard.md",
+          "section": "Keyboard in Phaser 4.2.1: keys, events, captures and scene lifetime"
+        }
+      ],
+      "nativeFacility": "KeyboardPlugin.addKey, KeyboardPlugin.addCapture, KeyboardPlugin.resetKeys",
+      "extensionSeam": "Use keys/events and native capture controls with explicit shutdown.",
+      "customWorkConditions": "Custom keyboard tracking requires a demonstrated unsupported input requirement.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/keyboard/KeyboardPlugin.js#L491",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "KeyboardPlugin.addKey",
+          "claim": "Register native keys."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/keyboard/KeyboardPlugin.js#L282",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "KeyboardPlugin.addCapture",
+          "claim": "Control which browser key defaults are captured."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/keyboard/KeyboardPlugin.js#L853",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "KeyboardPlugin.resetKeys",
+          "claim": "Reset tracked key state at a chosen lifecycle boundary."
+        }
+      ],
+      "evaluationCaseIds": [
+        81
+      ],
+      "versionLimits": "Keyboard capture affects DOM text entry; held state and game actions need an explicit blur/pause/restart release policy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "pointer-mouse",
+      "classification": "native",
+      "aliases": [
+        "Pointer",
+        "setInteractive",
+        "hitArea",
+        "topOnly"
+      ],
+      "primarySkill": "phaser-input",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-input/references/pointer-and-mouse.md",
+          "section": "Pointer and mouse in Phaser 4.2.1: routing, hit areas, coordinates and the canvas defaults"
+        }
+      ],
+      "nativeFacility": "GameObject.setInteractive, Pointer.positionToCamera, InputPlugin.setTopOnly",
+      "extensionSeam": "Use native interactive hit areas, coordinate conversion and scene routing.",
+      "customWorkConditions": "Custom gesture recognition may consume native pointer events; avoid a competing input owner.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/GameObject.js#L560",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "GameObject.setInteractive",
+          "claim": "Configure native hit areas and callbacks."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/Pointer.js#L535",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Pointer.positionToCamera",
+          "claim": "Convert pointer coordinates through a chosen camera."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L2855",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "InputPlugin.setTopOnly",
+          "claim": "Control whether overlapping interactive objects all receive events."
+        }
+      ],
+      "evaluationCaseIds": [
+        82
+      ],
+      "versionLimits": "Hit areas and painted bounds can diverge; camera conversion and topOnly scene routing must be explicit.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "gamepad",
+      "classification": "native",
+      "aliases": [
+        "GamepadPlugin",
+        "Gamepad",
+        "Button",
+        "axes",
+        "haptics"
+      ],
+      "primarySkill": "phaser-input",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-input/references/gamepad-and-input.md",
+          "section": "Controllers and input devices in a Phaser 4 game"
+        },
+        {
+          "path": "skills/phaser-input/references/gamepad-api-reference.md",
+          "section": "Gamepad API in Phaser 4.2.1: what the classes expose, assume and leave out"
+        },
+        {
+          "path": "skills/phaser-input/references/gamepad-lifecycle-hazards.md",
+          "section": "Gamepad input: version-scoped lifecycle hazards and the fallback gate"
+        }
+      ],
+      "nativeFacility": "GamepadPlugin.getPad",
+      "extensionSeam": "Use native polling and scoped version corrections; map actions above it.",
+      "customWorkConditions": "Fallback polling requires a reproduced native boundary failure after applicable corrections.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/gamepad/GamepadPlugin.js#L441",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "GamepadPlugin.getPad",
+          "claim": "Read a native pad by index; lifecycle events still own active membership."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/gamepad/GamepadPlugin.js#L341",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "GamepadPlugin.refreshPads",
+          "claim": "The native plugin polls browser gamepad snapshots."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/gamepad/Gamepad.js#L433",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Gamepad.update",
+          "claim": "Native wrappers update controls subject to the version-scoped timestamp guard."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/gamepad/GamepadPlugin.js#L508",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "GamepadPlugin.shutdown",
+          "claim": "Scene shutdown owns native plugin subscriptions."
+        }
+      ],
+      "evaluationCaseIds": [
+        83
+      ],
+      "versionLimits": "4.2.1 cached pad identity/membership, older timestamp filtering and lifecycle queue order have separate limitations; haptics belongs to optional browser hardware APIs.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [
+        "Gamepad API",
+        "optional haptics"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "touch-mobile",
+      "classification": "native",
+      "aliases": [
+        "Pointer",
+        "touch",
+        "addPointer",
+        "pinch",
+        "tap to move"
+      ],
+      "primarySkill": "phaser-input",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-input/references/touch-and-mobile.md",
+          "section": "Touch, tap to move and mobile in a Phaser 4 game"
+        },
+        {
+          "path": "skills/phaser-input/references/touch-input-and-design.md",
+          "section": "Touch in a Phaser 4 game: what the engine does and the design rules"
+        },
+        {
+          "path": "skills/phaser-input/references/touch-tap-to-move-and-page.md",
+          "section": "Touch in a Phaser 4 game: tap to move, the page, phones and tests"
+        }
+      ],
+      "nativeFacility": "InputPlugin.addPointer, TouchManager.startListeners",
+      "extensionSeam": "Use native pointers for touch and game-owned gesture/path policies.",
+      "customWorkConditions": "Navigation/pathfinding rules and platform gestures may need adapters; do not duplicate native finger tracking.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L3020",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "InputPlugin.addPointer",
+          "claim": "Allocate native touch pointers."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/touch/TouchManager.js#L231",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TouchManager.startListeners",
+          "claim": "The native manager owns browser touch listeners and capture policy."
+        }
+      ],
+      "evaluationCaseIds": [
+        84
+      ],
+      "versionLimits": "Native pointers track fingers; pinch/tap-to-move policy and pathfinding are application work, and browser gesture prevention/device acceptance remain separate.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "pixel-footprint",
+      "classification": "workflow",
+      "aliases": [
+        "BitmapText",
+        "pixelArt",
+        "device pixel ratio",
+        "integer scale"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/pixel-perfect-and-ui.md",
+          "section": "Pixel-perfect rendering and a pixel-only UI layer (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/phaser-pixel-ui/references/pixel-perfect-footprint.md",
+          "section": "Pixel-perfect rendering: the source-pixel footprint (Phaser 4.2.1)"
+        },
+        {
+          "path": "skills/phaser-pixel-ui/references/pixel-perfect-text-and-panels.md",
+          "section": "Pixel UI: device pixels, bitmap text and panels (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Bind declared density contexts to native text/canvas scales.",
+      "customWorkConditions": "Custom layout/density arithmetic is policy glue, not a new renderer.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/static/BitmapText.js#L385",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "BitmapText.setFontSize",
+          "claim": "Native bitmap text size participates in the footprint calculation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Config.js#L397",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Config.pixelArt",
+          "claim": "Pixel rendering configuration is separate from device-pixel geometry."
+        }
+      ],
+      "evaluationCaseIds": [
+        85
+      ],
+      "versionLimits": "Integer physical footprint is a density/layout policy; fractional logical units can still produce whole physical pixels. PixelArt does not establish layout correctness.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "integer physical footprint",
+        "source density",
+        "paint alignment"
+      ],
+      "platformFacilities": [
+        "devicePixelRatio"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "bitmap-fonts",
+      "classification": "native",
+      "aliases": [
+        "Text",
+        "BitmapText",
+        "DynamicBitmapText",
+        "RetroFont",
+        "bitmapFont"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/text-and-bitmap-fonts.md",
+          "section": "Text, BitmapText and bitmap fonts in Phaser 4.2.1"
+        }
+      ],
+      "nativeFacility": "BitmapText.setMaxWidth, BitmapText.getTextBounds, RetroFont.Parse",
+      "extensionSeam": "Use native text types and validated font descriptors.",
+      "customWorkConditions": "Custom glyph processing requires unsupported shaping or output constraints.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/static/BitmapText.js#L873",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BitmapText.setMaxWidth",
+          "claim": "Configure native bitmap text word wrapping."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/static/BitmapText.js#L730",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BitmapText.getTextBounds",
+          "claim": "Read native bitmap text layout bounds."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/ParseRetroFont.js#L29",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "RetroFont.Parse",
+          "claim": "Parse a retro-font config into a native cache entry."
+        }
+      ],
+      "evaluationCaseIds": [
+        86
+      ],
+      "versionLimits": "BitmapText does not provide general font shaping; glyph availability and wrapping must be checked against the loaded descriptor.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "panels-shapes",
+      "classification": "native",
+      "aliases": [
+        "NineSlice",
+        "Graphics",
+        "Shapes"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/panels-nine-slice-and-graphics.md",
+          "section": "Panels in Phaser 4.2.1: NineSlice, tiled pieces, Graphics and Shapes"
+        }
+      ],
+      "nativeFacility": "NineSlice.setSlices, Graphics.fillRect",
+      "extensionSeam": "Compose native NineSlice, tiled pieces and Graphics.",
+      "customWorkConditions": "A custom panel renderer needs a concrete pixel-border or tiling constraint.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/nineslice/NineSlice.js#L428",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "NineSlice.setSlices",
+          "claim": "Configure native panel slices and borders."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/graphics/Graphics.js#L645",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Graphics.fillRect",
+          "claim": "Draw a native rectangular panel/backdrop."
+        }
+      ],
+      "evaluationCaseIds": [
+        87
+      ],
+      "versionLimits": "NineSlice stretch and tile modes have different pixel constraints; native geometry does not decide modal opacity or panel size policy.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "dom-forms",
+      "classification": "native",
+      "aliases": [
+        "DOMElement",
+        "createDOMContainer",
+        "form"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/dom-overlays-and-forms.md",
+          "section": "DOM overlays and forms over a Phaser 4.2.1 canvas"
+        }
+      ],
+      "nativeFacility": "DOMElement.createFromHTML",
+      "extensionSeam": "Use DOMElement or page overlays with owned focus/input boundaries.",
+      "customWorkConditions": "Custom DOM bindings should preserve semantic controls and native canvas ownership.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/domelement/DOMElement.js#L735",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DOMElement.createFromHTML",
+          "claim": "Build native DOMElement content from HTML."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Config.js#L209",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Config.domCreateContainer",
+          "claim": "Enable the game DOM container through configuration."
+        }
+      ],
+      "evaluationCaseIds": [
+        88
+      ],
+      "versionLimits": "DOMElement requires the game DOM container; DOM propagation/focus and accessible semantics remain browser/application responsibilities.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [
+        "DOM focus",
+        "HTML semantics"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "ui-focus",
+      "classification": "workflow",
+      "aliases": [
+        "GetBounds",
+        "setInteractive",
+        "spatial-focus",
+        "keyboard focus"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/ui-layout-focus-and-navigation.md",
+          "section": "UI layout, hit areas, focus and navigation in Phaser 4.2.1"
+        },
+        {
+          "path": "skills/phaser-pixel-ui/references/pixel-ui-input-and-controls.md",
+          "section": "Pixel UI: input capture and accessible controls (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Use native geometry/input plus an explicit navigation policy.",
+      "customWorkConditions": "A focus adapter may supply semantics absent from Phaser; do not clone paint into a second UI tree.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/GetBounds.js#L310",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "GetBounds.getBounds",
+          "claim": "Read object bounds for navigation geometry."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/GameObject.js#L560",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "GameObject.setInteractive",
+          "claim": "Native hit testing supplies pointer activation."
+        }
+      ],
+      "evaluationCaseIds": [
+        89
+      ],
+      "versionLimits": "Keyboard/controller/spatial focus and semantic accessibility bridges are application/plugin policies; native bounds and input are building blocks, not a focus framework.",
+      "pluginFacilities": [
+        {
+          "symbol": "nextFocus",
+          "path": "skills/phaser-pixel-ui/scripts/assets/spatial-focus.mjs",
+          "line": 39,
+          "claim": "Pure plugin rectangle-navigation helper; it does not own native paint, input devices or accessibility semantics."
+        }
+      ],
+      "workflowTerms": [
+        "keyboard focus",
+        "spatial navigation",
+        "semantic accessibility bridge"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "ui-clipping",
+      "classification": "native",
+      "aliases": [
+        "Mask filter",
+        "CustomContext",
+        "setScissorBox",
+        "camera viewport",
+        "Stencil",
+        "GeometryMask",
+        "scroll clipping"
+      ],
+      "primarySkill": "phaser-pixel-ui",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-pixel-ui/references/pixel-ui-clipped-scrolling.md",
+          "section": "Pixel UI: clipped scrolling in Phaser 4 WebGL"
+        }
+      ],
+      "nativeFacility": "FilterList.addMask, CustomContext, DrawingContext.setScissorBox, BaseCamera.setViewport, Stencil",
+      "extensionSeam": "Use a WebGL Mask filter, scoped CustomContext scissor or owned camera viewport; use Stencil when stencil geometry fits. Gate input against the same viewport separately.",
+      "customWorkConditions": "A custom scroll model is allowed for game policy; retain native clipping where it meets the task.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L575",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addMask",
+          "claim": "Apply a native WebGL Mask filter with explicit camera/geometry ownership."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/customcontext/CustomContext.js#L46",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "CustomContext",
+          "claim": "Scope drawing-context changes to native children."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/DrawingContext.js#L541",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DrawingContext.setScissorBox",
+          "claim": "Scissor uses drawing-context pixels, not transformed world coordinates."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/cameras/2d/BaseCamera.js#L1388",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseCamera.setViewport",
+          "claim": "A dedicated camera viewport can clip a rectangular pane."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/stencil/Stencil.js#L165",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Stencil",
+          "claim": "Stencil supplies an explicit native stencil geometry scope."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Mask.js#L57",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Mask.setMask",
+          "claim": "The legacy mask component rejects WebGL use."
+        }
+      ],
+      "evaluationCaseIds": [
+        90
+      ],
+      "versionLimits": "In 4.2.1 setMask/GeometryMask is Canvas-only and warns/no-ops in WebGL. Use the Mask filter, CustomContext scissor, camera viewport or explicit Stencil geometry; clipping paint never clips input automatically.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [
+        {
+          "symbol": "GeometryMask / setMask",
+          "reason": "Canvas-only legacy component masking is not a WebGL scrolling solution in 4.2.1.",
+          "sourceSymbols": [
+            "Mask.setMask"
+          ]
+        }
+      ],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "render-nodes",
+      "classification": "native",
+      "aliases": [
+        "RenderNode",
+        "RenderNodeManager",
+        "batching",
+        "draw calls"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/render-system-overview.md",
+          "section": "How a Phaser 4.2.1 object reaches the GPU: render nodes, batches and draw calls"
+        }
+      ],
+      "nativeFacility": "RenderNodeManager.addNode, RenderNodeManager.getNode",
+      "extensionSeam": "Register supported custom render nodes only when native renderers do not fit.",
+      "customWorkConditions": "A new renderer requires an unmet rendering contract, not a desire to bypass batching.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/renderNodes/RenderNodeManager.js#L306",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "RenderNodeManager.addNode",
+          "claim": "Register custom native render nodes."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/renderNodes/RenderNodeManager.js#L353",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "RenderNodeManager.getNode",
+          "claim": "Resolve a native render node by name."
+        }
+      ],
+      "evaluationCaseIds": [
+        91
+      ],
+      "versionLimits": "Phaser 4 uses render nodes, not Phaser 3 pipelines; extend registered nodes only for an unsupported rendering contract and preserve native state/batching.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "render-filters",
+      "classification": "native",
+      "aliases": [
+        "FilterList",
+        "Blur",
+        "Glow",
+        "Mask",
+        "ColorMatrix",
+        "padding"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/filters.md",
+          "section": "Phaser 4.2.1 filters: choosing, padding, cost and order"
+        }
+      ],
+      "nativeFacility": "FilterList.addBlur, FilterList.addGlow, FilterList.add",
+      "extensionSeam": "Compose native filters and extend controllers/render nodes for new effects.",
+      "customWorkConditions": "Custom GLSL is justified after evaluating native filters and ordering.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L309",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addBlur",
+          "claim": "Add the native Blur controller."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L438",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addGlow",
+          "claim": "Add the native Glow controller."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L161",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.add",
+          "claim": "Register a custom filter controller through the native list."
+        }
+      ],
+      "evaluationCaseIds": [
+        92
+      ],
+      "versionLimits": "Internal and external filter lists use different coordinate/order contexts; padding and render-target costs must be included in effect bounds.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "pixel-filters",
+      "classification": "native",
+      "aliases": [
+        "Blocky",
+        "Pixelate",
+        "Quantize",
+        "GradientMap",
+        "smoothPixelArt"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [
+        "phaser-motion",
+        "phaser-pixel-ui",
+        "engine-phaser"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/pixel-art-filters.md",
+          "section": "Pixel-art filters and fractional scale (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": "FilterList.addBlocky, FilterList.addPixelate, FilterList.addQuantize, FilterList.addGradientMap",
+      "extensionSeam": "Compose native pixel filters and configure scaling deliberately.",
+      "customWorkConditions": "A custom palette shader requires a transform native Quantize/GradientMap cannot express.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L284",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addBlocky",
+          "claim": "Add native block/pixel processing."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L677",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addPixelate",
+          "claim": "Add native pixelation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L712",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addQuantize",
+          "claim": "Add native color quantization."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L469",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.addGradientMap",
+          "claim": "Map colors through a native gradient filter."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/shaders/additionMakers/MakeSmoothPixelArt.js#L32",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "MakeSmoothPixelArt derivative extension",
+          "claim": "The smooth-pixel shader requests the ES1 derivatives extension; supplied WebGL2 needs the documented compatibility check."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/shaders/Ramp-glsl.js#L2",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Ramp derivative extension",
+          "claim": "The shared ramp shader used by gradient effects enables the ES1 derivatives extension."
+        }
+      ],
+      "evaluationCaseIds": [
+        93
+      ],
+      "versionLimits": "Blocky, Pixelate, Quantize and GradientMap are native filters, while smoothPixelArt is a render config option. GradientMap/smoothPixelArt have documented 4.2.1 supplied-WebGL2 derivative-shader limits.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "phaser-motion",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            14
+          ],
+          "reference": "skills/phaser-motion/references/scene-transitions.md",
+          "rationale": "The original mosaic transition accepts motion as its sequencing owner; ordinary pixel-filter requests remain rendering tasks."
+        },
+        {
+          "skill": "phaser-pixel-ui",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            17
+          ],
+          "reference": "skills/phaser-pixel-ui/references/pixel-perfect-footprint.md",
+          "rationale": "The original fractional-zoom sampling question accepts pixel-footprint guidance; preserve its reviewed alternate."
+        },
+        {
+          "skill": "engine-phaser",
+          "kind": "case-specific-alternate",
+          "caseIds": [
+            17
+          ],
+          "reference": "skills/engine-phaser/references/config-and-boot.md",
+          "rationale": "The original sampling/config question accepts core boot configuration; preserve its reviewed alternate."
+        }
+      ]
+    },
+    {
+      "id": "shader-extension",
+      "classification": "native",
+      "aliases": [
+        "Shader",
+        "BaseFilterShader",
+        "custom filter",
+        "GLSL"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/custom-shaders-in-phaser.md",
+          "section": "Custom shaders in Phaser 4.2.1: Shader objects, custom filters, GLSL rules"
+        }
+      ],
+      "nativeFacility": "Shader, BaseFilterShader, FilterList.add",
+      "extensionSeam": "Use Shader objects or supported custom filter/render-node extensions.",
+      "customWorkConditions": "Standalone shader infrastructure requires an unmet engine integration requirement.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/shader/Shader.js#L117",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Shader",
+          "claim": "Construct a native Shader game object from ShaderQuadConfig or a fragment cache key."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/renderNodes/filters/BaseFilterShader.js#L50",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseFilterShader",
+          "claim": "Extend the native filter shader render node with custom source."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/FilterList.js#L161",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "FilterList.add",
+          "claim": "Use the filter list for a custom controller."
+        }
+      ],
+      "evaluationCaseIds": [
+        94
+      ],
+      "versionLimits": "Custom GLSL must match vertex/fragment language versions and Phaser texture/alpha ownership; Shader objects and custom filter controllers are native extension seams.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [
+        {
+          "symbol": "Shader.setShader / Phaser 3 BaseShader recipe",
+          "reason": "The 4.2.1 Shader constructor consumes ShaderQuadConfig or a fragment cache key; use the current custom filter render-node interface.",
+          "sourceSymbols": [
+            "Shader",
+            "BaseFilterShader"
+          ]
+        }
+      ],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "render-targets",
+      "classification": "native",
+      "aliases": [
+        "DynamicTexture",
+        "RenderTexture",
+        "CanvasTexture",
+        "TintModes",
+        "BlendModes"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/textures-and-render-targets.md",
+          "section": "Textures, render targets, tint modes and blend modes (4.2.1)"
+        }
+      ],
+      "nativeFacility": "DynamicTexture.draw, DynamicTexture.destroy, RenderTexture, TextureManager.createCanvas",
+      "extensionSeam": "Use native target drawing and texture ownership APIs.",
+      "customWorkConditions": "A custom target needs a documented native limitation with explicit resource disposal.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/textures/DynamicTexture.js#L793",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DynamicTexture.draw",
+          "claim": "Draw native objects/content into a texture."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/textures/DynamicTexture.js#L1298",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "DynamicTexture.destroy",
+          "claim": "Release the native texture owner."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/rendertexture/RenderTexture.js#L85",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "RenderTexture",
+          "claim": "RenderTexture exposes a displayable dynamic texture."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/textures/TextureManager.js#L652",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "TextureManager.createCanvas",
+          "claim": "Create a native CanvasTexture."
+        }
+      ],
+      "evaluationCaseIds": [
+        95
+      ],
+      "versionLimits": "DynamicTexture is a texture resource; RenderTexture is its display wrapper. CanvasTexture uses browser canvas, and GPU resource lifetimes require explicit disposal.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "gpu-sprites",
+      "classification": "native",
+      "aliases": [
+        "SpriteGPULayer",
+        "Blitter",
+        "Container",
+        "batching"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/sprite-gpu-layer-and-batching.md",
+          "section": "Many sprites: SpriteGPULayer, Blitter, batching and what to measure"
+        }
+      ],
+      "nativeFacility": "SpriteGPULayer.addMember, Blitter.create",
+      "extensionSeam": "Choose native batching objects against update frequency and texture constraints.",
+      "customWorkConditions": "Custom GPU buffers require measured limits beyond native batching options.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/spritegpulayer/SpriteGPULayer.js#L793",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "SpriteGPULayer.addMember",
+          "claim": "Batch sprite data through the native GPU layer."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/blitter/Blitter.js#L159",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Blitter.create",
+          "claim": "Create lightweight native blitter bobs."
+        }
+      ],
+      "evaluationCaseIds": [
+        96
+      ],
+      "versionLimits": "GPU sprite layers trade update/rebuild behavior for batching; a Container is a transform owner and does not itself promise fewer draw calls.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "mesh2d",
+      "classification": "native",
+      "aliases": [
+        "Mesh2D",
+        "triangle batching"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/mesh2d-and-triangle-batching.md",
+          "section": "Mesh2D and triangle batching (4.2.0)"
+        }
+      ],
+      "nativeFacility": "Mesh2D, Mesh2D.vertices",
+      "extensionSeam": "Use native Mesh2D data and batching strategies.",
+      "customWorkConditions": "Custom geometry generation may supply data without replacing the native submitter.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/mesh2d/Mesh2D.js#L114",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Mesh2D",
+          "claim": "Native Mesh2D consumes 2D mesh geometry."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/mesh2d/Mesh2D.js#L132",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Mesh2D.vertices",
+          "claim": "Supply or update the documented native vertex array."
+        }
+      ],
+      "evaluationCaseIds": [
+        97
+      ],
+      "versionLimits": "Mesh2D accepts game-generated geometry; generating geometry is legitimate custom work while native submission/batching remains reusable. Mesh2D is WebGL-only in 4.2.1.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "stencil-context",
+      "classification": "native",
+      "aliases": [
+        "Stencil",
+        "StencilReference",
+        "CustomContext"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/stencil-and-custom-context.md",
+          "section": "Stencil, StencilReference, CustomContext and alpha strategies (4.2.0, fixed in 4.2.1)"
+        }
+      ],
+      "nativeFacility": "Stencil, StencilReference, CustomContext",
+      "extensionSeam": "Use native stencil scopes and CustomContext for controlled render state.",
+      "customWorkConditions": "Custom GL work must satisfy the supported context and restore contract.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/stencil/Stencil.js#L165",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "Stencil",
+          "claim": "Create a native stencil scope."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/stencilreference/StencilReference.js#L59",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "StencilReference",
+          "claim": "Reuse a stencil reference."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/customcontext/CustomContext.js#L46",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "CustomContext",
+          "claim": "Apply scoped drawing-context configuration."
+        }
+      ],
+      "evaluationCaseIds": [
+        98
+      ],
+      "versionLimits": "Stencil scope and CustomContext render state are native WebGL mechanisms; raw GL changes must respect context pixels, alpha strategy and state restoration.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "webgl-backends",
+      "classification": "native",
+      "aliases": [
+        "WebGL1",
+        "WebGL2",
+        "GLSL ES3",
+        "context"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/webgl-backends.md",
+          "section": "Phaser 4 WebGL versions and custom shaders"
+        }
+      ],
+      "nativeFacility": "WebGLRenderer.init",
+      "extensionSeam": "Supply supported contexts and matching shader stages.",
+      "customWorkConditions": "Custom backend integration needs explicit compatibility evidence; Phaser AE is a different engine.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L703",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.init",
+          "claim": "Select a supplied context before requesting webgl/experimental-webgl."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L862",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.setExtensions",
+          "claim": "Renderer extensions and WebGL version handling remain backend-dependent."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/shaders/additionMakers/MakeSmoothPixelArt.js#L32",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "MakeSmoothPixelArt derivative extension",
+          "claim": "The smooth-pixel shader requests the ES1 derivatives extension; supplied WebGL2 needs the documented compatibility check."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/shaders/Ramp-glsl.js#L2",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Ramp derivative extension",
+          "claim": "The shared ramp shader used by gradient effects enables the ES1 derivatives extension."
+        }
+      ],
+      "evaluationCaseIds": [
+        99
+      ],
+      "versionLimits": "Default context requests WebGL 1; a supplied WebGL 2 context is accepted. Backend acceptance does not guarantee every 4.2.1 derivative shader works, and Phaser AE is a separate product.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [
+        "WebGL 1",
+        "WebGL 2",
+        "GLSL ES 3"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "renderer-lifecycle",
+      "classification": "native",
+      "aliases": [
+        "WEBGL_lose_context",
+        "WebGLFramebufferWrapper",
+        "WebGLTextureUnitsWrapper"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/phaser-4-webgl-context-gotchas.md",
+          "section": "Phaser 4.2.1 WebGL context restore gotchas"
+        },
+        {
+          "path": "skills/phaser-rendering/references/phaser-4-renderer-destruction-gotchas.md",
+          "section": "Phaser 4.2.1 renderer destruction gotchas"
+        }
+      ],
+      "nativeFacility": "WebGLRenderer.dispatchContextRestored, WebGLRenderer.destroy",
+      "extensionSeam": "Use native lifecycle plus narrowly versioned corrections.",
+      "customWorkConditions": "Custom resource wrappers require measured native defects and owned teardown.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L1022",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.dispatchContextRestored",
+          "claim": "Native restoration rebuilds renderer resources."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2626",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.destroy",
+          "claim": "Native renderer teardown owns its wrappers and state."
+        }
+      ],
+      "evaluationCaseIds": [
+        100
+      ],
+      "versionLimits": "Context restoration recreates GL handles, while applications must repaint dynamic contents. The published 4.2.1 framebuffer/texture-unit corrections remain plugin-owned and version-scoped.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [
+        "WEBGL_lose_context"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "renderer-version-traps",
+      "classification": "workflow",
+      "aliases": [
+        "TintModes",
+        "createFromAseprite",
+        "setFrequency",
+        "roundPixels"
+      ],
+      "primarySkill": "phaser-rendering",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-rendering/references/phaser-4-gotchas.md",
+          "section": "Phaser 4.2.1 gotchas"
+        },
+        {
+          "path": "skills/phaser-rendering/references/phaser-4-api-and-effects-gotchas.md",
+          "section": "Phaser 4.2.1 API, lighting and effects gotchas"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Use current native names and measured domain behavior.",
+      "customWorkConditions": "Compatibility patches must target a confirmed version-scoped defect.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Tint.js#L260",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tint.setTintMode",
+          "claim": "Choose the current native tint mode."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/particles/ParticleEmitter.js#L1727",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "ParticleEmitter.setFrequency",
+          "claim": "The setter updates frequency and resets the flow counter."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/animations/AnimationManager.js#L406",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "AnimationManager.createFromAseprite",
+          "claim": "Aseprite tags become global keys by default, with an explicit target option for local animations."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/components/Tint.js#L276",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Tint.setTintFill",
+          "claim": "The legacy method remains as a deprecated error-logging no-op; set tint color and mode separately."
+        }
+      ],
+      "evaluationCaseIds": [
+        101
+      ],
+      "versionLimits": "Migration/gotcha review is a workflow. setTintMode replaces removed tint-fill recipes, and calling emitter.setFrequency each frame resets its flow counter.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "version-scoped correction review"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "sound-manager",
+      "classification": "native",
+      "aliases": [
+        "WebAudioSoundManager",
+        "HTML5AudioSoundManager",
+        "unlock",
+        "decode"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/sound-manager-in-4x.md",
+          "section": "The Phaser 4 sound manager: which one, unlocking, blur and limits"
+        },
+        {
+          "path": "skills/phaser-audio/references/native-audio.md",
+          "section": "Recorded audio through Phaser"
+        },
+        {
+          "path": "skills/phaser-audio/references/native-audio-corrections.md",
+          "section": "Recorded audio through Phaser: the 4.2.1 corrections"
+        }
+      ],
+      "nativeFacility": "WebAudioSoundManager.unlock, WebAudioSoundManager.decodeAudio, HTML5AudioSoundManager.unlock",
+      "extensionSeam": "Use native managers and first-gesture activation with version corrections.",
+      "customWorkConditions": "Another playback owner needs a concrete producer capability or native limitation.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L348",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.unlock",
+          "claim": "Unlock WebAudio playback through native gesture handling."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L256",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.decodeAudio",
+          "claim": "Decode audio into the manager cache."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/html5/HTML5AudioSoundManager.js#L169",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "HTML5AudioSoundManager.unlock",
+          "claim": "HTML5Audio has its own unlock implementation."
+        }
+      ],
+      "evaluationCaseIds": [
+        102
+      ],
+      "versionLimits": "WebAudio and HTML5Audio are different backends; gesture unlock and decode/cache readiness need explicit handling, including version-scoped plugin corrections.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "markers-audio-sprites",
+      "classification": "native",
+      "aliases": [
+        "AudioSprite",
+        "addMarker",
+        "spritemapFromMap",
+        "markersFromSections"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/sounds-markers-and-sprites.md",
+          "section": "Sounds, markers and audio sprites in Phaser 4"
+        }
+      ],
+      "nativeFacility": "BaseSound.addMarker, LoaderPlugin.audioSprite, BaseSoundManager.addAudioSprite, BaseSoundManager.playAudioSprite",
+      "extensionSeam": "Adapt authenticated frame maps to native marker/audio-sprite contracts.",
+      "customWorkConditions": "Packing and codec conversion belong to producers; adapter glue remains pure.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSound.js#L196",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseSound.addMarker",
+          "claim": "Add a named start/duration/config region to a sound."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/loader/filetypes/AudioSpriteFile.js#L243",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "LoaderPlugin.audioSprite",
+          "claim": "Load resources and spritemap JSON through the native loader."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js#L215",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseSoundManager.addAudioSprite",
+          "claim": "Convert spritemap start/end seconds and loop flags into native markers."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js#L368",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseSoundManager.playAudioSprite",
+          "claim": "Play a one-shot audio-sprite cue through the native manager."
+        }
+      ],
+      "evaluationCaseIds": [
+        103
+      ],
+      "versionLimits": "AudioSprite is a loader/manager facility, not a standalone exported sound class. markersFromSections and spritemapFromMap are plugin adapters, not SDK exports. Native sprite times address decoded seconds; producer PCM-frame authentication is separate.",
+      "pluginFacilities": [
+        {
+          "symbol": "markersFromSections",
+          "path": "skills/phaser-audio/scripts/assets/beeps-markers.mjs",
+          "line": 29,
+          "claim": "Plugin adapter for agent-beeps song sections (0.35.0 or later): converts authoritative frames/sampleRate to native addMarker objects."
+        },
+        {
+          "symbol": "spritemapFromMap",
+          "path": "skills/phaser-audio/scripts/assets/beeps-spritemap.mjs",
+          "line": 18,
+          "claim": "Plugin adapter for released agent-beeps 0.36.0 beeps/audio-sprite@1: validates metadata and converts PCM frames to native spritemap seconds; does not authenticate WAV bytes."
+        },
+        {
+          "symbol": "createVariantPicker",
+          "path": "skills/phaser-audio/scripts/assets/pick-variant.mjs",
+          "line": 24,
+          "claim": "Plugin policy helper selects producer-declared variants; Phaser supplies playback, not weighted variant selection."
+        }
+      ],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [
+        {
+          "symbol": "markersFromMap",
+          "reason": "No such adapter is taught/exported; use markersFromSections for song sections or spritemapFromMap for a released PCM sprite map.",
+          "sourceSymbols": [
+            "BaseSound.addMarker",
+            "BaseSoundManager.addAudioSprite"
+          ]
+        }
+      ],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "sound-lifetime",
+      "classification": "native",
+      "aliases": [
+        "WebAudioSound",
+        "loop",
+        "pause",
+        "resume",
+        "SHUTDOWN"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/loops-and-scene-lifetime.md",
+          "section": "Loops, scene changes and pausing in Phaser 4"
+        }
+      ],
+      "nativeFacility": "BaseSoundManager.play, WebAudioSound.pause, WebAudioSound.resume, BaseSound.destroy",
+      "extensionSeam": "Retain game-owned music and clean scene-owned sounds.",
+      "customWorkConditions": "Custom music policy may decide transitions while native sound owns playback.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js#L328",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseSoundManager.play",
+          "claim": "One-shot playback registers completion-based destruction."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L292",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSound.pause",
+          "claim": "Pause a retained native sound."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L322",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSound.resume",
+          "claim": "Resume native playback."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSound.js#L476",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "BaseSound.destroy",
+          "claim": "Dispose retained sound state/listeners."
+        }
+      ],
+      "evaluationCaseIds": [
+        104
+      ],
+      "versionLimits": "The SoundManager is game-owned; retained sounds need an explicit owner. stop does not emit complete, so stopped fire-and-forget sounds are not automatically removed by completion cleanup.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "audio-mixing",
+      "classification": "native",
+      "aliases": [
+        "pan",
+        "spatialSource",
+        "PannerNode",
+        "volume",
+        "ducking"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/spatial-and-mix.md",
+          "section": "Pan, distance and mixing in Phaser 4"
+        }
+      ],
+      "nativeFacility": "WebAudioSound.pan, WebAudioSound.spatialSource, WebAudioSound.volume",
+      "extensionSeam": "Use native pan/spatial configuration and explicit gain policy.",
+      "customWorkConditions": "Custom buses need a mixing contract native per-sound/global controls cannot express.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L1106",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSound.pan",
+          "claim": "Control native stereo pan."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L125",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSound.spatialSource",
+          "claim": "Configure native spatial-source following."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L933",
+          "role": "native-api",
+          "visibility": "public",
+          "symbol": "WebAudioSound.volume",
+          "claim": "Set native per-sound volume."
+        }
+      ],
+      "evaluationCaseIds": [
+        105
+      ],
+      "versionLimits": "pan/spatialSource are native sound configuration; PannerNode is a browser API. Bus gain, authored volume and ducking decisions are game policy, not an SDK mixer graph.",
+      "pluginFacilities": [],
+      "workflowTerms": [],
+      "platformFacilities": [
+        "PannerNode"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "hybrid-audio",
+      "classification": "workflow",
+      "aliases": [
+        "AudioContext",
+        "masterMuteNode",
+        "agent-beeps live cues"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/hybrid-playback.md",
+          "section": "Hybrid playback: native recordings plus beeps live cues (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Share the declared context and connect live cues through the owned native path.",
+      "customWorkConditions": "A producer adapter must preserve mute, visibility and context lifetime.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L184",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.setAudioContext",
+          "claim": "Use the native context replacement/ownership boundary."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L61",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.masterMuteNode",
+          "claim": "Connect live cues through the manager mute path."
+        }
+      ],
+      "evaluationCaseIds": [
+        106
+      ],
+      "versionLimits": "AudioContext and live cue producers are external/browser facilities. A hybrid adapter must share context/mute ownership and may not introduce a second audible destination. setAudioContext closes the previous context; it is a replacement operation, not a harmless way to attach another producer.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "live-cue producer adapter",
+        "shared context ownership"
+      ],
+      "platformFacilities": [
+        "AudioContext"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "audio-reactive",
+      "classification": "workflow",
+      "aliases": [
+        "AnalyserNode",
+        "masterVolumeNode",
+        "FFT"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/music-reactive-visuals.md",
+          "section": "Music-reactive visuals (Phaser 4.2.1)"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Branch an analyser tap without a second audible destination.",
+      "customWorkConditions": "Custom signal mapping may drive visuals; do not replace native playback.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L70",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.masterVolumeNode",
+          "claim": "Tap the native master volume output for analysis."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L52",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.context",
+          "claim": "Create the browser analyser in the manager-owned context."
+        }
+      ],
+      "evaluationCaseIds": [
+        107
+      ],
+      "versionLimits": "AnalyserNode/FFT are Web Audio capabilities, not Phaser exports; an analysis branch must avoid duplicating audible output.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "signal-to-visual mapping",
+        "analysis tap"
+      ],
+      "platformFacilities": [
+        "AnalyserNode",
+        "FFT"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "audio-policy",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser sound",
+        "AudioDirector",
+        "music state machine"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/audio-directors.md",
+          "section": "Audio directors: decision tables and state machines, not scattered `play()` calls"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Put game decisions above native playback through an owned player contract.",
+      "customWorkConditions": "Decision tables and music state are domain policy; a custom audio engine needs a separate unmet requirement.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSoundManager.js#L225",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSoundManager.add",
+          "claim": "A manager implementation supplies retained sound creation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/BaseSoundManager.js#L388",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "BaseSoundManager.remove",
+          "claim": "Policy ownership must eventually release retained native sounds."
+        }
+      ],
+      "evaluationCaseIds": [
+        108
+      ],
+      "versionLimits": "AudioDirector, hysteresis and cue decision tables are game policy; native sound playback remains below the policy interface.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "AudioDirector",
+        "music state machine",
+        "ducking policy"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "audio-verification",
+      "classification": "workflow",
+      "aliases": [
+        "WebAudio",
+        "AudioContext",
+        "PCM",
+        "completion",
+        "loop"
+      ],
+      "primarySkill": "phaser-audio",
+      "secondarySkills": [
+        "phaser-verification"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-audio/references/testing-audio.md",
+          "section": "Testing Phaser audio when you cannot hear it"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Measure native source state and PCM rather than only play calls.",
+      "customWorkConditions": "Test instrumentation must preserve actual native playback and lifecycle.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L373",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "WebAudioSound.createAndStartBufferSource",
+          "claim": "Native source scheduling establishes marker/loop timing."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/sound/webaudio/WebAudioSound.js#L351",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebAudioSound.stop",
+          "claim": "Stop terminates native source playback for lifecycle checks."
+        }
+      ],
+      "evaluationCaseIds": [
+        109
+      ],
+      "versionLimits": "PCM sampling, browser gesture automation and independent signal oracles are test instrumentation, not a Phaser test API; hearing and play-call logs are insufficient.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "PCM window measurement",
+        "signal oracle"
+      ],
+      "platformFacilities": [
+        "AudioContext",
+        "PCM capture"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "phaser-verification",
+          "kind": "task-reference-handoff",
+          "reference": "skills/phaser-audio/references/testing-audio.md",
+          "rationale": "The verification routing table explicitly points audio tests to the audio testing reference."
+        }
+      ]
+    },
+    {
+      "id": "deterministic-driving",
+      "classification": "workflow",
+      "aliases": [
+        "game.step",
+        "TimeStep",
+        "page.clock",
+        "RandomDataGenerator"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/deterministic-test-driving.md",
+          "section": "Driving a Phaser 4 game deterministically"
+        },
+        {
+          "path": "skills/phaser-verification/references/verifying-loop-and-waiting.md",
+          "section": "Verifying a Phaser game: the manual loop, waiting and determinism"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Control native clocks and seeds through explicit test seams.",
+      "customWorkConditions": "A test adapter must preserve actual native execution rather than replace it with mocks.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L454",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Game.step",
+          "claim": "Drive native scene updates and rendering explicitly."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/tweens/TweenManager.js#L649",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TweenManager.getDelta",
+          "claim": "Control Date.now when testing native tweens."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/math/random-data-generator/RandomDataGenerator.js#L193",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "RandomDataGenerator.sow",
+          "claim": "Initialize native random generator state with seeds."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/math/Between.js#L20",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Math.Between",
+          "claim": "This helper uses Math.random rather than the seeded RND instance."
+        }
+      ],
+      "evaluationCaseIds": [
+        110
+      ],
+      "versionLimits": "Game.step, TweenManager wall time and browser/input clocks are distinct; Phaser.Math.RND is seeded but Math.random-based helpers are not covered by that seed.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "seed/clock control",
+        "input replay"
+      ],
+      "platformFacilities": [
+        "Playwright page.clock"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "pixel-assertions",
+      "classification": "workflow",
+      "aliases": [
+        "snapshotPixel",
+        "snapshotArea",
+        "premultiplied alpha"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/visual-and-pixel-assertions.md",
+          "section": "Reading and asserting pixels in a Phaser 4 game"
+        },
+        {
+          "path": "skills/phaser-verification/references/verifying-assertions-and-harness.md",
+          "section": "Verifying a Phaser game: assertions and the harness"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Read native frame output at controlled render boundaries.",
+      "customWorkConditions": "Custom image analysis may measure supplied output but must not fabricate native paint.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2209",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.snapshotPixel",
+          "claim": "Schedule a pixel read through native snapshot state."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2171",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.snapshotArea",
+          "claim": "Read one region for multiple pixel assertions."
+        }
+      ],
+      "evaluationCaseIds": [
+        111
+      ],
+      "versionLimits": "WebGL snapshots use one pending snapshot state; multiple requests in one frame can overwrite it. Pixel analysis/oracles remain external verification work.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "premultiplied alpha assertions",
+        "image comparison"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "native-observation",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser native controls",
+        "held state",
+        "paint contribution"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/native-control-observation.md",
+          "section": "Observe native controls through renderer-owned facts"
+        },
+        {
+          "path": "skills/phaser-verification/references/causal-pixel-observation.md",
+          "section": "Prove final-screen paint through controlled comparisons"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Observe renderer/input-owned serializable facts and controlled frame comparisons.",
+      "customWorkConditions": "Observation adapters must preserve native dispatch and independent source authentication.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/input/InputPlugin.js#L1021",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "InputPlugin.processDownEvents",
+          "claim": "Observe native pointer dispatch rather than substitute action calls."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2171",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.snapshotArea",
+          "claim": "Observe actual native frame pixels."
+        }
+      ],
+      "evaluationCaseIds": [
+        112
+      ],
+      "versionLimits": "Serializable observation schemas, source authentication and pixel ablations are test adapters; native input/render ownership must remain authoritative.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "serializable observations",
+        "held state",
+        "paint contribution"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "visual-instruments",
+      "classification": "workflow",
+      "aliases": [
+        "RGBA regions",
+        "BitmapText",
+        "glyph fit"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/visual-evidence-instruments.md",
+          "section": "Declared RGBA regions and native text fit"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Measure native text bounds and declared RGBA regions.",
+      "customWorkConditions": "Custom metrics require declared regions and must not claim aesthetic quality.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/static/BitmapText.js#L730",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "BitmapText.getTextBounds",
+          "claim": "Read actual bitmap layout bounds."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/bitmaptext/static/BitmapText.js#L121",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "BitmapText.fontData",
+          "claim": "Inspect loaded glyph data rather than inferred font support."
+        }
+      ],
+      "evaluationCaseIds": [
+        113
+      ],
+      "versionLimits": "RGBA/glyph/grid metrics are plugin/test instrumentation and do not establish aesthetic quality; native bounds and atlas glyphs supply evidence.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "RGBA regions",
+        "glyph fit",
+        "palette/grid metrics"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "lifecycle-verification",
+      "classification": "workflow",
+      "aliases": [
+        "SHUTDOWN",
+        "DESTROY",
+        "WEBGL_lose_context"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/leaks-and-lifecycle-tests.md",
+          "section": "Leak and lifecycle tests for a Phaser 4 game"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Count owned native resources across restart/destroy/restore.",
+      "customWorkConditions": "Counters may adapt instrumentation; replacing native owners invalidates lifecycle evidence.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Systems.js#L772",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Systems.shutdown",
+          "claim": "Exercise scene stop/restart cleanup."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/scene/Systems.js#L800",
+          "role": "native-boundary",
+          "visibility": "internal",
+          "symbol": "Systems.destroy",
+          "claim": "Exercise final scene teardown."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L1022",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.dispatchContextRestored",
+          "claim": "Exercise renderer restoration separately from scene restart."
+        }
+      ],
+      "evaluationCaseIds": [
+        114
+      ],
+      "versionLimits": "Resource censuses are evaluator-owned instrumentation; SHUTDOWN, DESTROY and browser context-loss events have distinct ownership and teardown expectations.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "resource census",
+        "restart/destroy/restore checks"
+      ],
+      "platformFacilities": [
+        "WEBGL_lose_context"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "gpu-ci",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser.WEBGL",
+        "Playwright",
+        "renderer identity"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/ci-for-phaser.md",
+          "section": "CI for a Phaser 4 game"
+        },
+        {
+          "path": "skills/phaser-verification/references/verifying-on-a-gpu.md",
+          "section": "Verifying a Phaser game on a real GPU"
+        },
+        {
+          "path": "skills/phaser-verification/references/verifying-playwright-setup.md",
+          "section": "Verifying a Phaser game: the Playwright setup"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Run native browser checks with explicit renderer and owned host cleanup.",
+      "customWorkConditions": "Custom hosting is justified by isolation needs; software success cannot substitute for hardware evidence.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/CreateRenderer.js#L30",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "CreateRenderer",
+          "claim": "Renderer selection/fallback occurs during game creation."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L703",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.init",
+          "claim": "Actual WebGL context identity must be observed separately."
+        }
+      ],
+      "evaluationCaseIds": [
+        115
+      ],
+      "versionLimits": "Playwright/CI and hardware identification are external tools. Phaser.WEBGL selects a renderer, not hardware acceleration or physical-device acceptance.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "Playwright host",
+        "renderer identity",
+        "CI acceptance"
+      ],
+      "platformFacilities": [
+        "Playwright",
+        "browser GPU process"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "debugging",
+      "classification": "workflow",
+      "aliases": [
+        "debug draw",
+        "display list",
+        "__MISSING",
+        "scene graph"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/debugging-a-phaser-game.md",
+          "section": "Debugging a Phaser 4 game from a script"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Inspect native state and output with bounded serialized handles.",
+      "customWorkConditions": "Debug adapters must avoid changing the behavior they observe.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/gameobjects/DisplayList.js#L220",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "DisplayList.getChildren",
+          "claim": "Read current native display-list members."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/textures/TextureManager.js#L1363",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TextureManager.get",
+          "claim": "Unknown texture keys resolve through the native missing-texture behavior."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/physics/arcade/World.js#L688",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Arcade.World.createDebugGraphic",
+          "claim": "Render native physics diagnostics."
+        }
+      ],
+      "evaluationCaseIds": [
+        116
+      ],
+      "versionLimits": "Scene graph and debug draw are native observations; missing-texture sentinels and screenshots still need independent assertions.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "scene graph inspection",
+        "pixel failure isolation"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    },
+    {
+      "id": "profiling",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser draw calls",
+        "frame budget",
+        "Chrome trace",
+        "ablation"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [
+        "phaser-architecture"
+      ],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/performance.md",
+          "section": "Performance of a Phaser 4 tile game: measure first, then these"
+        },
+        {
+          "path": "skills/phaser-verification/references/profiling-method.md",
+          "section": "Profiling a game against a frame budget (method, applied to Phaser)"
+        },
+        {
+          "path": "skills/phaser-verification/references/chrome-frame-budget.md",
+          "section": "Measuring a web game against a frame budget in Chrome"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Measure native frame cost and isolate the responsible subsystem before changing it.",
+      "customWorkConditions": "Custom rendering or pooling needs measured gains against a declared budget.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/TimeStep.js#L718",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "TimeStep.step",
+          "claim": "Native loop updates timing/frame statistics."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2007",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.render",
+          "claim": "Native renderer submission provides a draw-cost investigation boundary."
+        }
+      ],
+      "evaluationCaseIds": [
+        117
+      ],
+      "versionLimits": "Chrome traces, ablations and frame-budget accounting are external measurement workflows; native loop timings are evidence inputs, not proof of attribution or hardware performance.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "frame budget",
+        "Chrome trace",
+        "ablation"
+      ],
+      "platformFacilities": [
+        "Chrome tracing"
+      ],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": [
+        {
+          "skill": "phaser-architecture",
+          "kind": "task-reference-handoff",
+          "reference": "skills/phaser-verification/references/profiling-method.md",
+          "rationale": "The architecture routing table explicitly points cross-game frame-budget work to the verification profiling reference."
+        }
+      ]
+    },
+    {
+      "id": "capture-readiness",
+      "classification": "workflow",
+      "aliases": [
+        "Phaser capture",
+        "seeded frame",
+        "semantic readiness"
+      ],
+      "primarySkill": "phaser-verification",
+      "secondarySkills": [],
+      "references": [
+        {
+          "path": "skills/phaser-verification/references/capture-ready-game.md",
+          "section": "Capture a bounded Phaser scene with agent-vids"
+        }
+      ],
+      "nativeFacility": null,
+      "extensionSeam": "Expose bounded readiness and seeded frame state to an authenticated capture producer.",
+      "customWorkConditions": "Custom capture adapters must preserve authoritative clocks and output identities.",
+      "sourceAnchors": [
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/core/Game.js#L454",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "Game.step",
+          "claim": "Capture can coordinate with actual native frame execution."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/math/random-data-generator/RandomDataGenerator.js#L193",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "RandomDataGenerator.sow",
+          "claim": "Seed native randomness for repeatable capture."
+        },
+        {
+          "url": "https://github.com/phaserjs/phaser/blob/v4.2.1/src/renderer/webgl/WebGLRenderer.js#L2171",
+          "role": "native-boundary",
+          "visibility": "public",
+          "symbol": "WebGLRenderer.snapshotArea",
+          "claim": "Read native output after declared readiness."
+        }
+      ],
+      "evaluationCaseIds": [
+        118
+      ],
+      "versionLimits": "Capture producer protocols, readiness sentinels and whole-file audio bounds are application/tool contracts; the SDK supplies clocks/seeds/frame output only.",
+      "pluginFacilities": [],
+      "workflowTerms": [
+        "semantic readiness",
+        "capture producer protocol"
+      ],
+      "platformFacilities": [],
+      "rejectedAlternatives": [],
+      "secondaryRoutes": []
+    }
+  ]
+}
