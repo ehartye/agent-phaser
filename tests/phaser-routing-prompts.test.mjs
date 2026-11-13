@@ -2,6 +2,7 @@
 // and a prompt that carries a `term` still finds that term in its expected skill's description, so an edited description cannot lose its trigger unnoticed.
 // A prompt whose answer belongs to another plugin is marked `external` (an `alt` outside this plugin is written `plugin:skill`); the name is checked against
 // scripts/sibling-skills.json, so the test runs without the sibling plugin installed.
+// Outcome-language cases are requests that name only the result wanted; each guards the description phrase that should catch it.
 // The blind-router scoring itself needs a model and is run by hand (see the fixture's `about`).
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -208,6 +209,30 @@ test('route validation rejects missing legacy/near-miss keys, lost alternates an
   const missingReference = structuredClone(prompts.find(p => p.family === 'shared-ui'));
   for (const j of missingReference.routeJustifications) delete j.requiredReference;
   assert.throws(() => assertRoutes(missingReference), /missing task-reference condition/);
+});
+
+test('outcome-language cases name only the result, guard a description phrase and cover every skill', () => {
+  const cases = prompts.filter(p => p.kind === 'outcome-language');
+  const local = cases.filter(p => !p.external);
+  for (const name of skills) assert.ok(local.some(p => p.expect === name), `no outcome-language case expects ${name}`);
+  assert.ok(cases.some(p => p.external), 'outcome-language near misses are kept');
+  for (const p of cases) {
+    assert.equal(p.policyCue, 'none');
+    assert.ok(p.context?.length > 30, `case ${p.id} has no context line`);
+    assert.doesNotMatch(p.text, /phaser|webgl|tween|arcade|bitmaptext|playwright|emitter|filter/i, `case ${p.id} names the engine or an API`);
+    if (!p.external) assert.ok(p.term, `case ${p.id} guards no description phrase`);
+    for (const name of p.needsBoth ?? []) assert.ok([p.expect, ...(p.alt ?? [])].includes(name), `case ${p.id}: needsBoth ${name} is not an accepted owner`);
+  }
+});
+
+test('every description states the project trigger within the portable length', () => {
+  for (const name of skills) {
+    const text = description(name);
+    assert.ok(text.length <= 1024, `${name} description is ${text.length} characters`);
+    assert.match(text, /Use when working in a project that depends on phaser/, `${name} lost its project trigger`);
+    assert.match(text, /even when the user names only the result/, `${name} lost its outcome clause`);
+    assert.ok(text.indexOf('Use when') < text.indexOf('Not for'), `${name} states its exclusions before its trigger`);
+  }
 });
 
 test('task-language risk controls omit native-first policy instructions', () => {

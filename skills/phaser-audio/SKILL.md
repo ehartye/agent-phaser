@@ -1,6 +1,6 @@
 ---
 name: phaser-audio
-description: Play, mix and test sound in a Phaser 4 game - the sound manager and first-gesture unlock, music that survives scene restarts, loops, markers and audio sprites, pan, distance and ducking, the 4.2.1 decode and visibility patches, and checking audio without ears. Use when loading or playing exported sound or music in Phaser, when audio is silent until a click, stops when the tab hides, falls silent mid-loop, doubles on a level restart, throws on a missing key, or when deciding who owns sound decisions. Not for authoring sounds (agent-beeps), shipping audio to other engines (agent-engine:engine-asset-import), or input (phaser-input).
+description: Play, mix and test sound and music in a Phaser 4 game - the sound manager and first-gesture unlock, music that survives scene restarts, loops, markers and audio sprites, volume, pan, distance and ducking, the 4.2.1 decode and visibility patches, and checking audio without ears. Use when working in a project that depends on phaser and the task touches sound effects, music, volume or mute, even when the user names only the result - audio is silent until a click, is lost after a page refresh or reload, stops when the tab hides, falls silent mid-loop, doubles on a level restart, plays over itself or throws on a missing key - and when wiring exported sounds into the game or deciding who owns sound decisions. Not for authoring or designing sounds and music (agent-beeps), shipping audio to other engines (agent-engine:engine-asset-import), or input (phaser-input).
 ---
 
 # Phaser audio

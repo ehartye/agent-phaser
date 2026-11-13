@@ -1,6 +1,6 @@
 ---
 name: engine-phaser
-description: Start and structure a Phaser 4 game - pin the version, write the game config (WebGL, pixelArt), boot it with Vite or ESM, size and scale the canvas for windows and high-density screens, load assets and handle failures, organise scenes and the fixed-step loop, own events and state across scene restarts, use containers, groups and pools, and port Phaser 3 code. Use when starting a Phaser game, before writing Phaser code, when a scene restart leaks, an asset fails to load, the canvas is the wrong size or shape after a resize, or a tutorial's API does not exist in 4.2.1. The domain skills cover rendering, worlds, physics, motion (tweens, transitions, cutscenes), pixel UI, input, audio and verification. Not for choosing an engine (agent-engine:engine-selection) or importing assets into other engines (agent-engine:engine-asset-import).
+description: Entry point for any work on a Phaser 4 game - project setup, game config, canvas scaling, asset loading, scenes and the fixed-step loop, where state, rules and UI live, porting Phaser 3 code. Use when working in a project that depends on phaser and no domain skill clearly owns the task, even when the user names only the result and never mentions Phaser. Also use when starting a Phaser game, deciding how one game's scenes, simulation and UI are organised, adding save and load, when a scene restart leaks or fires events twice, an asset fails to load, the canvas is the wrong size after a resize, or a tutorial's API does not exist in 4.2.1. The domain skills cover effects, worlds, collision, motion (tweens, transitions, cutscenes), HUD and menus, input, audio and verification. Not for choosing an engine (agent-engine:engine-selection) or importing assets into other engines (agent-engine:engine-asset-import).
 ---
 
 # Phaser core
@@ -72,11 +72,11 @@ project supplies `phaser` 4.2.1 and `@playwright/test`, and a software renderer 
 
 | Work | Skill |
 | --- | --- |
-| WebGL, render nodes, filters, shaders, stencil, meshes, textures, context loss | [phaser-rendering](../phaser-rendering/SKILL.md) |
+| Effects, WebGL, render nodes, filters, shaders, stencil, meshes, textures, context loss | [phaser-rendering](../phaser-rendering/SKILL.md) |
 | Tilemaps, chunk streaming, cameras, lights, weather and particles | [phaser-worlds](../phaser-worlds/SKILL.md) |
 | Arcade and Matter physics, collision, tilemap collision, pathing | [phaser-physics](../phaser-physics/SKILL.md) |
 | Tweens, timelines, animations, timers, curves | [phaser-motion](../phaser-motion/SKILL.md) |
-| Pixel-exact canvas, bitmap text, panels, accessible controls | [phaser-pixel-ui](../phaser-pixel-ui/SKILL.md) |
+| HUD, pixel-exact canvas, bitmap text, panels, accessible controls | [phaser-pixel-ui](../phaser-pixel-ui/SKILL.md) |
 | Keyboard, pointer, gamepad, touch | [phaser-input](../phaser-input/SKILL.md) |
 | Native audio, lifecycle, beeps directors | [phaser-audio](../phaser-audio/SKILL.md) |
 | Real-GPU checks, profiling, frame budgets | [phaser-verification](../phaser-verification/SKILL.md) |
@@ -84,6 +84,5 @@ project supplies `phaser` 4.2.1 and `@playwright/test`, and a software renderer 
 
 ## Not covered here
 
-Choosing between Phaser, three.js, Godot and the rest is agent-engine:engine-selection. Custom Canvas or WebGL
-post effects outside Phaser are agent-engine:engine-custom-shaders. Exporting assets for other engines is
-agent-engine:engine-asset-import.
+Choosing an engine is agent-engine:engine-selection. Post effects outside Phaser are
+agent-engine:engine-custom-shaders. Assets for other engines are agent-engine:engine-asset-import.

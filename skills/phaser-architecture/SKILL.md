@@ -1,6 +1,6 @@
 ---
 name: phaser-architecture
-description: Coordinate architecture across Phaser games and owned tools. Use when shared dialogs, playbots, asset contracts or repeated testing/publication costs cross subsystem or game boundaries. Not for choosing an engine, ordinary Phaser implementation or cloud architecture.
+description: Coordinate architecture across more than one Phaser game and the tools they share - who owns a contract, shared UI and dialogs, playbots, asset contracts, and the cost of testing and publishing. Use when working in a project that depends on phaser and a decision reaches past one game, even when the user names only the result - sharing UI, dialogs, a simulation, a test bot or a build step between games, deciding which game or tool should own something, or cutting repeated test and publish cost across games. Not for organising one game's scenes, simulation and UI (engine-phaser), choosing an engine (agent-engine:engine-selection), ordinary Phaser implementation or cloud architecture.
 ---
 
 # Phaser architecture coordination
