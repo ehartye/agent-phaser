@@ -1,5 +1,5 @@
 {
-  "about": "Blind-routing answer key. Feed only text to a router. expect is primary; alt preserves justified overlaps. external qualifies expect with a sibling plugin. routes are exhaustive permitted ordered skill loads (one or two skills); any extra or unrelated Phaser activation fails. routeJustifications explain overlap and requiredReference conditions: a task-reference handoff passes only when that public reference is loaded before implementation. Direct core-to-domain routes are bounded to two skills. Every external near miss forbids all local Phaser skills, regardless of nearMissFor. Technology prompts intentionally name APIs; task-language prompts are uncued requirements; policy-cued-task is reported separately. Static tests validate key integrity, not live selection or usefulness.",
+  "about": "Blind-routing answer key. Feed only text to a router. expect is primary; alt preserves justified overlaps. external qualifies expect with a sibling plugin. routes are exhaustive permitted ordered skill loads (one or two skills); any extra or unrelated Phaser activation fails. routeJustifications explain overlap and requiredReference conditions: a task-reference handoff passes only when that public reference is loaded before implementation. Direct core-to-domain routes are bounded to two skills. Every external near miss forbids all local Phaser skills, regardless of nearMissFor. Technology prompts intentionally name APIs; task-language prompts are uncued requirements; policy-cued-task is reported separately. Outcome-language prompts are requests typed mid-session that name only the result wanted, never Phaser or an API: give the router their context line with the text and score them as their own group. needsBoth names the skills a complete answer loads; a router that loads only one of them is half right. Static tests validate key integrity, not live selection or usefulness.",
   "prompts": [
     {
       "id": 1,
@@ -4127,6 +4127,928 @@
           "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
         }
       ],
+      "policyCue": "none"
+    },
+    {
+      "id": 133,
+      "topic": "ambient-water",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The water does not quite read as water. Add some ripples or dragonflies or something.",
+      "expect": "phaser-worlds",
+      "term": "read as water",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 134,
+      "topic": "effects-showcase",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Pull out all the stops on the visuals: glowing, particles, ambience, weather.",
+      "expect": "phaser-rendering",
+      "alt": [
+        "phaser-worlds"
+      ],
+      "term": "glow",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ],
+        [
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "Particles, ambience and weather belong to the world owner; the glow half stays with rendering, so a complete answer loads both."
+        }
+      ],
+      "policyCue": "none",
+      "needsBoth": [
+        "phaser-rendering",
+        "phaser-worlds"
+      ]
+    },
+    {
+      "id": 135,
+      "topic": "effects-glow",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Make the pickups glow and give the whole scene a bit of bloom.",
+      "expect": "phaser-rendering",
+      "term": "bloom",
+      "routes": [
+        [
+          "phaser-rendering"
+        ],
+        [
+          "engine-phaser",
+          "phaser-rendering"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-rendering"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-rendering"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 136,
+      "topic": "ambient-weather",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The level feels dead. Give it some atmosphere: drifting mist, a little rain now and then, leaves blowing past.",
+      "expect": "phaser-worlds",
+      "term": "feel alive",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 137,
+      "topic": "collision-shape",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Obstacle collision should be on the object only, not the whole tile it stands on.",
+      "expect": "phaser-physics",
+      "term": "not the whole tile",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 138,
+      "topic": "collision-slide",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Bodies should slide along walls when they run into them at an angle instead of stopping dead.",
+      "expect": "phaser-physics",
+      "term": "slide along walls",
+      "routes": [
+        [
+          "phaser-physics"
+        ],
+        [
+          "engine-phaser",
+          "phaser-physics"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-physics"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-physics"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 139,
+      "topic": "input-action",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Add an evade roll on the B button with two charges and a cooldown.",
+      "expect": "phaser-input",
+      "alt": [
+        "engine-phaser"
+      ],
+      "term": "evade roll",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "The charges and cooldown are game rules for the headless layer that the core owner describes; the button binding stays with input."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 140,
+      "topic": "input-controller",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Add controller support so the whole game can be played from the couch.",
+      "expect": "phaser-input",
+      "term": "controller support",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 141,
+      "topic": "input-touch",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Give the game a full mobile interface with touch controls.",
+      "expect": "phaser-input",
+      "alt": [
+        "phaser-pixel-ui"
+      ],
+      "term": "touch controls",
+      "routes": [
+        [
+          "phaser-input"
+        ],
+        [
+          "engine-phaser",
+          "phaser-input"
+        ],
+        [
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-input"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "Laying out the on-screen interface pixel-exact is also the interface owner's work."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 142,
+      "topic": "ui-hud",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The skill bar, health orbs and inventory panel look blurry. They need to be pixel exact.",
+      "expect": "phaser-pixel-ui",
+      "term": "pixel exact",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 143,
+      "topic": "ui-lettering",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The lettering in the HUD is soft and some characters are missing.",
+      "expect": "phaser-pixel-ui",
+      "term": "HUD",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 144,
+      "topic": "ui-dom-overlay",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Put an HTML overlay over the canvas for the settings screen.",
+      "expect": "phaser-pixel-ui",
+      "alt": [
+        "phaser-input"
+      ],
+      "term": "overlay over the canvas",
+      "routes": [
+        [
+          "phaser-pixel-ui"
+        ],
+        [
+          "engine-phaser",
+          "phaser-pixel-ui"
+        ],
+        [
+          "phaser-input"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-pixel-ui"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-input"
+          ],
+          "reason": "Stopping overlay clicks from reaching the world is covered by the pointer reference of the input owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 145,
+      "topic": "motion-feet",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The feet slide when the character walks.",
+      "expect": "phaser-motion",
+      "term": "feet slide",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 146,
+      "topic": "motion-turn",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The character's body shifts sideways whenever it changes direction.",
+      "expect": "phaser-motion",
+      "term": "changes direction",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 147,
+      "topic": "motion-recoil",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The pistol kicks the wrong way when it fires.",
+      "expect": "phaser-motion",
+      "term": "recoil",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 148,
+      "topic": "motion-hover",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Make the drone hover and bob gently while it idles.",
+      "expect": "phaser-motion",
+      "term": "hover, bob",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 149,
+      "topic": "motion-shadow",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The contact shadows jitter while the characters move.",
+      "expect": "phaser-motion",
+      "alt": [
+        "phaser-worlds"
+      ],
+      "term": "shadow jitters",
+      "routes": [
+        [
+          "phaser-motion"
+        ],
+        [
+          "engine-phaser",
+          "phaser-motion"
+        ],
+        [
+          "phaser-worlds"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-motion"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "Shadows drawn as part of the world's ambient layer are covered by the world owner's ambient-motion reference."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 150,
+      "topic": "audio-refresh",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Audio is lost after a page refresh and stays silent until I click.",
+      "expect": "phaser-audio",
+      "term": "refresh",
+      "routes": [
+        [
+          "phaser-audio"
+        ],
+        [
+          "engine-phaser",
+          "phaser-audio"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-audio"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-audio"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 151,
+      "topic": "verify-screenshot",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Take a screenshot and check it actually looks right.",
+      "expect": "phaser-verification",
+      "term": "take a screenshot",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 152,
+      "topic": "verify-phones",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Is this fast enough on phones?",
+      "expect": "phaser-verification",
+      "term": "fast enough on phones",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 153,
+      "topic": "verify-prove",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Prove the change works before you tell me it is done.",
+      "expect": "phaser-verification",
+      "term": "prove the change works",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 154,
+      "topic": "game-organisation",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "How should this game's scenes, simulation and UI be organised?",
+      "expect": "engine-phaser",
+      "term": "scenes, simulation and UI",
+      "routes": [
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 155,
+      "topic": "shared-ui-outcome",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "I want the same dialogs and menus in both of our games without maintaining two copies.",
+      "expect": "phaser-architecture",
+      "alt": [
+        "phaser-pixel-ui"
+      ],
+      "term": "between games",
+      "routes": [
+        [
+          "phaser-architecture"
+        ],
+        [
+          "engine-phaser",
+          "phaser-architecture"
+        ],
+        [
+          "phaser-pixel-ui"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-architecture"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-architecture"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "phaser-pixel-ui"
+          ],
+          "reason": "Binding the shared themed UI inside one game is reached from the interface owner's routing table."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 156,
+      "topic": "near-miss",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The splash when something falls in the water sounds thin. Design a better one.",
+      "expect": "beeps-compose",
+      "external": "agent-beeps",
+      "nearMissFor": "phaser-audio",
+      "routes": [
+        [
+          "agent-beeps:beeps-compose"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-beeps:beeps-compose"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true,
+      "policyCue": "none"
+    },
+    {
+      "id": 157,
+      "topic": "near-miss",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Redraw the walk cycle frames so the legs read better at this size.",
+      "expect": "sprite-motion",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-motion",
+      "routes": [
+        [
+          "agent-sprites:sprite-motion"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-motion"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true,
+      "policyCue": "none"
+    },
+    {
+      "id": 158,
+      "topic": "near-miss",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "The health orb art looks flat. Shade it so it reads as glass.",
+      "expect": "sprite-shading",
+      "external": "agent-sprites",
+      "nearMissFor": "phaser-pixel-ui",
+      "routes": [
+        [
+          "agent-sprites:sprite-shading"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "agent-sprites:sprite-shading"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        }
+      ],
+      "forbidPhaserActivation": true,
       "policyCue": "none"
     }
   ],
