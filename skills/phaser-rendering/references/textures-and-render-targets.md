@@ -29,7 +29,7 @@ Phaser's own tour is `node_modules/phaser/skills/render-textures/SKILL.md`; this
 - [tested] Render targets and filter framebuffers are sampled LINEAR when `render.antialias` is true (the default) and NEAREST when it is false, which `pixelArt: true` sets; a scaled RenderTexture is blurry in a non-pixelArt game.
 - [tested] `render.mipmapRegeneration` (4.1.0, default false) with `mipmapFilter: 'LINEAR_MIPMAP_LINEAR'` gave a 32 by 32 DynamicTexture the mipmap minification filter and a 33 by 33 one did not; without `mipmapRegeneration` neither got it.
 - [documented] Every `render()` of a mipmapped target regenerates its mipmaps (10 microseconds or more per texture), and filters never use mipmaps (`src/core/Config.js`, `DrawingContext.js`). Leave it off for atlases and pixel art.
-- [documented] Memory: 4 bytes per pixel, +33% with mipmaps, +1 byte per pixel for the stencil attachment while `render.stencil` is true; texture data is also kept in system memory (`docs/Phaser 4 Rendering Concepts`).
+- [documented] Memory: 4 bytes per pixel, +33% with mipmaps, +1 byte per pixel for the stencil attachment while `render.stencil` is true; texture data is also kept in system memory (`docs/Phaser 4 Rendering Concepts`). The same arithmetic applies to every loaded PNG: budget the whole held set in [loading assets](../../engine-phaser/references/loading-assets.md).
 - [documented] Compressed textures must be encoded Y-up in Phaser 4; texture coordinates and framebuffers use GL orientation throughout.
 
 ## Tint modes (the 4.2.0 change)

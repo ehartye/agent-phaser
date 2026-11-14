@@ -14,7 +14,7 @@ const rendering = ['render-graph', 'filters', 'stencil', 'mesh-and-gpu-layer', '
 const worlds = ['cameras', 'layers', 'lights', 'normal-atlas', 'particles', 'tilemaps'].map(n => ({ file: `phaser-worlds-${n}.mjs`, lane: 'either' }));
 const software = ['engine-phaser-foundations', 'phaser-audio-manager', 'phaser-audio-sounds', 'phaser-input-gamepad', 'phaser-input-keyboard', 'phaser-input-pointer', 'phaser-motion-clocks', 'phaser-motion-scenes',
   'phaser-physics-arcade', 'phaser-physics-matter', 'phaser-physics-paths', 'phaser-physics-tilemap', 'phaser-pixel-ui-panels', 'phaser-pixel-ui-text',
-  'phaser-verification-driving', 'phaser-verification-leaks', 'phaser-verification-pixels', 'phaser-verification-renderer', 'phaser-native-control-observation', 'phaser-pixel-ui-accessibility-bridge', 'phaser-verification-evidence-kit'].map(n => ({ file: `${n}.mjs`, lane: 'software' }));
+  'phaser-verification-content-cost', 'phaser-verification-driving', 'phaser-verification-leaks', 'phaser-verification-pixels', 'phaser-verification-renderer', 'phaser-native-control-observation', 'phaser-pixel-ui-accessibility-bridge', 'phaser-verification-evidence-kit'].map(n => ({ file: `${n}.mjs`, lane: 'software' }));
 
 /** In run order. The errata check needs no browser, so it goes first and a Phaser upgrade names the stale documents before anything slower runs. */
 export const PROBES = [
@@ -35,7 +35,7 @@ export const PROBES = [
 export const NON_PROBES = [
   'errata-rows.mjs',                   // reads the errata tables for the check and the merge-lane test
   'phaser-rendering-harness.mjs',      // shared by the rendering probes
-  'phaser-worlds-lib.mjs',             // shared by the worlds probes
+  'phaser-worlds-lib.mjs',             // shared by the worlds probes and the content-cost probe
   'run-all-lib.mjs', 'run-all.mjs',    // this runner
   'probe.mjs', 'shot.mjs',             // debugging helpers that need a game already running at a URL
 ];

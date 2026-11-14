@@ -7,10 +7,11 @@ Where each asset loads, how keys and memory behave and which format to pick; how
 | Moment | Load | Why |
 | --- | --- | --- |
 | Boot scene | The error screen's font and skin, the loading-bar art | The failure path must not need what failed ([scenes 2](scenes-loop-and-plugins.md)) |
-| Preload scene | Everything the first scenes draw, queued by one function `queueAssets(load)` | A scene still loading ignores `start` ([gotcha 11](phaser-4-scene-lifecycle-gotchas.md)) |
-| Entering a level | One pack per level | Keeps the first load small and the release a single call |
+| Preload scene | What the first scenes draw, queued by one function `queueAssets(load)`: not every level's art | A scene still loading ignores `start` ([gotcha 11](phaser-4-scene-lifecycle-gotchas.md)); what is queued here is held as textures all session |
+| Entering a level or area | One pack per level, or the sheets that area can show | Keeps the held textures inside the [budget](texture-memory.md) and the release a single call |
 | On demand | `this.load.start()` outside `preload` | Rare art, user-chosen content |
 
+- [tested] A texture costs `width x height x 4` bytes whatever its file weighs: a 20 KB PNG became a 16 MiB texture. A boot scene that queues every sheet in the game works on a desktop and is killed on a phone; sum what is held and set a budget ([texture memory](texture-memory.md)).
 - [documented] Caches are game-wide (`game.textures`, `game.cache.json`, `.audio`, ...); the per-scene `LoaderPlugin` only queues files and emits events. `SceneManager#bootScene` resets the loader, runs `preload`, then starts it (`src/loader/LoaderPlugin.js`, `src/scene/SceneManager.js`).
 - [documented] Outside `preload` you call `load.start()` yourself; it does nothing unless the loader is idle or complete. A scene config `pack: { files: [...] }` loads before `preload` runs, for boot art.
 - [tested] A queue that holds only cached keys completes at once: `start()` emits `complete(loader, 0, 0)` synchronously and no `filecomplete-*` event ever fires (`loader-duplicate-key-is-silent-and-completes-at-once`). Wait on `complete`, or test `textures.exists(key)` first.
@@ -49,6 +50,7 @@ Where each asset loads, how keys and memory behave and which format to pick; how
 
 - [tested] `load.removePack(packKey)` removes the textures and cache entries a pack added: three pack images freed three GL texture wrappers. The pack JSON itself stays cached; remove it with `cache.json.remove` (`loader-pack-progress-falls-back-and-remove-pack-frees-textures`).
 - [documented] `textures.remove(key)` destroys the texture and its GL texture at once. Game objects still showing it fail on the next render, and animations that name its frames stay in the global manager until `anims.remove` (`src/textures/TextureManager.js`). Swap or destroy the users first.
+- [general] The per-area pattern (name what the area can show, destroy users then remove the rest, hold the simulation while a sheet is in flight, fetch an unexpected kind on first sight) and dropping a sheet whose pixels were read once for CPU painting are in [texture memory](texture-memory.md).
 - [tested] In a restart or level-change test, assert that `textures.getTextureKeys().length` and `renderer.glTextureWrappers.length` return to their starting values: ten restarts of a clean scene left both flat, and a texture added under a new key each restart grew both by ten (`phaser-verification-leaks.mjs`).
 
 ## Verify
