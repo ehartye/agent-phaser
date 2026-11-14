@@ -22,6 +22,7 @@ for (const fn of ['drawElements', 'drawArrays', 'drawElementsInstanced', 'drawAr
   long tasks, and a sampling CPU profile (self and inclusive time) for the real story.
 - [general] **Toggle layers off one at a time** (shadows, atmosphere, ambient, clouds, weather, roofs, ui) and re-measure; the delta is the cost.
 - [general] Put budgets in tests, loosely (they should catch doubling, not drift), and attach the numbers to the report.
+- [general] Frame time is not the only budget content spends: texture memory held and objects submitted while far off screen are counted, not timed, by the two checks in [cost of content](content-cost.md).
 
 ## 2. Findings that generalise
 

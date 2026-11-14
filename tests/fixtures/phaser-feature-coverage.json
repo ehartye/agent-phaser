@@ -211,6 +211,10 @@
         {
           "path": "skills/engine-phaser/references/asset-wiring.md",
           "section": "Wiring agent-sprites and agent-beeps into Phaser"
+        },
+        {
+          "path": "skills/engine-phaser/references/texture-memory.md",
+          "section": "Texture memory: budget what the game holds (Phaser 4.2.1)"
         }
       ],
       "nativeFacility": "LoaderPlugin.start, LoaderPlugin.atlas, LoaderPlugin.bitmapFont",
@@ -1946,6 +1950,10 @@
         {
           "path": "skills/phaser-worlds/references/tilemaps-and-terrain.md",
           "section": "Tilemaps and procedural terrain in Phaser 4"
+        },
+        {
+          "path": "skills/phaser-worlds/references/building-a-level.md",
+          "section": "Building a level in Phaser 4.2.1: hide by position from the first loop"
         }
       ],
       "nativeFacility": null,
@@ -1978,7 +1986,14 @@
         77
       ],
       "versionLimits": "Chunk loading/eviction and generation are application policy; native layers and camera bounds supply reusable views, not a built-in streaming service.",
-      "pluginFacilities": [],
+      "pluginFacilities": [
+        {
+          "symbol": "createChunkVisibility",
+          "path": "skills/phaser-worlds/scripts/assets/chunk-visibility.mjs",
+          "line": 27,
+          "claim": "Plugin helper: files display objects by chunk and toggles native visibility as the view moves; it owns no rendering and no display list order."
+        }
+      ],
       "workflowTerms": [
         "chunk streaming",
         "generation",
@@ -4284,6 +4299,10 @@
         {
           "path": "skills/phaser-verification/references/chrome-frame-budget.md",
           "section": "Measuring a web game against a frame budget in Chrome"
+        },
+        {
+          "path": "skills/phaser-verification/references/content-cost.md",
+          "section": "Cost of content: texture memory and objects submitted (Phaser 4.2.1)"
         }
       ],
       "nativeFacility": null,
@@ -4309,7 +4328,20 @@
         117
       ],
       "versionLimits": "Chrome traces, ablations and frame-budget accounting are external measurement workflows; native loop timings are evidence inputs, not proof of attribution or hardware performance.",
-      "pluginFacilities": [],
+      "pluginFacilities": [
+        {
+          "symbol": "measureTextures",
+          "path": "skills/phaser-verification/scripts/assets/texture-memory.mjs",
+          "line": 29,
+          "claim": "Plugin counter: sums width x height x 4 over the native texture manager list; Phaser exposes the sources but no total or budget."
+        },
+        {
+          "symbol": "viewCensus",
+          "path": "skills/phaser-verification/scripts/assets/view-census.mjs",
+          "line": 26,
+          "claim": "Plugin counter: per camera, objects that would be drawn sorted by distance from the view; Phaser culls nothing by position and reports no such count."
+        }
+      ],
       "workflowTerms": [
         "frame budget",
         "Chrome trace",

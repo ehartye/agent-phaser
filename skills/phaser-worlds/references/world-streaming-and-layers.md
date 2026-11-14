@@ -38,6 +38,7 @@ Probes: `node examples/web/phaser-probes/phaser-worlds-layers.mjs /path/to/host-
 ## Hide what is far away
 
 - [tested] Nothing culls sprites by position, but one `setVisible(false)` on a Container submitted none of its 300 children, and ten thousand hidden Images cost about 0 ms against about 1 ms visible ([cameras](cameras.md)).
+- [general] Decide this when the area's objects are first created, not after: the steps, a tested bucket for loose sprites that must keep depth-sorting against each other, and the check are in [building a level](building-a-level.md).
 - [general] Bucket entities by chunk. When a chunk enters the keep-alive ring (view plus one chunk, measured from the follow target), show its Container; when it leaves, hide it. One write per chunk, not per sprite.
 - [tested] `sprite.setActive(false)` stops a sprite's animation updates, because the update list skips inactive objects. Hide and deactivate together for far-away animated things; keep their logic in the simulation, not in display objects.
 - [general] Create objects for a chunk when it first enters the ring and pool them; destroying and recreating while scrolling causes hitches and, for tile layers, leaks (gotcha 13).

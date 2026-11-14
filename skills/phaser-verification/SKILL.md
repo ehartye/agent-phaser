@@ -1,6 +1,6 @@
 ---
 name: phaser-verification
-description: Prove a Phaser 4 change works and runs fast enough - screenshots and pixel reads of what the game really drew, deterministic stepping, scene-graph and physics debug draw, scene-restart leak tests, WebGL context loss, real-GPU and CI Playwright runs, mutation-proven regression tests and frame-budget profiling. Use when working in a project that depends on phaser and a change must be checked or measured, even when the user names only the result - take a screenshot and check it, prove the change works, find out why something does not show, is this fast enough on phones, it stutters or drops frames, it misses a 60 or 120 fps budget - and before reporting a visual change as done, when writing browser tests, making a test deterministic (tweens, seeds, input), checking a level restart for leaks or setting up CI. Not for choosing an engine (agent-engine:engine-selection), the renderer's behaviour (phaser-rendering), touch controls for phones (phaser-input) or cross-game test strategy (phaser-architecture).
+description: Prove a Phaser 4 change works and runs fast enough - screenshots and pixel reads of what the game really drew, deterministic stepping, restart leak tests, WebGL context loss, GPU and CI Playwright runs, mutation-proven regression tests, frame-budget profiling, texture memory and offscreen-object counts. Use when working in a project that depends on phaser and a change must be checked or measured, even when the user names only the result - take a screenshot and check it, prove the change works, find out why something does not show, is this fast enough on phones, it stutters or drops frames, the page crashes or reloads on mobile, can it take three times the enemies - and before reporting a visual change as done, when writing browser tests, making a test deterministic, checking a restart for leaks or setting up CI. Not for choosing an engine (agent-engine:engine-selection), the renderer's behaviour (phaser-rendering), touch controls for phones (phaser-input) or cross-game test strategy (phaser-architecture).
 ---
 
 # Phaser verification and performance
@@ -20,6 +20,7 @@ A plausible-looking screenshot can hide a layer covering the terrain. Phaser 4.2
 | Write the scene-restart leak test, or test a lost and restored WebGL context | [leaks and lifecycle tests](references/leaks-and-lifecycle-tests.md) |
 | Put browser tests in a pipeline, or choose the Chromium and renderer a run uses | [CI for Phaser](references/ci-for-phaser.md) |
 | Measure and fix frame cost, draw calls, pooling | [performance](references/performance.md) |
+| Cost content before it grows, or find why a phone kills or reloads the page: texture memory held, objects submitted against objects near the view | [cost of content](references/content-cost.md) |
 | Hit a frame budget (60 or 120 fps) or cost +25% to +50% more content: decompose, ablate, price items, prove a fix exact | [profiling method](references/profiling-method.md), [Chrome frame budget](references/chrome-frame-budget.md) |
 | Test Phaser audio | [testing audio](../phaser-audio/references/testing-audio.md) |
 
@@ -32,11 +33,12 @@ A plausible-looking screenshot can hide a layer covering the terrain. Phaser 4.2
 - [tested] **One pixel read per frame, and the canvas is black afterwards.** A second `snapshotPixel` before the same frame replaces the first, a negative coordinate is mirrored, and `drawImage(game.canvas)` after the frame reads black. Read points a frame apart or take one `snapshotArea`.
 - [tested] **Every scene restart must be leak-tested, with counters.** Restart ten times and require display list, tweens, timers, textures, GL texture wrappers, sounds and every listener count on `game.events`, `scale`, `registry` and the scene's own events to match the baseline: Phaser removes only what it owns.
 - [tested] **State the renderer and use `Phaser.WEBGL` in tests.** Playwright's default headless shell is software WebGL, new headless got the hardware GPU on the same machine, and `Phaser.AUTO` falls back to Canvas without a word when WebGL is missing. Print the renderer class on every run.
+- [tested] **Content has two costs a desktop hides; check both whenever content grows.** A 20 KB PNG became a 16 MiB texture, and 900 props added flat to a scene were all transformed every frame with 12 in view. Put `measureTextures` with a budget and `viewCensus` with a far-object limit in the first browser spec, and run the folder sum before any browser opens ([cost of content](references/content-cost.md)).
 - [tested] **Silent failures need an assertion.** An unknown texture key draws `__MISSING` and logs nothing; scan the display list for it, and fail on any console line that is not on an allow-list.
 
 ## Verify
 
-- [tested] `node examples/web/phaser-probes/phaser-verification-driving.mjs <project>`, `phaser-verification-pixels.mjs`, `phaser-verification-leaks.mjs` and `phaser-verification-renderer.mjs` (a project with `phaser@4.2.1` and `@playwright/test`) re-prove every `[tested]` claim above in headless Chromium. Rerun them after a Phaser or Playwright upgrade; a failure names the claim to update.
+- [tested] `node examples/web/phaser-probes/phaser-verification-driving.mjs <project>`, `phaser-verification-pixels.mjs`, `phaser-verification-leaks.mjs` and `phaser-verification-renderer.mjs` (a project with `phaser@4.2.1` and `@playwright/test`) re-prove every `[tested]` claim above in headless Chromium, with `phaser-verification-content-cost.mjs` for the content rule. Rerun them after a Phaser or Playwright upgrade; a failure names the claim to update.
 
 ## Not covered here
 

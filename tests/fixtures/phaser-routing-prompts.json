@@ -5050,6 +5050,167 @@
       ],
       "forbidPhaserActivation": true,
       "policyCue": "none"
+    },
+    {
+      "id": 159,
+      "topic": "phone-black-screen",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "It runs fine on my laptop, but on my phone the screen goes black as soon as the level starts.",
+      "expect": "engine-phaser",
+      "alt": [
+        "phaser-verification"
+      ],
+      "term": "goes black or reloads on a phone",
+      "routes": [
+        [
+          "engine-phaser"
+        ],
+        [
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "The verification owner holds the texture-memory counter that confirms the cause; the core owner holds the budget and the per-area loading that fixes it."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 160,
+      "topic": "mobile-reload-loop",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "On mobile the page keeps reloading itself and then says a problem repeatedly occurred.",
+      "expect": "phaser-verification",
+      "alt": [
+        "engine-phaser"
+      ],
+      "term": "crashes or reloads on mobile",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "The core owner names the same symptom and holds the texture budget and per-area loading; the verification owner measures what is held first."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 161,
+      "topic": "content-increase",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "We want three times as many enemy types in the game. Can it take that?",
+      "expect": "phaser-verification",
+      "term": "three times the enemies",
+      "routes": [
+        [
+          "phaser-verification"
+        ],
+        [
+          "engine-phaser",
+          "phaser-verification"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-verification"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-verification"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        }
+      ],
+      "policyCue": "none"
+    },
+    {
+      "id": 162,
+      "topic": "build-a-level",
+      "kind": "outcome-language",
+      "context": "The working project lists phaser 4.2.1 in package.json and a scene file is open; the request does not name Phaser or an API.",
+      "text": "Build the first dungeon room: stone walls around the edge, some barrels and plants inside, seen from an isometric angle.",
+      "expect": "phaser-worlds",
+      "alt": [
+        "engine-phaser"
+      ],
+      "term": "walls and props",
+      "routes": [
+        [
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser",
+          "phaser-worlds"
+        ],
+        [
+          "engine-phaser"
+        ]
+      ],
+      "routeJustifications": [
+        {
+          "route": [
+            "phaser-worlds"
+          ],
+          "reason": "This owner directly covers the task requested in the prompt."
+        },
+        {
+          "route": [
+            "engine-phaser",
+            "phaser-worlds"
+          ],
+          "reason": "Core is a general Phaser entry point; its domain navigation transfers this task to the declared owner."
+        },
+        {
+          "route": [
+            "engine-phaser"
+          ],
+          "reason": "The core owner covers building a first level and its table hands the level-building reference of the world owner to the task."
+        }
+      ],
+      "policyCue": "none"
     }
   ],
   "nearMissPhaserPolicy": "forbid-all-local-skills"

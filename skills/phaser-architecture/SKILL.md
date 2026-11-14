@@ -19,6 +19,7 @@ Read only the reference needed for the decision.
 | Authenticate a playbot producer pin or bind game-owned actions, observations, transports and starting states | [Playbot evidence](references/playbot-evidence.md) |
 | Reduce browser/build duplication, select checks or separate publication from deep acceptance | [Resources and validation](references/resources-and-validation.md) |
 | Set or verify a frame budget across games, or cost a content increase against it | [Profiling method](../phaser-verification/references/profiling-method.md) |
+| Set a texture-memory budget for the weakest device, or cost a content increase (more kinds, bigger levels) against memory held and objects submitted as well as frame time | [Cost of content](../phaser-verification/references/content-cost.md), [texture memory](../engine-phaser/references/texture-memory.md) |
 
 ## Establish the actual boundary
 
@@ -30,9 +31,10 @@ Read only the reference needed for the decision.
 
 1. [general] Map each concern to one contract owner and its consumers. Name the authoritative rules/session seam, storage/clock/RNG/input/audio owners and the changed boundary; inspect global-state assumptions before promising independent sim instances.
 2. [general] Verify the reusable producer contract independently, then let each consumer select and verify its own released pin. Preserve native bindings and game extensions. State what remains local, which API details still need design and which source/version consumers will pin.
-3. [general] Choose checks from changed inputs: producer invariants once, meaningful consumer render/input/loading seams, and explicit wider coverage for unknown/shared impact. Preserve actual transport, starting-state origin, fallback and backend evidence.
-4. [general] Keep immutable build/resource identity separate from mutable scenarios and publication identity. Retain failure/cleanup controls and required publication gates when moving a job; a fast observer is not deep acceptance.
-5. [general] Return the ownership map, proposed pilot, existing-versus-planned status, checks/stop condition and remaining acceptance limits. When presenting alternatives, explain time, risk, complexity, best practice and maintainability for each. Reuse passing checks with unchanged relevant inputs rather than repeating them for a handoff.
+3. [general] Cost a content increase against every budget it spends, not only frame time: texture memory held on the weakest target and objects submitted per frame have their own counters, and tripling the kinds of thing in a game changes the first even when the frame time holds ([cost of content](../phaser-verification/references/content-cost.md)).
+4. [general] Choose checks from changed inputs: producer invariants once, meaningful consumer render/input/loading seams, and explicit wider coverage for unknown/shared impact. Preserve actual transport, starting-state origin, fallback and backend evidence.
+5. [general] Keep immutable build/resource identity separate from mutable scenarios and publication identity. Retain failure/cleanup controls and required publication gates when moving a job; a fast observer is not deep acceptance.
+6. [general] Return the ownership map, proposed pilot, existing-versus-planned status, checks/stop condition and remaining acceptance limits. When presenting alternatives, explain time, risk, complexity, best practice and maintainability for each. Reuse passing checks with unchanged relevant inputs rather than repeating them for a handoff.
 
 ## Scope and routing
 
